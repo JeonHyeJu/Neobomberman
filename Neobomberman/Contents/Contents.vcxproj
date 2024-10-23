@@ -139,9 +139,50 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Bomb.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="BombPlain.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="BombRed.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="BombRemote.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="Enemy.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="Player.h" />
+    <ClInclude Include="Timer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Bomb.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="BombPlain.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="BombRed.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="BombRemote.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="Enemy.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Player.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
