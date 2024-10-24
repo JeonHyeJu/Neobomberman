@@ -149,8 +149,13 @@
     <ClInclude Include="BombPlain.h" />
     <ClInclude Include="BombRed.h" />
     <ClInclude Include="BombRemote.h" />
+    <ClInclude Include="ContentsCore.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="PlayGameMode.h" />
     <ClInclude Include="PreCompile.h" />
     <ClInclude Include="Timer.h" />
   </ItemGroup>
@@ -159,8 +164,13 @@
     <ClCompile Include="BombPlain.cpp" />
     <ClCompile Include="BombRed.cpp" />
     <ClCompile Include="BombRemote.cpp" />
+    <ClCompile Include="ContentsCore.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="PlayGameMode.cpp" />
     <ClCompile Include="PreCompile.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>

@@ -1,11 +1,9 @@
 #pragma once
 #include <functional>
 
-// Ό³Έν :
 class EngineDelegate
 {
 public:
-	// constrcuter destructer
 	EngineDelegate();
 	EngineDelegate(std::function<void()> _Function)
 	{
@@ -25,7 +23,7 @@ public:
 		return false == Functions.empty();
 	}
 
-	void operator=(std::function<void()> _Function)
+	void operator+=(std::function<void()> _Function)
 	{
 		Functions.push_back(_Function);
 	}

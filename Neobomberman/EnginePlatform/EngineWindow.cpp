@@ -46,13 +46,18 @@ void UEngineWindow::EngineWindowInit(HINSTANCE _Instance)
     CreateWindowClass(wcex);
 }
 
-int UEngineWindow::WindowMessageLoop(EngineDelegate _FrameFunction)
+int UEngineWindow::WindowMessageLoop(EngineDelegate _StartFunction, EngineDelegate _FrameFunction)
 {
     // window short cut
     // HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_WINDOWSPROJECT2));
-    MSG msg;
+    MSG msg = MSG();
 
-    while (WindowCount)
+    if (true == _StartFunction.IsBind())
+    {
+        _StartFunction();
+    }
+
+    while (0 != WindowCount)
     {
 		// Window's short cut is not used.
         // if (!TranslateAccelerator(msg.hwnd, nullptr, &msg))
@@ -116,15 +121,20 @@ void UEngineWindow::Create(std::string_view _TitleName, std::string_view _ClassN
         return;
     }
 
+    BackBuffer = GetDC(WindowHandle);
 }
 
 void UEngineWindow::Open(std::string_view _TitleName /*= "Window"*/)
 {
-    if (nullptr == WindowHandle)
+    if (0 == WindowHandle)
     {
         Create("Window");
     }
 
+    if (0 == WindowHandle)
+    {
+        return;
+    }
 	ShowWindow(WindowHandle, SW_SHOW);
     UpdateWindow(WindowHandle);
     ++WindowCount;

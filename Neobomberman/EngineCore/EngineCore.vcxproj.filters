@@ -1,36 +1,54 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Core">
-      <UniqueIdentifier>{aa5626a6-ed18-43b6-95b2-cf3ae6bef35c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Object">
-      <UniqueIdentifier>{e4d0108f-ee8c-4af6-aa9b-95170a93d71b}</UniqueIdentifier>
+      <UniqueIdentifier>{03815b07-2c1f-4a32-9997-ac4233f691d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameMode">
+      <UniqueIdentifier>{7049d7ab-422d-485f-b6ab-8860f8d125d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Level">
+      <UniqueIdentifier>{d41a1a4c-fdfc-4130-a387-ec899e228d80}</UniqueIdentifier>
     </Filter>
     <Filter Include="PreCompile">
-      <UniqueIdentifier>{c639fd6b-21de-432b-ac9b-ed1c747d55c0}</UniqueIdentifier>
+      <UniqueIdentifier>{e9deed64-d643-40b4-ab81-ef16c6694034}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{1a384826-512b-4f15-91e1-15e516a67bf8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AActor.cpp">
+    <ClCompile Include="Actor.cpp">
       <Filter>Object</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\0_Reference\GM2\API\EngineCore\EngineAPICore.cpp">
-      <Filter>Core</Filter>
+    <ClCompile Include="GameMode.cpp">
+      <Filter>GameMode</Filter>
+    </ClCompile>
+    <ClCompile Include="Level.cpp">
+      <Filter>Level</Filter>
     </ClCompile>
     <ClCompile Include="PreCompile.cpp">
       <Filter>PreCompile</Filter>
     </ClCompile>
+    <ClCompile Include="EngineAPICore.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AActor.h">
+    <ClInclude Include="Actor.h">
       <Filter>Object</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\0_Reference\GM2\API\EngineCore\EngineAPICore.h">
-      <Filter>Core</Filter>
+    <ClInclude Include="GameMode.h">
+      <Filter>GameMode</Filter>
+    </ClInclude>
+    <ClInclude Include="Level.h">
+      <Filter>Level</Filter>
     </ClInclude>
     <ClInclude Include="PreCompile.h">
       <Filter>PreCompile</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineAPICore.h">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

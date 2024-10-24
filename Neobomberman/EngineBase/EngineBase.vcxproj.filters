@@ -10,11 +10,11 @@
     <ClInclude Include="EngineMath.h">
       <Filter>Math</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\0_Reference\GM2\API\EngineBase\EngineDelegate.h">
-      <Filter>Function</Filter>
-    </ClInclude>
     <ClInclude Include="PreCompile.h">
       <Filter>PreCompile</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineDelegate.h">
+      <Filter>Function</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -27,11 +27,11 @@
     <ClCompile Include="EngineMath.cpp">
       <Filter>Math</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\0_Reference\GM2\API\EngineBase\EngineDelegate.cpp">
-      <Filter>Function</Filter>
-    </ClCompile>
     <ClCompile Include="PreCompile.cpp">
       <Filter>PreCompile</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineDelegate.cpp">
+      <Filter>Function</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

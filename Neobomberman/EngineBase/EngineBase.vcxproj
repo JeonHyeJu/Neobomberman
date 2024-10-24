@@ -147,15 +147,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\0_Reference\GM2\API\EngineBase\EngineDelegate.h" />
     <ClInclude Include="EngineDebug.h" />
+    <ClInclude Include="EngineDelegate.h" />
     <ClInclude Include="EngineFile.h" />
     <ClInclude Include="EngineMath.h" />
     <ClInclude Include="PreCompile.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\0_Reference\GM2\API\EngineBase\EngineDelegate.cpp" />
     <ClCompile Include="EngineDebug.cpp" />
+    <ClCompile Include="EngineDelegate.cpp" />
     <ClCompile Include="EngineFile.cpp" />
     <ClCompile Include="EngineMath.cpp" />
     <ClCompile Include="PreCompile.cpp">
