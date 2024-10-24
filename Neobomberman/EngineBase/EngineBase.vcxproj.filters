@@ -10,6 +10,12 @@
     <ClInclude Include="EngineMath.h">
       <Filter>Math</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\0_Reference\GM2\API\EngineBase\EngineDelegate.h">
+      <Filter>Function</Filter>
+    </ClInclude>
+    <ClInclude Include="PreCompile.h">
+      <Filter>PreCompile</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EngineDebug.cpp">
@@ -21,6 +27,12 @@
     <ClCompile Include="EngineMath.cpp">
       <Filter>Math</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\0_Reference\GM2\API\EngineBase\EngineDelegate.cpp">
+      <Filter>Function</Filter>
+    </ClCompile>
+    <ClCompile Include="PreCompile.cpp">
+      <Filter>PreCompile</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Debug">
@@ -31,6 +43,12 @@
     </Filter>
     <Filter Include="Math">
       <UniqueIdentifier>{ea7ef493-e79b-4081-9ac6-502c8d1eb677}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Function">
+      <UniqueIdentifier>{da2ae9dd-51b6-42cb-a0ee-369e3c114e52}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PreCompile">
+      <UniqueIdentifier>{e430ae29-f7d9-408e-87c1-0ebddfa22661}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

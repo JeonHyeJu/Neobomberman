@@ -1,3 +1,4 @@
+#include "PreCompile.h"
 #include "EngineMath.h"
 
 const FIntPoint FIntPoint::LEFT = {-1, 0};

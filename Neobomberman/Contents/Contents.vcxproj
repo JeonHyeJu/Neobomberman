@@ -73,10 +73,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)Bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Bin\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)Bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Bin\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -114,6 +116,8 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>..\;</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>PreCompile.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -130,6 +134,8 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>..\;</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>PreCompile.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,51 +145,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Bomb.h">
-      <SubType>
-      </SubType>
-    </ClInclude>
-    <ClInclude Include="BombPlain.h">
-      <SubType>
-      </SubType>
-    </ClInclude>
-    <ClInclude Include="BombRed.h">
-      <SubType>
-      </SubType>
-    </ClInclude>
-    <ClInclude Include="BombRemote.h">
-      <SubType>
-      </SubType>
-    </ClInclude>
-    <ClInclude Include="Enemy.h">
-      <SubType>
-      </SubType>
-    </ClInclude>
+    <ClInclude Include="Bomb.h" />
+    <ClInclude Include="BombPlain.h" />
+    <ClInclude Include="BombRed.h" />
+    <ClInclude Include="BombRemote.h" />
+    <ClInclude Include="Enemy.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="PreCompile.h" />
     <ClInclude Include="Timer.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Bomb.cpp">
-      <SubType>
-      </SubType>
-    </ClCompile>
-    <ClCompile Include="BombPlain.cpp">
-      <SubType>
-      </SubType>
-    </ClCompile>
-    <ClCompile Include="BombRed.cpp">
-      <SubType>
-      </SubType>
-    </ClCompile>
-    <ClCompile Include="BombRemote.cpp">
-      <SubType>
-      </SubType>
-    </ClCompile>
-    <ClCompile Include="Enemy.cpp">
-      <SubType>
-      </SubType>
-    </ClCompile>
+    <ClCompile Include="Bomb.cpp" />
+    <ClCompile Include="BombPlain.cpp" />
+    <ClCompile Include="BombRed.cpp" />
+    <ClCompile Include="BombRemote.cpp" />
+    <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="PreCompile.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,3 +1,4 @@
+#include "PreCompile.h"
 #include "Bomb.h"
 #include "Timer.h"
 

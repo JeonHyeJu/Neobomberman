@@ -1,3 +1,4 @@
+#include "PreCompile.h"
 #include "EngineFile.h"
 #include "EngineDebug.h"
 
@@ -18,9 +19,11 @@ void UEngineFile::FileOpen(const char* _Mode)
 
 	if (nullptr == File)
 	{
-		char arr[512] = { 0, };
-		sprintf_s(arr, "%s 오픈에 실패했습니다.", Path);
-		MSGASSERT(arr);
+		// char [] Arr0
+		// char [] Arr1
+		// Arr0 + Arr1
+
+		MSGASSERT(Path /*+ "파일 오픈에 실패했습니다"*/);
 	}
 }
 

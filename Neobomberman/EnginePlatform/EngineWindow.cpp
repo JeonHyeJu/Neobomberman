@@ -1,15 +1,10 @@
+#include "PreCompile.h"
 #include "EngineWindow.h"
 #include <EngineBase/EngineDebug.h>
-//#ifdef _WINDOWS
-//#include <Windows.h>
-//#elseif _리눅스
-//#include <Windows.h>
-//#elseif 안드로이드
-//#endif 
 
 HINSTANCE UEngineWindow::hInstance = nullptr;
 std::map<std::string, WNDCLASSEXA> UEngineWindow::WindowClasss;
-
+int WindowCount = 0;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -23,7 +18,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     }
     break;
     case WM_DESTROY:
-        PostQuitMessage(0);
+        --WindowCount;
         break;
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
@@ -31,13 +26,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-
 void UEngineWindow::EngineWindowInit(HINSTANCE _Instance)
 {
+    hInstance = _Instance;
+
     WNDCLASSEXA wcex;
-
     wcex.cbSize = sizeof(WNDCLASSEX);
-
     wcex.style = CS_HREDRAW | CS_VREDRAW;
     wcex.lpfnWndProc = WndProc;
     wcex.cbClsExtra = 0;
@@ -50,21 +44,29 @@ void UEngineWindow::EngineWindowInit(HINSTANCE _Instance)
     wcex.lpszClassName = "Default";
     wcex.hIconSm = nullptr;
     CreateWindowClass(wcex);
-
-    hInstance = _Instance;
 }
 
-int UEngineWindow::WindowMessageLoop()
+int UEngineWindow::WindowMessageLoop(EngineDelegate _FrameFunction)
 {
+    // window short cut
     // HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_WINDOWSPROJECT2));
     MSG msg;
 
-    while (GetMessage(&msg, nullptr, 0, 0))
+    while (WindowCount)
     {
-        if (!TranslateAccelerator(msg.hwnd, nullptr, &msg))
+		// Window's short cut is not used.
+        // if (!TranslateAccelerator(msg.hwnd, nullptr, &msg))
+        
+        // PM_REMOVE: delete message buffer
+        if(0 != PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
+        }
+
+        if (true == _FrameFunction.IsBind())
+        {
+            _FrameFunction();
         }
     }
 
@@ -76,10 +78,9 @@ void UEngineWindow::CreateWindowClass(const WNDCLASSEXA& _Class)
     std::map<std::string, WNDCLASSEXA>::iterator EndIter = WindowClasss.end();
     std::map<std::string, WNDCLASSEXA>::iterator FindIter = WindowClasss.find(std::string(_Class.lpszClassName));
 
-    // ckw
     if (EndIter != FindIter)
     {
-        MSGASSERT("같은 이름의 윈도우 클래스를 2번 등록했습니다" + std::string(_Class.lpszClassName));
+        MSGASSERT(std::string(_Class.lpszClassName) + " 같은 이름의 윈도우 클래스를 2번 등록했습니다");
         return;
     }
 
@@ -98,25 +99,20 @@ UEngineWindow::~UEngineWindow()
 {
 }
 
-void UEngineWindow::Create(std::string_view _ClassName /*= "Default"*/)
-{
-    Create("Window", _ClassName);
-}
-
 void UEngineWindow::Create(std::string_view _TitleName, std::string_view _ClassName)
 {
     if (false == WindowClasss.contains(_ClassName.data()))
     {
-        MSGASSERT("등록하지 않은 클래스로 윈도우창을 만들려고 했습니다" + std::string(_ClassName));
+        MSGASSERT(std::string(_ClassName) + " 등록하지 않은 클래스로 윈도우창을 만들려고 했습니다");
         return;
     }
 
     WindowHandle = CreateWindowA(_ClassName.data(), _TitleName.data(), WS_OVERLAPPEDWINDOW,
         0, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
 
-    if (!WindowHandle)
+    if (nullptr == WindowHandle)
     {
-        MSGASSERT("윈도우 생성에 실패했습니다." + std::string(_TitleName));
+        MSGASSERT(std::string(_TitleName) + " 윈도우 생성에 실패했습니다.");
         return;
     }
 
@@ -126,10 +122,11 @@ void UEngineWindow::Open(std::string_view _TitleName /*= "Window"*/)
 {
     if (nullptr == WindowHandle)
     {
-        Create();
+        Create("Window");
     }
 
 	ShowWindow(WindowHandle, SW_SHOW);
     UpdateWindow(WindowHandle);
+    ++WindowCount;
 	// ShowWindow(WindowHandle, SW_HIDE);
 }
