@@ -12,7 +12,7 @@ public:
     }
 
 	Timer(const Timer& _other) = delete;
-	Timer(Timer&& _other) = delete;
+	Timer(Timer&& _other) noexcept = delete;
 	Timer& operator=(const Timer& _other) = delete;
 	Timer& operator=(Timer&& _other) noexcept = delete;
 

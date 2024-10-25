@@ -8,7 +8,7 @@ public:
 	~Enemy();
 
 	Enemy(const Enemy& _other) = delete;
-	Enemy(Enemy&& _other) = delete;
+	Enemy(Enemy&& _other) noexcept = delete;
 	Enemy& operator=(const Enemy& _other) = delete;
 	Enemy& operator=(Enemy&& _other) noexcept = delete;
 };

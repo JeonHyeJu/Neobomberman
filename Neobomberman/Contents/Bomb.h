@@ -7,7 +7,7 @@ public:
 	~Bomb();
 
 	Bomb(const Bomb& _other) = delete;
-	Bomb(Bomb&& _other) = delete;
+	Bomb(Bomb&& _other) noexcept = delete;
 	Bomb& operator=(const Bomb& _other) = delete;
 	Bomb& operator=(Bomb&& _other) noexcept = delete;
 

@@ -66,13 +66,15 @@ void UEngineAPICore::EngineTick()
 
 void UEngineAPICore::Tick()
 {
+	DeltaTimer.TimeCheck();
+	float DeltaTime = DeltaTimer.GetDeltaTime();
 	if (nullptr == CurLevel)
 	{
 		MSGASSERT("엔진 코어에 현재 레벨이 지정되지 않았습니다");
 		return;
 	}
 
-	CurLevel->Tick();
+	CurLevel->Tick(DeltaTime);
 	CurLevel->Render();
 }
 

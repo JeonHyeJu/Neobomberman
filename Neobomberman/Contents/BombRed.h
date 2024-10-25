@@ -8,7 +8,7 @@ public:
 	~BombRed();
 
 	BombRed(const BombRed& _other) = delete;
-	BombRed(BombRed&& _other) = delete;
+	BombRed(BombRed&& _other) noexcept = delete;
 	BombRed& operator=(const BombRed& _other) = delete;
 	BombRed& operator=(BombRed&& _other) noexcept = delete;
 };

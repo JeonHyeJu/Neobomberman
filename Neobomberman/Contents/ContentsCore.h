@@ -8,7 +8,7 @@ public:
 	~ContentsCore();
 
 	ContentsCore(const ContentsCore& _other) = delete;
-	ContentsCore(ContentsCore&& _other) = delete;
+	ContentsCore(ContentsCore&& _other) noexcept = delete;
 	ContentsCore& operator=(const ContentsCore& _other) = delete;
 	ContentsCore& operator=(ContentsCore&& _other) noexcept = delete;
 
