@@ -18,6 +18,8 @@ ContentsCore::~ContentsCore()
 void ContentsCore::BeginPlay()
 {
 	//UEngineAPICore::GetCore()->CreateLevel("Title");
+	UEngineAPICore::GetCore()->GetMainWindow().SetWindowTitle("Window");
+
 	UEngineAPICore::GetCore()->CreateLevel<APlayGameMode, APlayer>("Play");
 	//UEngineAPICore::GetCore()->CreateLevel("End");
 
@@ -26,4 +28,5 @@ void ContentsCore::BeginPlay()
 
 void ContentsCore::Tick()
 {
+	// Nothing..
 }

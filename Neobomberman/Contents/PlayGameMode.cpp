@@ -2,6 +2,7 @@
 #include "PlayGameMode.h"
 
 #include <EngineCore/Level.h>
+#include "Player.h"
 
 APlayGameMode::APlayGameMode()
 {

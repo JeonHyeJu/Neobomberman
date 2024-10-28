@@ -38,6 +38,11 @@ public:
 		Scale = _Scale;
 	}
 
+	FVector2D GetActorLocation()
+	{
+		return Location;
+	}
+
 protected:
 
 private:
