@@ -36,7 +36,6 @@ double UEngineTimer::DEnd()
 
 void UEngineTimer::TimeCheck()
 {
-
 	QueryPerformanceCounter(&CurTime);
 
 	double Tick = static_cast<double>(CurTime.QuadPart - PrevTime.QuadPart);

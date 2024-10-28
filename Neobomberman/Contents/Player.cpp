@@ -12,7 +12,6 @@ APlayer::APlayer()
 
 APlayer::~APlayer()
 {
-
 }
 
 void APlayer::BeginPlay()
@@ -45,7 +44,8 @@ void APlayer::DownMove(float _DeltaTime)
 
 void APlayer::Tick(float _DeltaTime)
 {
-	if (3.0f < UEngineInput::GetInst().IsPreeTime(VK_LBUTTON))
+	//if (3.0f < UEngineInput::GetInst().GetPressTime(VK_LBUTTON))
+	if (UEngineInput::GetInst().IsDown(VK_LBUTTON))
 	{
 		ABullet* Ptr = GetWorld()->SpawnActor<ABullet>();
 		Ptr->SetActorLocation(GetActorLocation());

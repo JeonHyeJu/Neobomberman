@@ -12,7 +12,6 @@ UContentsCore* UEngineAPICore::UserCore = nullptr;
 
 UEngineAPICore::UEngineAPICore()
 {
-
 }
 
 UEngineAPICore::~UEngineAPICore()
@@ -58,7 +57,6 @@ void UEngineAPICore::EngineBeginPlay()
 void UEngineAPICore::EngineTick()
 {
 	UserCore->Tick();
-
 	// MainCore->TimeCheck();
 	MainCore->Tick();
 	// MainCore->Render();
@@ -70,13 +68,13 @@ void UEngineAPICore::Tick()
 	DeltaTimer.TimeCheck();
 	float DeltaTime = DeltaTimer.GetDeltaTime();
 	UEngineInput::GetInst().KeyCheck(DeltaTime);
+	UEngineInput::GetInst().EventCheck(DeltaTime);
+
 	if (nullptr == CurLevel)
 	{
 		MSGASSERT("엔진 코어에 현재 레벨이 지정되지 않았습니다");
 		return;
 	}
-
-	UEngineInput::GetInst().EventCheck(DeltaTime);
 	CurLevel->Tick(DeltaTime);
 	CurLevel->Render();
 }
