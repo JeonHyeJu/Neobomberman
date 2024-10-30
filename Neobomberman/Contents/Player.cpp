@@ -6,6 +6,7 @@
 
 APlayer::APlayer()
 {
+	// UEngineAPICore::GetCore()->CreateLevel("Title");
 	SetActorLocation({100, 100});
 	SetActorScale({ 100, 100 });
 }
@@ -16,38 +17,43 @@ APlayer::~APlayer()
 
 void APlayer::BeginPlay()
 {
-	UEngineInput::GetInst().BindAction('A', KeyEvent::Press, std::bind(&APlayer::LeftMove, this, std::placeholders::_1));
-	UEngineInput::GetInst().BindAction('D', KeyEvent::Press, std::bind(&APlayer::RightMove, this, std::placeholders::_1));
-	UEngineInput::GetInst().BindAction('S', KeyEvent::Press, std::bind(&APlayer::DownMove, this, std::placeholders::_1));
-	UEngineInput::GetInst().BindAction('W', KeyEvent::Press, std::bind(&APlayer::UpMove, this, std::placeholders::_1));
+	Super::BeginPlay();
+
+	//UEngineInput::GetInst().BindAction('A', KeyEvent::Press, std::bind(&APlayer::MoveFunction, this, FVector2D::LEFT));
+	//UEngineInput::GetInst().BindAction('D', KeyEvent::Press, std::bind(&APlayer::MoveFunction, this, FVector2D::RIGHT));
+	//UEngineInput::GetInst().BindAction('S', KeyEvent::Press, std::bind(&APlayer::MoveFunction, this, FVector2D::DOWN));
+	//UEngineInput::GetInst().BindAction('W', KeyEvent::Press, std::bind(&APlayer::MoveFunction, this, FVector2D::UP));
+
+	// GetWorld()->SpawnActor<APlayer>();
 }
 
-void APlayer::LeftMove(float _DeltaTime)
+void APlayer::MoveFunction(FVector2D _Dir/*, AMonster* Monster*/)
 {
-	AddActorLocation(FVector2D::LEFT * _DeltaTime * Speed);
-}
+	float DeltaTime = UEngineAPICore::GetCore()->GetDeltaTime();
 
-void APlayer::RightMove(float _DeltaTime)
-{
-	AddActorLocation(FVector2D::RIGHT * _DeltaTime * Speed);
-}
-
-void APlayer::UpMove(float _DeltaTime)
-{
-	AddActorLocation(FVector2D::UP *_DeltaTime * Speed);
-}
-
-void APlayer::DownMove(float _DeltaTime)
-{
-	AddActorLocation(FVector2D::DOWN * _DeltaTime * Speed);
+	AddActorLocation(_Dir * DeltaTime * Speed);
 }
 
 void APlayer::Tick(float _DeltaTime)
 {
-	//if (3.0f < UEngineInput::GetInst().GetPressTime(VK_LBUTTON))
-	if (UEngineInput::GetInst().IsDown(VK_LBUTTON))
+	Super::Tick(_DeltaTime);
+
+	if (true == UEngineInput::GetInst().IsPress('D'))
 	{
-		ABullet* Ptr = GetWorld()->SpawnActor<ABullet>();
-		Ptr->SetActorLocation(GetActorLocation());
+		AddActorLocation(FVector2D::RIGHT * _DeltaTime * Speed);
 	}
+	if (true == UEngineInput::GetInst().IsPress('A'))
+	{
+		AddActorLocation(FVector2D::LEFT * _DeltaTime * Speed);
+	}
+	if (true == UEngineInput::GetInst().IsPress('S'))
+	{
+		AddActorLocation(FVector2D::DOWN * _DeltaTime * Speed);
+	}
+	if (true == UEngineInput::GetInst().IsPress('W'))
+	{
+		AddActorLocation(FVector2D::UP * _DeltaTime * Speed);
+	}
+
+	// UEngineDebug::OutPutString("Down");
 }

@@ -16,6 +16,9 @@
     <Filter Include="Core">
       <UniqueIdentifier>{1a384826-512b-4f15-91e1-15e516a67bf8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Image">
+      <UniqueIdentifier>{fa4e8e08-860c-4179-9839-8e2fedae3412}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Actor.cpp">
@@ -33,6 +36,9 @@
     <ClCompile Include="EngineAPICore.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="ImageManager.cpp">
+      <Filter>Image</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -49,6 +55,9 @@
     </ClInclude>
     <ClInclude Include="EngineAPICore.h">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageManager.h">
+      <Filter>Image</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -32,6 +32,8 @@ public:
 protected:
 
 private:
+	void ScreenClear();
+	void DoubleBuffering();
 
 	template<typename GameModeType, typename MainPawnType>
 	void CreateGameMode()

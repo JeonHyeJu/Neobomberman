@@ -19,6 +19,9 @@
     <Filter Include="GameMode">
       <UniqueIdentifier>{64e1df81-1609-4a3b-a62a-5039906d2f2e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Map">
+      <UniqueIdentifier>{4a1ddc86-217d-4734-9565-42d9536d9925}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BombRemote.h">
@@ -54,6 +57,9 @@
     <ClInclude Include="Bullet.h">
       <Filter>Actor</Filter>
     </ClInclude>
+    <ClInclude Include="PlayMap.h">
+      <Filter>Map</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Bomb.cpp">
@@ -85,6 +91,9 @@
     </ClCompile>
     <ClCompile Include="Bullet.cpp">
       <Filter>Actor</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayMap.cpp">
+      <Filter>Map</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

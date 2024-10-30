@@ -8,6 +8,18 @@ UEngineFile::UEngineFile()
 
 }
 
+UEngineFile::UEngineFile(std::string_view _Path)
+	: UEnginePath(_Path)
+{
+
+}
+
+UEngineFile::UEngineFile(std::filesystem::path _Path)
+	: UEnginePath(_Path)
+{
+
+}
+
 UEngineFile::~UEngineFile()
 {
 	Close();
@@ -78,7 +90,6 @@ bool UEngineFile::IsExits()
 
 void UEngineFile::Close()
 {
-	// 방어코드
 	if (nullptr != File)
 	{
 		fclose(File);

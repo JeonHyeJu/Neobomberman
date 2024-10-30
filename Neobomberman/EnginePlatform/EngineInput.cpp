@@ -1,5 +1,86 @@
-#include "PreCompile.h"
+﻿#include "PreCompile.h"
 #include "EngineInput.h"
+
+// UEngineInput UEngineInput::Inst = UEngineInput();
+// UEngineInput* UEngineInput::Inst = nullptr;
+
+void UEngineInput::UEngineKey::KeyCheck(float _DeltaTime)
+{
+	// if (true == GetAsyncKeyState('B'))
+	if (0 != GetAsyncKeyState(Key))
+	{
+
+		PressTime += _DeltaTime;
+
+		if (true == IsFree)
+		{
+			IsDown = true;
+			IsPress = true;
+			IsFree = false;
+			IsUp = false;
+		}
+		else if(true == IsDown)
+		{
+			IsDown = false;
+			IsPress = true;
+			IsFree = false;
+			IsUp = false;
+		}
+	}
+	else 
+	{
+		PressTime = 0.0f;
+		if (true == IsPress)
+		{
+			IsDown = false;
+			IsPress = false;
+			IsFree = true;
+			IsUp = true;
+		}
+		else if (true == IsUp)
+		{
+			IsDown = false;
+			IsPress = false;
+			IsFree = true;
+			IsUp = false;
+		}
+	}
+}
+
+void UEngineInput::UEngineKey::EventCheck()
+{
+	if (true == IsDown)
+	{
+		for (size_t i = 0; i < DownEvents.size(); i++)
+		{
+			DownEvents[i]();
+		}
+	}
+
+	if (true == IsPress)
+	{
+		for (size_t i = 0; i < PressEvents.size(); i++)
+		{
+			PressEvents[i]();
+		}
+	}
+
+	if (true == IsFree)
+	{
+		for (size_t i = 0; i < FreeEvents.size(); i++)
+		{
+			FreeEvents[i]();
+		}
+	}
+
+	if (true == IsUp)
+	{
+		for (size_t i = 0; i < UpEvents.size(); i++)
+		{
+			UpEvents[i]();
+		}
+	}
+}
 
 UEngineInput::UEngineInput()
 {
@@ -109,10 +190,6 @@ UEngineInput::UEngineInput()
 	Keys.insert({ VK_F24, UEngineKey(VK_F24) });
 }
 
-UEngineInput::~UEngineInput()
-{
-}
-
 void UEngineInput::EventCheck(float _DeltaTime)
 {
 	std::map<int, UEngineKey>::iterator StartIter = Keys.begin();
@@ -121,7 +198,7 @@ void UEngineInput::EventCheck(float _DeltaTime)
 	for (; StartIter != EndIter; ++StartIter)
 	{
 		UEngineKey& CurKey = StartIter->second;
-		CurKey.EventCheck(_DeltaTime);
+		CurKey.EventCheck();
 	}
 }
 
@@ -137,7 +214,11 @@ void UEngineInput::KeyCheck(float _DeltaTime)
 	}
 }
 
-void UEngineInput::BindAction(int _KeyIndex, KeyEvent _EventType, std::function<void(float) > _Function)
+UEngineInput::~UEngineInput()
+{
+}
+
+void UEngineInput::BindAction(int _KeyIndex, KeyEvent _EventType, std::function<void() > _Function)
 {
 	if (false == Keys.contains(_KeyIndex))
 	{
@@ -161,83 +242,5 @@ void UEngineInput::BindAction(int _KeyIndex, KeyEvent _EventType, std::function<
 		break;
 	default:
 		break;
-	}
-}
-
-/*** UEngineKey definition ***/
-void UEngineInput::UEngineKey::KeyCheck(float _DeltaTime)
-{
-	if (0 != GetAsyncKeyState(Key))
-	{
-		PressTime += _DeltaTime;
-
-		if (true == IsFree)
-		{
-			IsDown = true;
-			IsPress = true;
-			IsFree = false;
-			IsUp = false;
-		}
-		else if (true == IsDown)
-		{
-			IsDown = false;
-			IsPress = true;
-			IsFree = false;
-			IsUp = false;
-		}
-	}
-	else
-	{
-		PressTime = 0.0f;
-
-		if (true == IsPress)
-		{
-			IsDown = false;
-			IsPress = false;
-			IsFree = true;
-			IsUp = true;
-		}
-		else if (true == IsUp)
-		{
-			IsDown = false;
-			IsPress = false;
-			IsFree = true;
-			IsUp = false;
-		}
-	}
-}
-
-void UEngineInput::UEngineKey::EventCheck(float _DeltaTime)
-{
-	if (true == IsDown)
-	{
-		for (size_t i = 0; i < DownEvents.size(); i++)
-		{
-			DownEvents[i](_DeltaTime);
-		}
-	}
-
-	if (true == IsPress)
-	{
-		for (size_t i = 0; i < PressEvents.size(); i++)
-		{
-			PressEvents[i](_DeltaTime);
-		}
-	}
-
-	if (true == IsFree)
-	{
-		for (size_t i = 0; i < FreeEvents.size(); i++)
-		{
-			FreeEvents[i](_DeltaTime);
-		}
-	}
-
-	if (true == IsUp)
-	{
-		for (size_t i = 0; i < UpEvents.size(); i++)
-		{
-			UpEvents[i](_DeltaTime);
-		}
 	}
 }

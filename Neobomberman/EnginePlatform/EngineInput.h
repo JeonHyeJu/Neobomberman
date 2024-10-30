@@ -33,12 +33,6 @@ private:
 	class UEngineKey
 	{
 	public:
-		UEngineKey() {}
-		UEngineKey(int _Key): Key(_Key) {}
-
-		void EventCheck(float _DeltaTime);
-		void KeyCheck(float _DeltaTime);
-
 		int Key = -1;
 		
 		bool IsDown = false;	// released -> pressed
@@ -48,10 +42,24 @@ private:
 
 		float PressTime = 0.0f;
 
-		std::vector<std::function<void(float)>> PressEvents;
-		std::vector<std::function<void(float)>> DownEvents;
-		std::vector<std::function<void(float)>> UpEvents;
-		std::vector<std::function<void(float)>> FreeEvents;
+		std::vector<std::function<void()>> PressEvents;
+		std::vector<std::function<void()>> DownEvents;
+		std::vector<std::function<void()>> UpEvents;
+		std::vector<std::function<void()>> FreeEvents;
+
+		UEngineKey()
+		{
+		}
+
+		UEngineKey(int _Key)
+			: Key(_Key)
+		{
+		}
+
+		void EventCheck();
+
+		void KeyCheck(float _DeltaTime);
+		
 	};
 
 public:
@@ -113,7 +121,7 @@ public:
 		return Keys[_KeyIndex].IsFree;
 	}
 
-	void BindAction(int _KeyIndex, KeyEvent _EventType, std::function<void(float)> _Function);
+	void BindAction(int _KeyIndex, KeyEvent _EventType,  std::function<void()> _Function);
 
 protected:
 

@@ -149,16 +149,20 @@
   <ItemGroup>
     <ClInclude Include="EngineDebug.h" />
     <ClInclude Include="EngineDelegate.h" />
+    <ClInclude Include="EngineDirectory.h" />
     <ClInclude Include="EngineFile.h" />
     <ClInclude Include="EngineMath.h" />
+    <ClInclude Include="EnginePath.h" />
     <ClInclude Include="EngineTimer.h" />
     <ClInclude Include="PreCompile.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EngineDebug.cpp" />
     <ClCompile Include="EngineDelegate.cpp" />
+    <ClCompile Include="EngineDirectory.cpp" />
     <ClCompile Include="EngineFile.cpp" />
     <ClCompile Include="EngineMath.cpp" />
+    <ClCompile Include="EnginePath.cpp" />
     <ClCompile Include="EngineTimer.cpp" />
     <ClCompile Include="PreCompile.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

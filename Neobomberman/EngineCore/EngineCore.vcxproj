@@ -150,6 +150,7 @@
     <ClInclude Include="Actor.h" />
     <ClInclude Include="EngineAPICore.h" />
     <ClInclude Include="GameMode.h" />
+    <ClInclude Include="ImageManager.h" />
     <ClInclude Include="Level.h" />
     <ClInclude Include="PreCompile.h" />
   </ItemGroup>
@@ -157,6 +158,7 @@
     <ClCompile Include="Actor.cpp" />
     <ClCompile Include="EngineAPICore.cpp" />
     <ClCompile Include="GameMode.cpp" />
+    <ClCompile Include="ImageManager.cpp" />
     <ClCompile Include="Level.cpp" />
     <ClCompile Include="PreCompile.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

@@ -102,6 +102,17 @@ UEngineWindow::UEngineWindow()
 
 UEngineWindow::~UEngineWindow()
 {
+    if (nullptr != WindowImage)
+    {
+        delete WindowImage;
+        WindowImage = nullptr;
+    }
+
+    if (nullptr != BackBufferImage)
+    {
+        delete BackBufferImage;
+        BackBufferImage = nullptr;
+    }
 }
 
 void UEngineWindow::Create(std::string_view _TitleName, std::string_view _ClassName)
@@ -121,7 +132,9 @@ void UEngineWindow::Create(std::string_view _TitleName, std::string_view _ClassN
         return;
     }
 
-    BackBuffer = GetDC(WindowHandle);
+    HDC WindowMainDC = GetDC(WindowHandle);
+    WindowImage = new UEngineWinImage();
+    WindowImage->Create(WindowMainDC);
 }
 
 void UEngineWindow::Open(std::string_view _TitleName /*= "Window"*/)
@@ -139,4 +152,27 @@ void UEngineWindow::Open(std::string_view _TitleName /*= "Window"*/)
     UpdateWindow(WindowHandle);
     ++WindowCount;
 	// ShowWindow(WindowHandle, SW_HIDE);
+}
+
+void UEngineWindow::SetWindowPosAndScale(FVector2D _Pos, FVector2D _Scale)
+{
+    if (false == WindowSize.EqualToInt(_Scale))
+    {
+        if (nullptr != BackBufferImage)
+        {
+            delete BackBufferImage;
+            BackBufferImage = nullptr;
+        }
+
+        BackBufferImage = new UEngineWinImage();
+        BackBufferImage->Create(WindowImage, _Scale);
+    }
+
+    WindowSize = _Scale;
+
+    RECT Rc = { 0, 0, _Scale.iX(), _Scale.iY() };
+
+    AdjustWindowRect(&Rc, WS_OVERLAPPEDWINDOW, FALSE);
+    
+    ::SetWindowPos(WindowHandle, nullptr, _Pos.iX(), _Pos.iY(), Rc.right - Rc.left, Rc.bottom - Rc.top, SWP_NOZORDER);
 }

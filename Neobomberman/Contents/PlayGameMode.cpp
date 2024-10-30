@@ -2,7 +2,7 @@
 #include "PlayGameMode.h"
 
 #include <EngineCore/Level.h>
-#include "Player.h"
+#include "PlayMap.h"
 
 APlayGameMode::APlayGameMode()
 {
@@ -16,6 +16,5 @@ void APlayGameMode::BeginPlay()
 {
 	// GetWorld()->SpawnActor<BackGround>();
 
-	// GetWorld()->SpawnActor<Monster>();
-	int a = 0;
+	APlayMap* PMAP0 = GetWorld()->SpawnActor<APlayMap>();
 }

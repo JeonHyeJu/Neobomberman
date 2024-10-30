@@ -41,6 +41,11 @@ public:
 		return EngineMainWindow;
 	}
 
+	float GetDeltaTime()
+	{
+		return DeltaTimer.GetDeltaTime();
+	}
+
 	template<typename GameModeType, typename MainPawnType>
 	ULevel* CreateLevel(std::string_view _LevelName)
 	{
