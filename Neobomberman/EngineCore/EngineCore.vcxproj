@@ -149,6 +149,7 @@
   <ItemGroup>
     <ClInclude Include="Actor.h" />
     <ClInclude Include="EngineAPICore.h" />
+    <ClInclude Include="EngineSprite.h" />
     <ClInclude Include="GameMode.h" />
     <ClInclude Include="ImageManager.h" />
     <ClInclude Include="Level.h" />
@@ -157,6 +158,7 @@
   <ItemGroup>
     <ClCompile Include="Actor.cpp" />
     <ClCompile Include="EngineAPICore.cpp" />
+    <ClCompile Include="EngineSprite.cpp" />
     <ClCompile Include="GameMode.cpp" />
     <ClCompile Include="ImageManager.cpp" />
     <ClCompile Include="Level.cpp" />

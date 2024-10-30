@@ -15,6 +15,5 @@ APlayGameMode::~APlayGameMode()
 void APlayGameMode::BeginPlay()
 {
 	// GetWorld()->SpawnActor<BackGround>();
-
-	APlayMap* PMAP0 = GetWorld()->SpawnActor<APlayMap>();
+	// APlayMap* PMAP0 = GetWorld()->SpawnActor<APlayMap>();
 }

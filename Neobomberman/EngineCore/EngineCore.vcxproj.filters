@@ -16,7 +16,7 @@
     <Filter Include="Core">
       <UniqueIdentifier>{1a384826-512b-4f15-91e1-15e516a67bf8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Image">
+    <Filter Include="Render">
       <UniqueIdentifier>{fa4e8e08-860c-4179-9839-8e2fedae3412}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -37,7 +37,10 @@
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="ImageManager.cpp">
-      <Filter>Image</Filter>
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineSprite.cpp">
+      <Filter>Render</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -57,7 +60,10 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="ImageManager.h">
-      <Filter>Image</Filter>
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineSprite.h">
+      <Filter>Render</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

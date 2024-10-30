@@ -153,7 +153,9 @@
     <ClInclude Include="EngineFile.h" />
     <ClInclude Include="EngineMath.h" />
     <ClInclude Include="EnginePath.h" />
+    <ClInclude Include="EngineString.h" />
     <ClInclude Include="EngineTimer.h" />
+    <ClInclude Include="Object.h" />
     <ClInclude Include="PreCompile.h" />
   </ItemGroup>
   <ItemGroup>
@@ -163,7 +165,9 @@
     <ClCompile Include="EngineFile.cpp" />
     <ClCompile Include="EngineMath.cpp" />
     <ClCompile Include="EnginePath.cpp" />
+    <ClCompile Include="EngineString.cpp" />
     <ClCompile Include="EngineTimer.cpp" />
+    <ClCompile Include="Object.cpp" />
     <ClCompile Include="PreCompile.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>

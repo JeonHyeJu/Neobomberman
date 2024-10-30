@@ -39,6 +39,8 @@ void ContentsCore::BeginPlay()
 	}
 
 
+	UImageManager::GetInst().CuttingSprite("Player_Right.png", {128, 128});
+
 	UEngineAPICore::GetCore()->GetMainWindow().SetWindowTitle("EduWindow");
 
 	// You must call this.

@@ -8,7 +8,9 @@ APlayer::APlayer()
 {
 	// UEngineAPICore::GetCore()->CreateLevel("Title");
 	SetActorLocation({100, 100});
-	SetActorScale({ 100, 100 });
+	SetActorScale({ 256, 256 });
+
+	SetSprite("Player_Right.png");
 }
 
 APlayer::~APlayer()
@@ -18,21 +20,8 @@ APlayer::~APlayer()
 void APlayer::BeginPlay()
 {
 	Super::BeginPlay();
-
-	//UEngineInput::GetInst().BindAction('A', KeyEvent::Press, std::bind(&APlayer::MoveFunction, this, FVector2D::LEFT));
-	//UEngineInput::GetInst().BindAction('D', KeyEvent::Press, std::bind(&APlayer::MoveFunction, this, FVector2D::RIGHT));
-	//UEngineInput::GetInst().BindAction('S', KeyEvent::Press, std::bind(&APlayer::MoveFunction, this, FVector2D::DOWN));
-	//UEngineInput::GetInst().BindAction('W', KeyEvent::Press, std::bind(&APlayer::MoveFunction, this, FVector2D::UP));
-
-	// GetWorld()->SpawnActor<APlayer>();
 }
 
-void APlayer::MoveFunction(FVector2D _Dir/*, AMonster* Monster*/)
-{
-	float DeltaTime = UEngineAPICore::GetCore()->GetDeltaTime();
-
-	AddActorLocation(_Dir * DeltaTime * Speed);
-}
 
 void APlayer::Tick(float _DeltaTime)
 {
@@ -55,5 +44,9 @@ void APlayer::Tick(float _DeltaTime)
 		AddActorLocation(FVector2D::UP * _DeltaTime * Speed);
 	}
 
-	// UEngineDebug::OutPutString("Down");
+	if (true == UEngineInput::GetInst().IsDown('R'))
+	{
+		SetSprite("Player_Right.png", MySpriteIndex);
+		++MySpriteIndex;
+	}
 }

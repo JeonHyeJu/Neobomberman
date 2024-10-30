@@ -19,6 +19,8 @@ public:
 
 	std::string GetPathToString();
 
+	std::string GetFileName();
+	std::string GetExtension();
 	bool MoveParentToDirectory(std::string_view _Path);
 
 	bool IsDirectory();

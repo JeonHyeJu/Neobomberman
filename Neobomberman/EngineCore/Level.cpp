@@ -49,7 +49,6 @@ void ULevel::Render()
 	for (; StartIter != EndIter; ++StartIter)
 	{
 		AActor* CurActor = *StartIter;
-
 		CurActor->Render();
 	}
 
@@ -62,7 +61,7 @@ void ULevel::ScreenClear()
 	UEngineWinImage* BackBufferImage = MainWindow.GetBackBuffer();
 	FVector2D Size = MainWindow.GetWindowSize();
 
-	Rectangle(BackBufferImage->GetDC(), 0, 0, Size.iX(), Size.iY());
+	Rectangle(BackBufferImage->GetDC(), -1, -1, Size.iX() + 2, Size.iY() + 2);
 }
 
 void ULevel::DoubleBuffering()
@@ -76,7 +75,5 @@ void ULevel::DoubleBuffering()
 	Trans.Location = MainWindow.GetWindowSize().Half();
 	Trans.Scale = MainWindow.GetWindowSize();
 
-	// 이미지 들은 백버퍼에 다 그려졌을 것이다.
 	BackBufferImage->CopyToBit(WindowImage, Trans);
-
 }
