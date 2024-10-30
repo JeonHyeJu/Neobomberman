@@ -60,6 +60,9 @@
     <ClInclude Include="PlayMap.h">
       <Filter>Map</Filter>
     </ClInclude>
+    <ClInclude Include="GlobalVar.h">
+      <Filter>Util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Bomb.cpp">
@@ -94,6 +97,9 @@
     </ClCompile>
     <ClCompile Include="PlayMap.cpp">
       <Filter>Map</Filter>
+    </ClCompile>
+    <ClCompile Include="GlobalVar.cpp">
+      <Filter>Util</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

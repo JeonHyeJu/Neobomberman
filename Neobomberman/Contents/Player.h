@@ -15,17 +15,10 @@ public:
 	void BeginPlay() override;
 	void Tick(float _DeltaTime) override;
 
-	void MoveFunction(FVector2D _Dir);
-
-	/*void LeftMove();
-	void RightMove();
-	void UpMove();
-	void DownMove();*/
-
 protected:
 
 private:
+	int CurIndex = 0;
 	float Speed = 100.0f;
-	int MySpriteIndex = 0;
-
+	const char* PLAYER_SPRITE_PATH = "MainCharater_White_32x64.png";	// 1024 x 640 (32x64)
 };

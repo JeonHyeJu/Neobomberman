@@ -155,6 +155,7 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="Enemy.h" />
+    <ClInclude Include="GlobalVar.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="PlayGameMode.h" />
     <ClInclude Include="PlayMap.h" />
@@ -172,6 +173,7 @@
       </SubType>
     </ClCompile>
     <ClCompile Include="Enemy.cpp" />
+    <ClCompile Include="GlobalVar.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="PlayGameMode.cpp" />
     <ClCompile Include="PlayMap.cpp" />

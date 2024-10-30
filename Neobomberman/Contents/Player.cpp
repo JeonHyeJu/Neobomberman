@@ -1,16 +1,19 @@
 #include "PreCompile.h"
 #include "Player.h"
+#include "Bullet.h"
+
 #include <EngineCore/EngineAPICore.h>
 #include <EnginePlatform/EngineInput.h>
-#include "Bullet.h"
+#include <EngineCore/ImageManager.h>
+#include "GlobalVar.h"
 
 APlayer::APlayer()
 {
-	// UEngineAPICore::GetCore()->CreateLevel("Title");
 	SetActorLocation({100, 100});
-	SetActorScale({ 256, 256 });
-
-	SetSprite("Player_Right.png");
+	SetActorScale(GlobalVar::BOMBERMAN_SIZE);
+	
+	SetSprite(PLAYER_SPRITE_PATH);
+	UImageManager::GetInst().CuttingSprite(PLAYER_SPRITE_PATH, GlobalVar::BOMBERMAN_SIZE);
 }
 
 APlayer::~APlayer()
@@ -21,7 +24,6 @@ void APlayer::BeginPlay()
 {
 	Super::BeginPlay();
 }
-
 
 void APlayer::Tick(float _DeltaTime)
 {
@@ -43,10 +45,9 @@ void APlayer::Tick(float _DeltaTime)
 	{
 		AddActorLocation(FVector2D::UP * _DeltaTime * Speed);
 	}
-
 	if (true == UEngineInput::GetInst().IsDown('R'))
 	{
-		SetSprite("Player_Right.png", MySpriteIndex);
-		++MySpriteIndex;
+		SetSprite(PLAYER_SPRITE_PATH, CurIndex++);
+		CurIndex %= 6;
 	}
 }
