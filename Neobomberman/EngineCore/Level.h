@@ -4,6 +4,7 @@
 class ULevel
 {
 public:
+	friend class USpriteRenderer;
 	friend class UEngineAPICore;
 	ULevel();
 	~ULevel();
@@ -14,7 +15,7 @@ public:
 	ULevel& operator=(ULevel&& _Other) noexcept = delete;
 
 	void Tick(float _DeltaTime);
-	void Render();
+	void Render(float _DeltaTime);
 
 	template<typename ActorType>
 	ActorType* SpawnActor()
@@ -24,8 +25,8 @@ public:
 		AActor* ActorPtr = dynamic_cast<AActor*>(NewActor);
 		ActorPtr->World = this;
 
-		NewActor->BeginPlay();
-		AllActors.push_back(NewActor);
+		BeginPlayList.push_back(ActorPtr);
+
 		return NewActor;
 	}
 
@@ -44,17 +45,25 @@ private:
 		MainPawn->World = this;
 		GameMode->World = this;
 
-		GameMode->BeginPlay();
-		MainPawn->BeginPlay();
+		BeginPlayList.push_back(GameMode);
+		BeginPlayList.push_back(MainPawn);
 
-		AllActors.push_back(GameMode);
-		AllActors.push_back(MainPawn);
+		//GameMode->BeginPlay();
+		//MainPawn->BeginPlay();
+		//AllActors.push_back(GameMode);
+		//AllActors.push_back(MainPawn);
 	}
 
 
-	AGameMode* GameMode = nullptr;
+	void PushRenderer(class USpriteRenderer* _Renderer);
+	void ChangeRenderOrder(class USpriteRenderer* _Renderer, int _PrevOrder);
+	class AGameMode* GameMode = nullptr;
 
-	AActor* MainPawn = nullptr;
+	class AActor* MainPawn = nullptr;
 
 	std::list<AActor*> AllActors;
+
+	std::list<AActor*> BeginPlayList;
+
+	std::map<int, std::list<class USpriteRenderer*>> Renderers;
 };

@@ -1,4 +1,4 @@
-#include "PreCompile.h"
+ï»¿#include "PreCompile.h"
 #include "EngineString.h"
 #include <EngineBase/EngineDebug.h>
 
@@ -30,7 +30,7 @@ std::wstring UEngineString::AnsiToUnicode(std::string_view _Name)
 
 	if (0 == Size)
 	{
-		MSGASSERT("MultiByteToWideChar ¹®ÀÚ¿­ º¯È¯¿¡ ½ÇÆĞÇß½À´Ï´Ù" + std::string(_Name));
+		MSGASSERT("MultiByteToWideChar ë¬¸ìì—´ ë³€í™˜ì— ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤" + std::string(_Name));
 		return L"";
 	}
 
@@ -41,7 +41,7 @@ std::wstring UEngineString::AnsiToUnicode(std::string_view _Name)
 
 	if (0 == Size)
 	{
-		MSGASSERT("MultiByteToWideChar ¹®ÀÚ¿­ º¯È¯¿¡ ½ÇÆĞÇß½À´Ï´Ù" + std::string(_Name));
+		MSGASSERT("MultiByteToWideChar ë¬¸ìì—´ ë³€í™˜ì— ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤" + std::string(_Name));
 		return L"";
 	}
 

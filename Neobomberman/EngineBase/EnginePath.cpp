@@ -30,6 +30,23 @@ std::string UEnginePath::GetPathToString()
 
 std::string UEnginePath::GetFileName()
 {
+	if (true == IsDirectory())
+	{
+		MSGASSERT("파일 경로 일때만 GetFileName을 호출할수 있습니다." + Path.string());
+		return "";
+	}
+
+	return Path.filename().string();
+}
+
+std::string UEnginePath::GetDirectoryName()
+{
+	if (false == IsDirectory())
+	{
+		MSGASSERT("디렉토리 경로 일때만 GetDirectoryName을 호출할수 있습니다." + Path.string());
+		return "";
+	}
+
 	return Path.filename().string();
 }
 
@@ -57,6 +74,11 @@ bool UEnginePath::IsDirectory()
 void UEnginePath::MoveParent()
 {
 	Path = Path.parent_path();
+}
+
+void UEnginePath::Append(std::string_view _AppendName)
+{
+	Path.append(_AppendName);
 }
 
 bool UEnginePath::MoveParentToDirectory(std::string_view _Path)

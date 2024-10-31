@@ -19,6 +19,9 @@
     <Filter Include="Render">
       <UniqueIdentifier>{fa4e8e08-860c-4179-9839-8e2fedae3412}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Object\Component">
+      <UniqueIdentifier>{8bd09c1b-8acb-4f7d-8370-b81c3668cb5f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Actor.cpp">
@@ -42,6 +45,18 @@
     <ClCompile Include="EngineSprite.cpp">
       <Filter>Render</Filter>
     </ClCompile>
+    <ClCompile Include="2DCollision.cpp">
+      <Filter>Object\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="ActorComponent.cpp">
+      <Filter>Object\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneComponent.cpp">
+      <Filter>Object\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="SpriteRenderer.cpp">
+      <Filter>Object\Component</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -64,6 +79,18 @@
     </ClInclude>
     <ClInclude Include="EngineSprite.h">
       <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="2DCollision.h">
+      <Filter>Object\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="ActorComponent.h">
+      <Filter>Object\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneComponent.h">
+      <Filter>Object\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="SpriteRenderer.h">
+      <Filter>Object\Component</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -53,6 +53,22 @@ public:
 		return { X * 0.5f, Y * 0.5f };
 	}
 
+	float Length() const
+	{
+		return sqrtf(X * X + Y * Y);
+	}
+
+	void Normalize()
+	{
+		float Len = Length();
+		if (0.0f < Len && false == isnan(Len))
+		{
+			X = X / Len;
+			X = Y / Len;
+		}
+		return;
+	}
+
 	FVector2D operator*(float _Value) const
 	{
 		FVector2D Result;
@@ -60,8 +76,6 @@ public:
 		Result.Y = Y * _Value;
 		return Result;
 	}
-
-
 
 	FVector2D operator+(FVector2D _Other) const
 	{
@@ -79,7 +93,6 @@ public:
 		return Result;
 	}
 
-
 	FVector2D operator/(int _Value) const
 	{
 		FVector2D Result;
@@ -93,7 +106,6 @@ public:
 		return X == _Other.X && Y == _Other.Y;
 	}
 
-
 	bool EqualToInt(FVector2D _Other) const
 	{
 		return iX() == _Other.iX() && iY() == _Other.iY();
@@ -104,11 +116,6 @@ public:
 		X += _Other.X;
 		Y += _Other.Y;
 		return *this;
-	}
-
-	void Normalize()
-	{
-
 	}
 };
 

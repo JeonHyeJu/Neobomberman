@@ -10,6 +10,7 @@
 
 #include "PlayGameMode.h"
 #include "Player.h"
+#include "GlobalVar.h"
 
 ContentsCore::ContentsCore()
 {
@@ -38,10 +39,20 @@ void ContentsCore::BeginPlay()
 		UImageManager::GetInst().Load(FilePath);
 	}
 
-	UEngineAPICore::GetCore()->GetMainWindow().SetWindowTitle("EduWindow");
+	UImageManager::GetInst().CuttingSprite("MainCharater_White.png", GlobalVar::BOMBERMAN_SIZE);
+
+	//{
+	//	UEngineDirectory BombDir;
+	//	BombDir.MoveParentToDirectory("Resources");
+	//	BombDir.Append("bomb");
+
+	//	UImageManager::GetInst().LoadFolder(BombDir.GetPathToString());
+	//}
+
+	UEngineAPICore::GetCore()->GetMainWindow().SetWindowTitle("Neobomberman");
 
 	// You must call this.
-	UEngineAPICore::GetCore()->GetMainWindow().SetWindowPosAndScale({ 0, 0 }, {1280, 720});
+	UEngineAPICore::GetCore()->GetMainWindow().SetWindowPosAndScale({ 0, 0 }, { 302, 224 });
 
 	UEngineAPICore::GetCore()->CreateLevel<APlayGameMode, APlayer>("Play");
 	//UEngineAPICore::GetCore()->CreateLevel("End");

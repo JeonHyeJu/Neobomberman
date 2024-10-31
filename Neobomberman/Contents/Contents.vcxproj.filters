@@ -54,9 +54,6 @@
     <ClInclude Include="Enemy.h">
       <Filter>Actor</Filter>
     </ClInclude>
-    <ClInclude Include="Bullet.h">
-      <Filter>Actor</Filter>
-    </ClInclude>
     <ClInclude Include="PlayMap.h">
       <Filter>Map</Filter>
     </ClInclude>
@@ -90,9 +87,6 @@
       <Filter>GameMode</Filter>
     </ClCompile>
     <ClCompile Include="Enemy.cpp">
-      <Filter>Actor</Filter>
-    </ClCompile>
-    <ClCompile Include="Bullet.cpp">
       <Filter>Actor</Filter>
     </ClCompile>
     <ClCompile Include="PlayMap.cpp">

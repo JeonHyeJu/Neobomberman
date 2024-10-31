@@ -1,6 +1,7 @@
 #pragma once
 #include <EnginePlatform/EngineWinImage.h>
 #include <vector>
+#include <EngineBase/EngineDebug.h>
 
 class UEngineSprite : public UObject
 {
@@ -24,6 +25,11 @@ public:
 
 	USpriteData GetSpriteData(int _Index = 0)
 	{
+		if (_Index >= Data.size())
+		{
+			MSGASSERT("스프라이트의 인덱스를 오버하여 사용하려고 했습니다." + GetName());
+		}
+
 		return Data[_Index];
 	}
 

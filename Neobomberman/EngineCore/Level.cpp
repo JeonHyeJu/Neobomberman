@@ -6,6 +6,8 @@
 #include <EnginePlatform/EngineWindow.h>
 #include <EnginePlatform/EngineWinImage.h>
 
+#include "SpriteRenderer.h"
+
 ULevel::ULevel()
 {
 }
@@ -28,29 +30,56 @@ ULevel::~ULevel()
 
 void ULevel::Tick(float _DeltaTime)
 {
-	std::list<AActor*>::iterator StartIter = AllActors.begin();
-	std::list<AActor*>::iterator EndIter = AllActors.end();
-
-	for (; StartIter != EndIter; ++StartIter)
 	{
-		AActor* CurActor = *StartIter;
+		std::list<AActor*>::iterator StartIter = BeginPlayList.begin();
+		std::list<AActor*>::iterator EndIter = BeginPlayList.end();
 
-		CurActor->Tick(_DeltaTime);
+		for (; StartIter != EndIter; ++StartIter)
+		{
+			AActor* CurActor = *StartIter;
+			CurActor->BeginPlay();
+			AllActors.push_back(CurActor);
+		}
+
+		BeginPlayList.clear();
+
+		AActor::ComponentBeginPlay();
+	}
+
+	{
+		std::list<AActor*>::iterator StartIter = AllActors.begin();
+		std::list<AActor*>::iterator EndIter = AllActors.end();
+
+		for (; StartIter != EndIter; ++StartIter)
+		{
+			AActor* CurActor = *StartIter;
+
+			CurActor->Tick(_DeltaTime);
+		}
 	}
 }
 
-void ULevel::Render()
+void ULevel::Render(float _DeltaTime)
 {
 	ScreenClear();
 
-	std::list<AActor*>::iterator StartIter = AllActors.begin();
-	std::list<AActor*>::iterator EndIter = AllActors.end();
+	std::map<int, std::list<class USpriteRenderer*>>::iterator StartOrderIter = Renderers.begin();
+	std::map<int, std::list<class USpriteRenderer*>>::iterator EndOrderIter = Renderers.end();
 
-	for (; StartIter != EndIter; ++StartIter)
+	for (; StartOrderIter != EndOrderIter; ++StartOrderIter)
 	{
-		AActor* CurActor = *StartIter;
-		CurActor->Render();
+		std::list<class USpriteRenderer*>& RendererList = StartOrderIter->second;
+
+		std::list<class USpriteRenderer*>::iterator RenderStartIter = RendererList.begin();
+		std::list<class USpriteRenderer*>::iterator RenderEndIter = RendererList.end();
+
+		for (; RenderStartIter != RenderEndIter; ++RenderStartIter)
+		{
+			(*RenderStartIter)->Render(_DeltaTime);
+		}
+
 	}
+
 
 	DoubleBuffering();
 }
@@ -76,4 +105,17 @@ void ULevel::DoubleBuffering()
 	Trans.Scale = MainWindow.GetWindowSize();
 
 	BackBufferImage->CopyToBit(WindowImage, Trans);
+}
+
+void ULevel::PushRenderer(class USpriteRenderer* _Renderer)
+{
+	int Order = _Renderer->GetOrder();
+
+	Renderers[Order].push_back(_Renderer);
+}
+
+void ULevel::ChangeRenderOrder(class USpriteRenderer* _Renderer, int _PrevOrder)
+{
+	Renderers[_PrevOrder].remove(_Renderer);
+	Renderers[_Renderer->GetOrder()].push_back(_Renderer);
 }

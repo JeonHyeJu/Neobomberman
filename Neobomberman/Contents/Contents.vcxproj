@@ -149,7 +149,6 @@
     <ClInclude Include="BombPlain.h" />
     <ClInclude Include="BombRed.h" />
     <ClInclude Include="BombRemote.h" />
-    <ClInclude Include="Bullet.h" />
     <ClInclude Include="ContentsCore.h">
       <SubType>
       </SubType>
@@ -167,7 +166,6 @@
     <ClCompile Include="BombPlain.cpp" />
     <ClCompile Include="BombRed.cpp" />
     <ClCompile Include="BombRemote.cpp" />
-    <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="ContentsCore.cpp">
       <SubType>
       </SubType>
