@@ -1,6 +1,7 @@
 #pragma once
+#include <EngineCore/Actor.h>
 
-class Bomb
+class Bomb : public AActor
 {
 public:
 	Bomb();

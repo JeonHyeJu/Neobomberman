@@ -1,5 +1,6 @@
 #include "PreCompile.h"
 #include "Player.h"
+#include "BombPlain.h"
 
 #include <EngineCore/EngineAPICore.h>
 #include <EngineCore/SpriteRenderer.h>
@@ -81,6 +82,7 @@ void APlayer::Tick(float _DeltaTime)
 	bool isPressedA = UEngineInput::GetInst().IsPress('A');
 	bool isPressedS = UEngineInput::GetInst().IsPress('S');
 	bool isPressedW = UEngineInput::GetInst().IsPress('W');
+	bool isDownSpace = UEngineInput::GetInst().IsDown(VK_SPACE);
 
 	if (isPressedD)
 	{
@@ -129,11 +131,16 @@ void APlayer::Tick(float _DeltaTime)
 			SpriteRendererBody->ChangeAnimation("Idle_Up_Body");
 		}
 	}
+
+	if (isDownSpace)
+	{
+		BombPlain* pBomb = GetWorld()->SpawnActor<BombPlain>();
+		pBomb->SetActorLocation(GetActorLocation());
+	}
 }
 
 void APlayer::RunSoundPlay()
 {
-	// UEngineDebug::OutPutString("SoundPlay");
 }
 
 void APlayer::LevelChangeStart()

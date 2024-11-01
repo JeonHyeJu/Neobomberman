@@ -6,6 +6,7 @@ class ULevel
 public:
 	friend class USpriteRenderer;
 	friend class UEngineAPICore;
+
 	ULevel();
 	~ULevel();
 
@@ -15,7 +16,6 @@ public:
 	ULevel& operator=(ULevel&& _Other) noexcept = delete;
 
 	void LevelChangeStart();
-
 	void LevelChangeEnd();
 
 	void Tick(float _DeltaTime);

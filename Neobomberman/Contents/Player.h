@@ -19,12 +19,14 @@ public:
 
 	void LevelChangeStart();
 	void LevelChangeEnd();
+
 protected:
 
 private:
 	int CurIndex = 0;
 	float Speed = 100.0f;
 	const char* PLAYER_SPRITE_PATH = "MainCharater_White.png";	// 1024 x 640 (32x64)
+
 	class USpriteRenderer* SpriteRendererHead = nullptr;
 	class USpriteRenderer* SpriteRendererBody = nullptr;
 };

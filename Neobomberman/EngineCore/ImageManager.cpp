@@ -134,7 +134,6 @@ void UImageManager::LoadFolder(std::string_view _KeyName, std::string_view _Path
 		return;
 	}
 
-
 	UEngineSprite* NewSprite = new UEngineSprite();
 	NewSprite->SetName(UpperName);
 	Sprites.insert({ UpperName , NewSprite });

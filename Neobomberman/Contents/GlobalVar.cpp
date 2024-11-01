@@ -2,3 +2,4 @@
 #include "GlobalVar.h"
 
 const FVector2D GlobalVar::BOMBERMAN_SIZE = { 32, 32 };
+const FVector2D GlobalVar::BOMB_SIZE = { 16, 16 };

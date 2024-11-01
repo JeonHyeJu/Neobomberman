@@ -19,7 +19,6 @@ ATitle::~ATitle()
 
 void ATitle::BeginPlay()
 {
-	UEngineDebug::OutPutString("Temp!!!!!!!!!!!!!!!!!!!!!!!");
 }
 
 void ATitle::Tick(float _DeltaTime)

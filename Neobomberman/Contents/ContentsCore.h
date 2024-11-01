@@ -18,7 +18,9 @@ protected:
 	void Tick() override;
 
 private:
-	void LoadResources();
+	void InitResources();
+	void LoadResourceNotRecursively(const std::string_view& _path, const std::string_view& _append="");
+	void LoadResourceFolders(const std::string_view& _path, const std::string_view& _append="");
 
 	ULevel* TitleLevel = nullptr;
 };
