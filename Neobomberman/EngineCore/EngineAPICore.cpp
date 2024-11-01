@@ -9,7 +9,6 @@
 UEngineAPICore* UEngineAPICore::MainCore = nullptr;
 UContentsCore* UEngineAPICore::UserCore = nullptr;
 
-
 UEngineAPICore::UEngineAPICore()
 {
 }
@@ -30,7 +29,6 @@ UEngineAPICore::~UEngineAPICore()
 
 	Levels.clear();
 }
-
 
 int UEngineAPICore::EngineStart(HINSTANCE _Inst, UContentsCore* _UserCore)
 {
@@ -73,11 +71,9 @@ void UEngineAPICore::Tick()
 		}
 
 		CurLevel = NextLevel;
-
 		NextLevel->LevelChangeStart();
 
 		NextLevel = nullptr;
-
 		DeltaTimer.TimeStart();
 	}
 
@@ -95,7 +91,6 @@ void UEngineAPICore::Tick()
 	CurLevel->Tick(DeltaTime);
 	CurLevel->Render(DeltaTime);
 }
-
 
 void UEngineAPICore::OpenLevel(std::string_view _LevelName)
 {

@@ -30,7 +30,6 @@ void AActor::ComponentBeginPlay()
 
 		ComponentList.clear();
 	}
-
 }
 
 AActor::AActor()

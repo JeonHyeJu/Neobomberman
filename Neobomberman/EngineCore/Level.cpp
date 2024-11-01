@@ -23,54 +23,51 @@ ULevel::~ULevel()
 		for (; StartIter != EndIter; ++StartIter)
 		{
 			AActor* CurActor = *StartIter;
-			delete CurActor;
+			if (nullptr != CurActor)
+			{
+				delete CurActor;
+			}
 		}
 	}
+	
 
-	std::list<AActor*>::iterator StartIter = AllActors.begin();
-	std::list<AActor*>::iterator EndIter = AllActors.end();
-
-	for (; StartIter != EndIter; ++StartIter)
 	{
-		AActor* CurActor = *StartIter;
+		std::list<AActor*>::iterator StartIter = AllActors.begin();
+		std::list<AActor*>::iterator EndIter = AllActors.end();
 
-		if (nullptr != CurActor)
+		for (; StartIter != EndIter; ++StartIter)
 		{
-			delete *StartIter;
+			AActor* CurActor = *StartIter;
+			if (nullptr != CurActor)
+			{
+				delete CurActor;
+			}
 		}
 	}
 }
 
 void ULevel::LevelChangeStart()
 {
+	std::list<AActor*>::iterator StartIter = AllActors.begin();
+	std::list<AActor*>::iterator EndIter = AllActors.end();
+
+	for (; StartIter != EndIter; ++StartIter)
 	{
-		std::list<AActor*>::iterator StartIter = AllActors.begin();
-		std::list<AActor*>::iterator EndIter = AllActors.end();
-
-		for (; StartIter != EndIter; ++StartIter)
-		{
-			AActor* CurActor = *StartIter;
-
-			CurActor->LevelChangeStart();
-		}
+		AActor* CurActor = *StartIter;
+		CurActor->LevelChangeStart();
 	}
-
 }
 
 void ULevel::LevelChangeEnd()
 {
+	std::list<AActor*>::iterator StartIter = AllActors.begin();
+	std::list<AActor*>::iterator EndIter = AllActors.end();
+
+	for (; StartIter != EndIter; ++StartIter)
 	{
-		std::list<AActor*>::iterator StartIter = AllActors.begin();
-		std::list<AActor*>::iterator EndIter = AllActors.end();
-
-		for (; StartIter != EndIter; ++StartIter)
-		{
-			AActor* CurActor = *StartIter;
-
-			CurActor->LevelChangeEnd();
-		}
+		AActor* CurActor = *StartIter;
+		CurActor->LevelChangeEnd();
 	}
-
 }
 
 void ULevel::Tick(float _DeltaTime)
@@ -87,7 +84,6 @@ void ULevel::Tick(float _DeltaTime)
 		}
 
 		BeginPlayList.clear();
-
 		AActor::ComponentBeginPlay();
 	}
 
@@ -98,7 +94,6 @@ void ULevel::Tick(float _DeltaTime)
 		for (; StartIter != EndIter; ++StartIter)
 		{
 			AActor* CurActor = *StartIter;
-
 			CurActor->Tick(_DeltaTime);
 		}
 	}
@@ -128,7 +123,6 @@ void ULevel::Render(float _DeltaTime)
 		{
 			(*RenderStartIter)->Render(_DeltaTime);
 		}
-
 	}
 
 	UEngineDebug::PrintEngineDebugText();
@@ -142,7 +136,13 @@ void ULevel::ScreenClear()
 	UEngineWinImage* BackBufferImage = MainWindow.GetBackBuffer();
 	FVector2D Size = MainWindow.GetWindowSize();
 
-	Rectangle(BackBufferImage->GetDC(), -1, -1, Size.iX() + 2, Size.iY() + 2);
+	HBRUSH hbrush = CreateSolidBrush(RGB(0, 0, 0));		// Set black color
+	RECT rect(-1, -1, Size.iX() + 1, Size.iY() + 1);
+
+	FillRect(BackBufferImage->GetDC(), &rect, hbrush);
+	DeleteObject(hbrush);
+
+	//Rectangle(BackBufferImage->GetDC(), -1, -1, Size.iX() + 2, Size.iY() + 2);
 }
 
 void ULevel::DoubleBuffering()

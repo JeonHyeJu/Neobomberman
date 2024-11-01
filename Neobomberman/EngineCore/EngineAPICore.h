@@ -3,11 +3,10 @@
 #include <Windows.h>
 #include <EnginePlatform/EngineWindow.h>
 #include <EngineBase/EngineTimer.h>
+#include "Level.h"
 
 #pragma comment (lib, "EngineBase.lib")
 #pragma comment (lib, "EnginePlatform.lib")
-
-#include "Level.h"
 
 class UContentsCore
 {
@@ -19,11 +18,9 @@ public:
 class UEngineAPICore
 {
 public:
-	// constrcuter destructer
 	UEngineAPICore();
 	~UEngineAPICore();
 
-	// delete Function
 	UEngineAPICore(const UEngineAPICore& _Other) = delete;
 	UEngineAPICore(UEngineAPICore&& _Other) noexcept = delete;
 	UEngineAPICore& operator=(const UEngineAPICore& _Other) = delete;
@@ -65,17 +62,16 @@ protected:
 private:
 	static void EngineBeginPlay();
 	static void EngineTick();
+	void Tick();
+
 	static UEngineAPICore* MainCore;
 	static UContentsCore* UserCore;
+	class ULevel* CurLevel = nullptr;
+	class ULevel* NextLevel = nullptr;
 
 	UEngineTimer DeltaTimer = UEngineTimer();
 	UEngineWindow EngineMainWindow = UEngineWindow();
 
 	std::map<std::string, class ULevel*> Levels;
-	class ULevel* CurLevel = nullptr;
-	class ULevel* NextLevel = nullptr;
-
-	void Tick();
-
 };
 

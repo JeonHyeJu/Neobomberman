@@ -7,6 +7,7 @@
 // GDI+
 #include <objidl.h>
 #include <gdiplus.h>
+
 // in $(WindowsSDK_LibraryPath_x64)
 #pragma comment(lib, "Msimg32.lib")
 #pragma comment(lib, "Gdiplus.lib")
@@ -28,7 +29,6 @@ UEngineWinImage::~UEngineWinImage()
 		DeleteDC(ImageDC);
 		ImageDC = nullptr;
 	}
-
 }
 
 void UEngineWinImage::Create(UEngineWinImage* _TargetImage,  FVector2D _Scale)
@@ -40,10 +40,8 @@ void UEngineWinImage::Create(UEngineWinImage* _TargetImage,  FVector2D _Scale)
 	}
 	
 	HBITMAP NewBitmap = static_cast<HBITMAP>(CreateCompatibleBitmap(_TargetImage->GetDC(), _Scale.iX(), _Scale.iY()));
-
-
 	HDC NewImageDC = CreateCompatibleDC(_TargetImage->GetDC());
-
+	
 	HBITMAP OldBitMap = static_cast<HBITMAP>(SelectObject(NewImageDC, NewBitmap));
 	DeleteObject(OldBitMap);
 
@@ -78,6 +76,7 @@ void UEngineWinImage::CopyToBit(UEngineWinImage* _TargetImage, const FTransform&
 		SRCCOPY);
 	FVector2D Vector;
 }
+
 void UEngineWinImage::CopyToTrans(UEngineWinImage* _TargetImage, const FTransform& _RenderTrans, const FTransform& _LTImageTrans, UColor _Color /*= UColor(255, 0, 255, 255)*/)
 {
 	HDC CopyDC = ImageDC;

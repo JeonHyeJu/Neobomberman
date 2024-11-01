@@ -4,9 +4,6 @@
     <Filter Include="Object">
       <UniqueIdentifier>{03815b07-2c1f-4a32-9997-ac4233f691d7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="GameMode">
-      <UniqueIdentifier>{7049d7ab-422d-485f-b6ab-8860f8d125d2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Level">
       <UniqueIdentifier>{d41a1a4c-fdfc-4130-a387-ec899e228d80}</UniqueIdentifier>
     </Filter>
@@ -25,13 +22,13 @@
     <Filter Include="Debug">
       <UniqueIdentifier>{99993266-8161-47d4-94bf-3585386e4511}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GameMode">
+      <UniqueIdentifier>{af77fa47-6d09-4e09-9acb-809429b85243}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Actor.cpp">
       <Filter>Object</Filter>
-    </ClCompile>
-    <ClCompile Include="GameMode.cpp">
-      <Filter>GameMode</Filter>
     </ClCompile>
     <ClCompile Include="Level.cpp">
       <Filter>Level</Filter>
@@ -63,13 +60,13 @@
     <ClCompile Include="EngineCoreDebug.cpp">
       <Filter>Debug</Filter>
     </ClCompile>
+    <ClCompile Include="GameMode.cpp">
+      <Filter>GameMode</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
       <Filter>Object</Filter>
-    </ClInclude>
-    <ClInclude Include="GameMode.h">
-      <Filter>GameMode</Filter>
     </ClInclude>
     <ClInclude Include="Level.h">
       <Filter>Level</Filter>
@@ -100,6 +97,9 @@
     </ClInclude>
     <ClInclude Include="EngineCoreDebug.h">
       <Filter>Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="GameMode.h">
+      <Filter>GameMode</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -50,6 +50,9 @@ private:
 	void ScreenClear();
 	void DoubleBuffering();
 
+	void PushRenderer(class USpriteRenderer* _Renderer);
+	void ChangeRenderOrder(class USpriteRenderer* _Renderer, int _PrevOrder);
+
 	template<typename GameModeType, typename MainPawnType>
 	void CreateGameMode()
 	{
@@ -61,16 +64,8 @@ private:
 
 		BeginPlayList.push_back(GameMode);
 		BeginPlayList.push_back(MainPawn);
-
-		//GameMode->BeginPlay();
-		//MainPawn->BeginPlay();
-		//AllActors.push_back(GameMode);
-		//AllActors.push_back(MainPawn);
 	}
 
-
-	void PushRenderer(class USpriteRenderer* _Renderer);
-	void ChangeRenderOrder(class USpriteRenderer* _Renderer, int _PrevOrder);
 	class AGameMode* GameMode = nullptr;
 	class AActor* MainPawn = nullptr;
 

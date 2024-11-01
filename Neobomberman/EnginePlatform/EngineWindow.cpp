@@ -96,8 +96,6 @@ void UEngineWindow::CreateWindowClass(const WNDCLASSEXA& _Class)
 
 UEngineWindow::UEngineWindow() 
 {
-
-    
 }
 
 UEngineWindow::~UEngineWindow()
@@ -154,6 +152,7 @@ void UEngineWindow::Open(std::string_view _TitleName /*= "Window"*/)
     {
         return;
     }
+
 	ShowWindow(WindowHandle, SW_SHOW);
     UpdateWindow(WindowHandle);
     ++WindowCount;
