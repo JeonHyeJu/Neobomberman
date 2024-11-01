@@ -14,5 +14,7 @@ APlayGameMode::~APlayGameMode()
 
 void APlayGameMode::BeginPlay()
 {
+	Super::BeginPlay();
 	APlayMap* NewActor = GetWorld()->SpawnActor<APlayMap>();
 }
+

@@ -13,8 +13,8 @@ public:
 	TitleLogo& operator=(TitleLogo&& _Other) noexcept = delete;
 
 protected:
+	void Tick(float _DeltaTime) override;
 
 private:
-
+	class USpriteRenderer* SpriteRenderer= nullptr;
 };
-

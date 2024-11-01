@@ -9,18 +9,11 @@
 #include <EngineCore/ImageManager.h>
 #include "GlobalVar.h"
 
-void APlayer::RunSoundPlay()
-{
-	// UEngineDebug::OutPutString("SoundPlay");
-}
-
 APlayer::APlayer()
 {
 	FVector2D playerSize = GlobalVar::BOMBERMAN_SIZE;
 
 	SetActorLocation({100, 100});
-
-	
 
 	{
 		SpriteRendererHead = CreateDefaultSubObject<USpriteRenderer>();
@@ -83,6 +76,7 @@ void APlayer::Tick(float _DeltaTime)
 
 	UEngineDebug::CoreOutPutString("FPS : " + std::to_string(1.0f / _DeltaTime));
 	UEngineDebug::CoreOutPutString("PlayerPos : " + GetActorLocation().ToString());
+
 	bool isPressedD = UEngineInput::GetInst().IsPress('D');
 	bool isPressedA = UEngineInput::GetInst().IsPress('A');
 	bool isPressedS = UEngineInput::GetInst().IsPress('S');
@@ -135,6 +129,11 @@ void APlayer::Tick(float _DeltaTime)
 			SpriteRendererBody->ChangeAnimation("Idle_Up_Body");
 		}
 	}
+}
+
+void APlayer::RunSoundPlay()
+{
+	// UEngineDebug::OutPutString("SoundPlay");
 }
 
 void APlayer::LevelChangeStart()

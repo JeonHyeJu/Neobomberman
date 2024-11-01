@@ -57,7 +57,6 @@ private:
 		}
 
 		void EventCheck();
-
 		void KeyCheck(float _DeltaTime);
 		
 	};
