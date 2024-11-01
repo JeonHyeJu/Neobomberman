@@ -44,7 +44,7 @@ void ContentsCore::InitResources()
 
 	/** Load resources **/
 	LoadResourceNotRecursively("Resources");
-	LoadResourceNotRecursively("Resources", "Stage_1-1");
+	LoadResourceNotRecursively("Resources", "Background");
 	LoadResourceNotRecursively("Resources", "Riding_32x32");
 	LoadResourceNotRecursively("Resources", "Enemies_32x32");
 
