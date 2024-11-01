@@ -49,6 +49,7 @@ void ContentsCore::InitResources()
 	LoadResourceNotRecursively("Resources", "Enemies_32x32");
 
 	LoadResourceFolders("Resources", "BombOrg_16x16");
+	LoadResourceFolders("Resources", "BombRed_16x16");
 	LoadResourceFolders("Resources", "Opening");
 
 	/** Cutting **/

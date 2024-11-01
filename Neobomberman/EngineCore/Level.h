@@ -72,11 +72,9 @@ private:
 	void PushRenderer(class USpriteRenderer* _Renderer);
 	void ChangeRenderOrder(class USpriteRenderer* _Renderer, int _PrevOrder);
 	class AGameMode* GameMode = nullptr;
-
 	class AActor* MainPawn = nullptr;
 
 	std::list<AActor*> AllActors;
-
 	std::list<AActor*> BeginPlayList;
 
 	bool IsCameraToMainPawn = false;

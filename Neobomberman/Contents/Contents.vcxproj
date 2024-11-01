@@ -146,13 +146,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Bomb.h" />
-    <ClInclude Include="BombPlain.h" />
-    <ClInclude Include="BombRed.h" />
-    <ClInclude Include="BombRemote.h" />
     <ClInclude Include="ContentsCore.h">
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="ContentsEnum.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="GlobalVar.h" />
     <ClInclude Include="Player.h" />
@@ -165,9 +163,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Bomb.cpp" />
-    <ClCompile Include="BombPlain.cpp" />
-    <ClCompile Include="BombRed.cpp" />
-    <ClCompile Include="BombRemote.cpp" />
     <ClCompile Include="ContentsCore.cpp">
       <SubType>
       </SubType>

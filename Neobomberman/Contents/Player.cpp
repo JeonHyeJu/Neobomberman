@@ -1,6 +1,6 @@
 #include "PreCompile.h"
 #include "Player.h"
-#include "BombPlain.h"
+#include "Bomb.h"
 
 #include <EngineCore/EngineAPICore.h>
 #include <EngineCore/SpriteRenderer.h>
@@ -14,7 +14,7 @@ APlayer::APlayer()
 {
 	FVector2D playerSize = GlobalVar::BOMBERMAN_SIZE;
 
-	SetActorLocation({100, 100});
+	SetActorLocation({100, 100});	// temp
 
 	{
 		SpriteRendererHead = CreateDefaultSubObject<USpriteRenderer>();
@@ -134,7 +134,7 @@ void APlayer::Tick(float _DeltaTime)
 
 	if (isDownSpace)
 	{
-		BombPlain* pBomb = GetWorld()->SpawnActor<BombPlain>();
+		Bomb* pBomb = GetWorld()->SpawnActor<Bomb>();
 		pBomb->SetActorLocation(GetActorLocation());
 	}
 }

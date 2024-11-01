@@ -60,16 +60,34 @@ public:
 	void ChangeAnimation(std::string_view _AnimationName, bool _Force = false);
 	void SetAnimationEvent(std::string_view _AnimationName, int _Frame, std::function<void()> _Function);
 
+	inline std::string GetNowAnimation() const
+	{
+		return NowAnimName;
+	}
+
+	inline void Show()
+	{
+		IsShow = true;
+	}
+	
+	inline void Hide()
+	{
+		IsShow = false;
+	}
+
 protected:
 
 public:
 	int Order = 0;
 	int CurIndex = 0;
+	bool IsShow = true;
+	std::string NowAnimName = "";
 
 	class UEngineSprite* Sprite = nullptr;
-	void SetSprite(std::string_view _Name, int _CurIndex = 0);
 
 	std::map<std::string, FrameAnimation> FrameAnimations;
 	FrameAnimation* CurAnimation = nullptr;
+
+	void SetSprite(std::string_view _Name, int _CurIndex = 0);
 };
 

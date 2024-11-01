@@ -51,7 +51,7 @@ std::vector<class UEngineFile> UEngineDirectory::GetAllFile(bool _IsRecursive /*
 		Result.push_back(UEngineFile(FilePath));
 		++Diriter;
 	}
-	
+
 	return Result;
 }
 

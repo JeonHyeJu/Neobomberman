@@ -48,12 +48,10 @@ public:
 		return BackBufferImage;
 	}
 
-
 	inline void SetWindowTitle(std::string_view Text)
 	{
 		SetWindowTextA(WindowHandle, Text.data());
 	}
-
 
 	void SetWindowPosAndScale(FVector2D _Pos, FVector2D _Scale);
 

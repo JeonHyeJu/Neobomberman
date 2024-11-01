@@ -17,5 +17,11 @@ protected:
 	void Tick(float _DeltaTime) override;
 
 private:
-	class USpriteRenderer* SpriteRenderer= nullptr;
+	void OnEndAnimation();
+
+	const char* RESOURCE_PATH = "Opening";
+	const char* ANIM_IDLE_NAME = "Opening_Idle";
+	const char* ANIM_RUN_NAME = "Opening_Run";
+
+	class USpriteRenderer* SpriteRenderer = nullptr;
 };

@@ -15,6 +15,11 @@ USpriteRenderer::~USpriteRenderer()
 
 void USpriteRenderer::Render(float _DeltaTime)
 {
+	if (IsShow == false)
+	{
+		return;
+	}
+
 	if (nullptr != CurAnimation)
 	{
 		std::vector<int>& Indexs = CurAnimation->FrameIndex;
@@ -137,7 +142,6 @@ FVector2D USpriteRenderer::SetSpriteScale(float _Ratio /*= 1.0f*/, int _CurIndex
 	return Scale;
 }
 
-
 void USpriteRenderer::CreateAnimation(std::string_view _AnimationName, std::string_view _SpriteName, int _Start, int _End, float Time /*= 0.1f*/, bool _Loop /*= true*/)
 {
 	if (_Start > _End)
@@ -204,7 +208,7 @@ void USpriteRenderer::ChangeAnimation(std::string_view _AnimationName, bool _For
 		return;
 	}
 
-	FrameAnimation* ChangeAnimation =&FrameAnimations[UpperName];
+	FrameAnimation* ChangeAnimation = &FrameAnimations[UpperName];
 
 	if (CurAnimation == ChangeAnimation && false == _Force)
 	{
@@ -213,6 +217,7 @@ void USpriteRenderer::ChangeAnimation(std::string_view _AnimationName, bool _For
 
 	CurAnimation = &FrameAnimations[UpperName];
 	CurAnimation->Reset();
+	NowAnimName = UpperName;
 
 	if (CurAnimation->Events.contains(CurAnimation->CurIndex))
 	{

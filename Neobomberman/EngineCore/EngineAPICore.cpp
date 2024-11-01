@@ -45,7 +45,7 @@ int UEngineAPICore::EngineStart(HINSTANCE _Inst, UContentsCore* _UserCore)
 	MainCore = &Core;
 
 	EngineDelegate Start = EngineDelegate(std::bind(EngineBeginPlay));
-	EngineDelegate FrameLoop = EngineDelegate(std::bind(EngineTick));;
+	EngineDelegate FrameLoop = EngineDelegate(std::bind(EngineTick));
 	return UEngineWindow::WindowMessageLoop(Start, FrameLoop);
 }
 

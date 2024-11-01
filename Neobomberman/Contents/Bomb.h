@@ -1,5 +1,6 @@
 #pragma once
 #include <EngineCore/Actor.h>
+#include "ContentsEnum.h"
 
 class Bomb : public AActor
 {
@@ -12,24 +13,29 @@ public:
 	Bomb& operator=(const Bomb& _other) = delete;
 	Bomb& operator=(Bomb&& _other) noexcept = delete;
 
-	void CreateTimer();
-	void DeleteTimer();
+	void BeginPlay() override;
+	void Tick(float _DeltaTime) override;
 
-	// Get, Set
-	inline int GetPower() const
+	inline EBombType GetBombType() const
 	{
-		return mPower;
+		return BombType;
 	}
-	inline void SetPower(int _val)
+	inline void SetBombType(const EBombType& _bombType)
 	{
-		mPower = _val;
+		BombType = _bombType;
 	}
 
 private:
+	EBombType BombType = EBombType::PLAIN;
+
+	const char* RESOURCE_PLAINBOMB_PATH = "BombOrg_16x16";	// 16x16
+	const char* RESOURCE_REDBOMB_PATH = "BombRed_16x16";	// 16x16
+	const float EXPLODE_SECONDS = 3.f;
+
+	class USpriteRenderer* SpriteRenderer = nullptr;
+
+	float AccumulatedSeconds = 0.f;
+	int CurIndex = 0;
+
 	void Explode();
-
-	const int EXPLODE_MILLI_SECONDS = 3000;
-
-	class Timer* mTimer = nullptr;
-	int mPower = 1;
 };

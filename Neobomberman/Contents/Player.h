@@ -1,9 +1,23 @@
 #pragma once
 #include <EngineCore/Actor.h>
+#include <vector>
+#include "ContentsEnum.h"
 
 class APlayer : public AActor
 {
 public:
+	struct PlayerAbility
+	{
+		int Power = 1;
+		int Speed = 1;
+		int BombCount = 1;
+		bool HasGlove = false;
+		bool HasShoes = false;
+		bool HasMoveThrogh = false;
+		bool IsRinding = false;
+		EBombType BombType = EBombType::PLAIN;
+	};
+
 	APlayer();
 	~APlayer();
 
@@ -29,4 +43,7 @@ private:
 
 	class USpriteRenderer* SpriteRendererHead = nullptr;
 	class USpriteRenderer* SpriteRendererBody = nullptr;
+
+	std::vector<class Bomb*> Bombs;
+	PlayerAbility Ability;
 };
