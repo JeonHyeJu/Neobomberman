@@ -33,11 +33,21 @@ void USpriteRenderer::Render(float _DeltaTime)
 			CurAnimation->CurTime -= CurFrameTime;
 			++CurAnimation->CurIndex;
 
+			if (CurAnimation->Events.contains(CurAnimation->CurIndex))
+			{
+				CurAnimation->Events[CurAnimation->CurIndex]();
+			}
+
 			if (CurAnimation->CurIndex >= Indexs.size())
 			{
 				if (true == CurAnimation->Loop)
 				{
 					CurAnimation->CurIndex = 0;
+
+					if (CurAnimation->Events.contains(CurAnimation->CurIndex))
+					{
+						CurAnimation->Events[CurAnimation->CurIndex]();
+					}
 				}
 				else
 				{
@@ -60,7 +70,12 @@ void USpriteRenderer::Render(float _DeltaTime)
 	UEngineWindow& MainWindow = UEngineAPICore::GetCore()->GetMainWindow();
 	UEngineWinImage* BackBufferImage = MainWindow.GetBackBuffer();
 	UEngineSprite::USpriteData CurData = Sprite->GetSpriteData(CurIndex);
-	CurData.Image->CopyToTrans(BackBufferImage, GetActorTransform(), CurData.Transform);
+
+	FTransform Trans = GetActorTransform();
+	ULevel* Level = GetActor()->GetWorld();
+	Trans.Location = Trans.Location - Level->CameraPos;
+
+	CurData.Image->CopyToTrans(BackBufferImage, Trans, CurData.Transform);
 }
 
 void USpriteRenderer::BeginPlay()
@@ -198,4 +213,42 @@ void USpriteRenderer::ChangeAnimation(std::string_view _AnimationName, bool _For
 
 	CurAnimation = &FrameAnimations[UpperName];
 	CurAnimation->Reset();
+
+	if (CurAnimation->Events.contains(CurAnimation->CurIndex))
+	{
+		CurAnimation->Events[CurAnimation->CurIndex]();
+	}
+}
+
+void USpriteRenderer::SetAnimationEvent(std::string_view _AnimationName, int _Frame, std::function<void()> _Function)
+{
+	std::string UpperName = UEngineString::ToUpper(_AnimationName);
+
+	if (false == FrameAnimations.contains(UpperName))
+	{
+		MSGASSERT("존재하지 않은 애니메이션으로 변경하려고 했습니다. = " + UpperName);
+		return;
+	}
+
+	FrameAnimation* ChangeAnimation = &FrameAnimations[UpperName];
+
+	bool Check = false;
+
+	for (size_t i = 0; i < ChangeAnimation->FrameIndex.size(); i++)
+	{
+		if (_Frame == ChangeAnimation->FrameIndex[i])
+		{
+			Check = true;
+			break;
+		}
+	}
+
+	if (false == Check)
+	{
+		MSGASSERT("존재하지 않는 프레임에 이벤트를 생성하려고 했습니다" + std::string(_AnimationName));
+		return;
+	}
+
+	ChangeAnimation->Events[_Frame] += _Function;
+
 }

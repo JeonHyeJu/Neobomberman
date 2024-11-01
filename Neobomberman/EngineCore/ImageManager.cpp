@@ -165,6 +165,35 @@ void UImageManager::LoadFolder(std::string_view _KeyName, std::string_view _Path
 	}
 }
 
+void UImageManager::CuttingSprite(std::string_view _KeyName, int _X, int _Y)
+{
+	std::string UpperName = UEngineString::ToUpper(_KeyName);
+
+	if (false == Sprites.contains(UpperName))
+	{
+		MSGASSERT("존재하지 않은 스프라이트를 자르려고 했습니다" + std::string(_KeyName));
+		return;
+	}
+
+	if (false == Images.contains(UpperName))
+	{
+		MSGASSERT("존재하지 않은 이미지를 기반으로 스프라이트를 자르려고 했습니다" + std::string(_KeyName));
+		return;
+	}
+
+	UEngineSprite* Sprite = Sprites[UpperName];
+	UEngineWinImage* Image = Images[UpperName];
+
+	Sprite->ClearSpriteData();
+
+	FVector2D Scale = Image->GetImageScale();
+
+	Scale.X /= _X;
+	Scale.Y /= _Y;
+
+	CuttingSprite(_KeyName, Scale);
+}
+
 void UImageManager::CuttingSprite(std::string_view _KeyName, FVector2D _CuttingSize)
 {
 	std::string UpperName = UEngineString::ToUpper(_KeyName);

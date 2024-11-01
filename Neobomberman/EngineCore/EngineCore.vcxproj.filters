@@ -22,6 +22,9 @@
     <Filter Include="Object\Component">
       <UniqueIdentifier>{8bd09c1b-8acb-4f7d-8370-b81c3668cb5f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Debug">
+      <UniqueIdentifier>{99993266-8161-47d4-94bf-3585386e4511}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Actor.cpp">
@@ -57,6 +60,9 @@
     <ClCompile Include="SpriteRenderer.cpp">
       <Filter>Object\Component</Filter>
     </ClCompile>
+    <ClCompile Include="EngineCoreDebug.cpp">
+      <Filter>Debug</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -91,6 +97,9 @@
     </ClInclude>
     <ClInclude Include="SpriteRenderer.h">
       <Filter>Object\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineCoreDebug.h">
+      <Filter>Debug</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

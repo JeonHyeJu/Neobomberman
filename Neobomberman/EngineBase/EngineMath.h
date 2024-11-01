@@ -117,6 +117,18 @@ public:
 		Y += _Other.Y;
 		return *this;
 	}
+
+	std::string ToString()
+	{
+		std::string Stream;
+
+		Stream += "X : [";
+		Stream += std::to_string(X);
+		Stream += "] Y : [";
+		Stream += std::to_string(Y);
+		Stream += "]";
+		return Stream;
+	}
 };
 
 class FTransform

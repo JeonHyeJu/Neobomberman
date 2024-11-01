@@ -3,10 +3,16 @@
 
 #include <EngineCore/EngineAPICore.h>
 #include <EngineCore/SpriteRenderer.h>
+#include <EngineCore/EngineCoreDebug.h>
 
 #include <EnginePlatform/EngineInput.h>
 #include <EngineCore/ImageManager.h>
 #include "GlobalVar.h"
+
+void APlayer::RunSoundPlay()
+{
+	// UEngineDebug::OutPutString("SoundPlay");
+}
 
 APlayer::APlayer()
 {
@@ -65,12 +71,18 @@ APlayer::~APlayer()
 void APlayer::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Set camera
+	//	FVector2D Size = UEngineAPICore::GetCore()->GetMainWindow().GetWindowSize();
+	//	GetWorld()->SetCameraPivot(Size.Half() * -1.0f);
 }
 
 void APlayer::Tick(float _DeltaTime)
 {
 	Super::Tick(_DeltaTime);
 
+	UEngineDebug::CoreOutPutString("FPS : " + std::to_string(1.0f / _DeltaTime));
+	UEngineDebug::CoreOutPutString("PlayerPos : " + GetActorLocation().ToString());
 	bool isPressedD = UEngineInput::GetInst().IsPress('D');
 	bool isPressedA = UEngineInput::GetInst().IsPress('A');
 	bool isPressedS = UEngineInput::GetInst().IsPress('S');
@@ -123,4 +135,14 @@ void APlayer::Tick(float _DeltaTime)
 			SpriteRendererBody->ChangeAnimation("Idle_Up_Body");
 		}
 	}
+}
+
+void APlayer::LevelChangeStart()
+{
+	Super::LevelChangeStart();
+}
+
+void APlayer::LevelChangeEnd()
+{
+	Super::LevelChangeEnd();
 }

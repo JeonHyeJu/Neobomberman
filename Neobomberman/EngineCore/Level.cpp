@@ -8,12 +8,25 @@
 
 #include "SpriteRenderer.h"
 
+#include "EngineCoreDebug.h"
+
 ULevel::ULevel()
 {
 }
 
 ULevel::~ULevel()
 {
+	{
+		std::list<AActor*>::iterator StartIter = BeginPlayList.begin();
+		std::list<AActor*>::iterator EndIter = BeginPlayList.end();
+
+		for (; StartIter != EndIter; ++StartIter)
+		{
+			AActor* CurActor = *StartIter;
+			delete CurActor;
+		}
+	}
+
 	std::list<AActor*>::iterator StartIter = AllActors.begin();
 	std::list<AActor*>::iterator EndIter = AllActors.end();
 
@@ -26,6 +39,38 @@ ULevel::~ULevel()
 			delete *StartIter;
 		}
 	}
+}
+
+void ULevel::LevelChangeStart()
+{
+	{
+		std::list<AActor*>::iterator StartIter = AllActors.begin();
+		std::list<AActor*>::iterator EndIter = AllActors.end();
+
+		for (; StartIter != EndIter; ++StartIter)
+		{
+			AActor* CurActor = *StartIter;
+
+			CurActor->LevelChangeStart();
+		}
+	}
+
+}
+
+void ULevel::LevelChangeEnd()
+{
+	{
+		std::list<AActor*>::iterator StartIter = AllActors.begin();
+		std::list<AActor*>::iterator EndIter = AllActors.end();
+
+		for (; StartIter != EndIter; ++StartIter)
+		{
+			AActor* CurActor = *StartIter;
+
+			CurActor->LevelChangeEnd();
+		}
+	}
+
 }
 
 void ULevel::Tick(float _DeltaTime)
@@ -63,6 +108,13 @@ void ULevel::Render(float _DeltaTime)
 {
 	ScreenClear();
 
+	if (true == IsCameraToMainPawn)
+	{
+		// CameraPivot = FVector2D(-1280, -720) * 0.5f;
+		CameraPos = MainPawn->GetTransform().Location + CameraPivot;
+	}
+
+
 	std::map<int, std::list<class USpriteRenderer*>>::iterator StartOrderIter = Renderers.begin();
 	std::map<int, std::list<class USpriteRenderer*>>::iterator EndOrderIter = Renderers.end();
 
@@ -80,6 +132,7 @@ void ULevel::Render(float _DeltaTime)
 
 	}
 
+	UEngineDebug::PrintEngineDebugText();
 
 	DoubleBuffering();
 }

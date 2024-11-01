@@ -14,6 +14,10 @@ public:
 	ULevel& operator=(const ULevel& _Other) = delete;
 	ULevel& operator=(ULevel&& _Other) noexcept = delete;
 
+	void LevelChangeStart();
+
+	void LevelChangeEnd();
+
 	void Tick(float _DeltaTime);
 	void Render(float _DeltaTime);
 
@@ -28,6 +32,16 @@ public:
 		BeginPlayList.push_back(ActorPtr);
 
 		return NewActor;
+	}
+
+	void SetCameraToMainPawn(bool _IsCameraToMainPawn)
+	{
+		IsCameraToMainPawn = _IsCameraToMainPawn;
+	}
+
+	void SetCameraPivot(FVector2D _Pivot)
+	{
+		CameraPivot = _Pivot;
 	}
 
 protected:
@@ -64,6 +78,11 @@ private:
 	std::list<AActor*> AllActors;
 
 	std::list<AActor*> BeginPlayList;
+
+	bool IsCameraToMainPawn = false;
+
+	FVector2D CameraPos;
+	FVector2D CameraPivot;
 
 	std::map<int, std::list<class USpriteRenderer*>> Renderers;
 };

@@ -8,6 +8,7 @@
 #include <EngineBase/EngineFile.h>
 #include <EngineCore/ImageManager.h>
 
+#include "TitleGameMode.h"
 #include "PlayGameMode.h"
 #include "Player.h"
 #include "GlobalVar.h"
@@ -55,8 +56,10 @@ void ContentsCore::BeginPlay()
 	UEngineAPICore::GetCore()->GetMainWindow().SetWindowPosAndScale({ 0, 0 }, { 302, 224 });
 
 	UEngineAPICore::GetCore()->CreateLevel<APlayGameMode, APlayer>("Play");
-	//UEngineAPICore::GetCore()->CreateLevel("End");
 
+	// UEngineAPICore::GetCore()->CreateLevel<ATitleGameMode, AActor>("Title");
+
+	// UEngineAPICore::GetCore()->OpenLevel("Title");
 	UEngineAPICore::GetCore()->OpenLevel("Play");
 }
 

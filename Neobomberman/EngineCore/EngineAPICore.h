@@ -73,6 +73,8 @@ private:
 
 	std::map<std::string, class ULevel*> Levels;
 	class ULevel* CurLevel = nullptr;
+	class ULevel* NextLevel = nullptr;
+
 	void Tick();
 
 };

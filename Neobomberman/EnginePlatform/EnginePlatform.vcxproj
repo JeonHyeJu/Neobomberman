@@ -148,12 +148,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="EngineInput.h" />
+    <ClInclude Include="EngineWinDebug.h" />
     <ClInclude Include="EngineWindow.h" />
     <ClInclude Include="EngineWinImage.h" />
     <ClInclude Include="PreCompile.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EngineInput.cpp" />
+    <ClCompile Include="EngineWinDebug.cpp" />
     <ClCompile Include="EngineWindow.cpp" />
     <ClCompile Include="EngineWinImage.cpp" />
     <ClCompile Include="PreCompile.cpp">

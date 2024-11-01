@@ -13,6 +13,9 @@
     <Filter Include="Image">
       <UniqueIdentifier>{41439a39-0dc7-484c-8873-c220a4a4b73b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Debug">
+      <UniqueIdentifier>{1b11d295-0063-4ee5-97f9-5ea72c75a838}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EngineWindow.cpp">
@@ -27,6 +30,9 @@
     <ClCompile Include="EngineWinImage.cpp">
       <Filter>Image</Filter>
     </ClCompile>
+    <ClCompile Include="EngineWinDebug.cpp">
+      <Filter>Debug</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EngineWindow.h">
@@ -40,6 +46,9 @@
     </ClInclude>
     <ClInclude Include="EngineWinImage.h">
       <Filter>Image</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineWinDebug.h">
+      <Filter>Debug</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

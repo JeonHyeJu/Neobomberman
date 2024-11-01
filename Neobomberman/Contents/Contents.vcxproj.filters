@@ -60,6 +60,12 @@
     <ClInclude Include="GlobalVar.h">
       <Filter>Util</Filter>
     </ClInclude>
+    <ClInclude Include="TitleGameMode.h">
+      <Filter>GameMode</Filter>
+    </ClInclude>
+    <ClInclude Include="TitleLogo.h">
+      <Filter>Actor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Bomb.cpp">
@@ -94,6 +100,12 @@
     </ClCompile>
     <ClCompile Include="GlobalVar.cpp">
       <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="TitleGameMode.cpp">
+      <Filter>GameMode</Filter>
+    </ClCompile>
+    <ClCompile Include="TitleLogo.cpp">
+      <Filter>Actor</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
