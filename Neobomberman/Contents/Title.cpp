@@ -1,5 +1,6 @@
 #include "PreCompile.h"
 #include "Title.h"
+#include "GlobalVar.h"
 #include <EnginePlatform/EngineInput.h>
 #include <EngineCore/SpriteRenderer.h>
 #include <EngineCore/EngineAPICore.h>
@@ -7,31 +8,32 @@
 
 ATitle::ATitle()
 {
-	SpriteRenderer = CreateDefaultSubObject<USpriteRenderer>();
-	SpriteRenderer->SetSprite(RESOURCE_PATH);
-	SpriteRenderer->SetComponentLocation({ 151, 112 });
-	SpriteRenderer->SetComponentScale({ 302, 224 });
-
-	const int ALL_FRAME = 156;
+	FVector2D winSize = GlobalVar::WINDOW_SIZE;
+	const int ALL_FRAME_CNT = 156;
 	const float SHORT_ANIM_SEC = .125f;
 	const float LONG_ANIM_SEC = 2.f;
 
+	SpriteRenderer = CreateDefaultSubObject<USpriteRenderer>();
+	SpriteRenderer->SetSprite(RESOURCE_PATH);
+	SpriteRenderer->SetComponentLocation(winSize * .5);
+	SpriteRenderer->SetComponentScale(winSize);
+
 	std::vector<int> indexes;
-	std::vector<float> frames(ALL_FRAME, SHORT_ANIM_SEC);
+	std::vector<float> frames(ALL_FRAME_CNT, SHORT_ANIM_SEC);
 
-	indexes.reserve(ALL_FRAME);
-	frames.reserve(ALL_FRAME);
+	indexes.reserve(ALL_FRAME_CNT);
+	frames.reserve(ALL_FRAME_CNT);
 
-	for (int i = 0; i < ALL_FRAME; ++i)
+	for (int i = 0; i < ALL_FRAME_CNT; ++i)
 	{
 		indexes.push_back(i);
 	}
 	frames[0] = LONG_ANIM_SEC;
 
-	SpriteRenderer->CreateAnimation(ANIM_IDLE_NAME, RESOURCE_PATH, ALL_FRAME, ALL_FRAME, 0.1f);
+	SpriteRenderer->CreateAnimation(ANIM_IDLE_NAME, RESOURCE_PATH, ALL_FRAME_CNT, ALL_FRAME_CNT, 0.1f);
 
 	SpriteRenderer->CreateAnimation(ANIM_RUN_NAME, RESOURCE_PATH, indexes, frames, false);
-	SpriteRenderer->SetAnimationEvent(ANIM_RUN_NAME, ALL_FRAME-1, std::bind(&ATitle::OnEndAnimation, this));
+	SpriteRenderer->SetAnimationEvent(ANIM_RUN_NAME, ALL_FRAME_CNT-1, std::bind(&ATitle::OnEndAnimation, this));
 }
 
 ATitle::~ATitle()

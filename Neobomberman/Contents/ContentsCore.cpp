@@ -23,7 +23,7 @@ void ContentsCore::BeginPlay()
 	UEngineAPICore* pCore = UEngineAPICore::GetCore();
 
 	pCore->GetMainWindow().SetWindowTitle("Neobomberman");
-	pCore->GetMainWindow().SetWindowPosAndScale({ 0, 0 }, { 302, 224 });	// You must call this.
+	pCore->GetMainWindow().SetWindowPosAndScale({ 0, 0 }, GlobalVar::WINDOW_SIZE);	// You must call this.
 
 	InitResources();
 
