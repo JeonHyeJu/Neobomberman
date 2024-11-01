@@ -18,5 +18,7 @@ protected:
 	void Tick() override;
 
 private:
-	ULevel* TitleLevel;
+	void LoadResources();
+
+	ULevel* TitleLevel = nullptr;
 };

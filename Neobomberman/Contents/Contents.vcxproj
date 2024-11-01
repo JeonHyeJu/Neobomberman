@@ -161,7 +161,7 @@
     <ClInclude Include="PreCompile.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TitleGameMode.h" />
-    <ClInclude Include="TitleLogo.h" />
+    <ClInclude Include="Title.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Bomb.cpp" />
@@ -182,7 +182,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="TitleGameMode.cpp" />
-    <ClCompile Include="TitleLogo.cpp" />
+    <ClCompile Include="Title.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

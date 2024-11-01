@@ -1,15 +1,10 @@
 ﻿#include "PreCompile.h"
 #include "EngineInput.h"
 
-// UEngineInput UEngineInput::Inst = UEngineInput();
-// UEngineInput* UEngineInput::Inst = nullptr;
-
 void UEngineInput::UEngineKey::KeyCheck(float _DeltaTime)
 {
-	// if (true == GetAsyncKeyState('B'))
 	if (0 != GetAsyncKeyState(Key))
 	{
-
 		PressTime += _DeltaTime;
 
 		if (true == IsFree)

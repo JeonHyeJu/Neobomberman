@@ -250,5 +250,4 @@ void USpriteRenderer::SetAnimationEvent(std::string_view _AnimationName, int _Fr
 	}
 
 	ChangeAnimation->Events[_Frame] += _Function;
-
 }

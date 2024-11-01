@@ -1,6 +1,6 @@
 #include "PreCompile.h"
 #include "TitleGameMode.h"
-#include "TitleLogo.h"
+#include "Title.h"
 
 ATitleGameMode::ATitleGameMode()
 {
@@ -13,5 +13,5 @@ ATitleGameMode::~ATitleGameMode()
 void ATitleGameMode::BeginPlay()
 {
 	Super::BeginPlay();
-	TitleLogo* logo = GetWorld()->SpawnActor<TitleLogo>();
+	ATitle* logo = GetWorld()->SpawnActor<ATitle>();
 }

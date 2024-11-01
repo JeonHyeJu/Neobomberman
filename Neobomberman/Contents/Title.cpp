@@ -1,10 +1,11 @@
 #include "PreCompile.h"
-#include "TitleLogo.h"
-#include <EngineCore/EngineAPICore.h>
-#include <EngineCore/SpriteRenderer.h>
+#include "Title.h"
 #include <EnginePlatform/EngineInput.h>
+#include <EngineCore/SpriteRenderer.h>
+#include <EngineCore/EngineAPICore.h>
+#include <EngineBase/EngineDebug.h>
 
-TitleLogo::TitleLogo()
+ATitle::ATitle()
 {
 	SpriteRenderer = CreateDefaultSubObject<USpriteRenderer>();
 	SpriteRenderer->SetSprite("TempTitle.png");
@@ -12,12 +13,16 @@ TitleLogo::TitleLogo()
 	SpriteRenderer->SetComponentScale({ 302, 224 });
 }
 
-TitleLogo::~TitleLogo()
+ATitle::~ATitle()
 {
-	
 }
 
-void TitleLogo::Tick(float _DeltaTime)
+void ATitle::BeginPlay()
+{
+	UEngineDebug::OutPutString("Temp!!!!!!!!!!!!!!!!!!!!!!!");
+}
+
+void ATitle::Tick(float _DeltaTime)
 {
 	Super::Tick(_DeltaTime);
 
