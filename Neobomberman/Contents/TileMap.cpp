@@ -36,22 +36,21 @@ void ATileMap::SetSpriteAndIndex(const FIntPoint& _Index, const FVector2D& _Pivo
 		return;
 	}
 
-	Tile tile = AllTiles[_Index.Y][_Index.X];
-	if (tile.SpriteRenderer == nullptr)
+	if (AllTiles[_Index.Y][_Index.X].SpriteRenderer == nullptr)
 	{
-		tile.SpriteRenderer = CreateDefaultSubObject<USpriteRenderer>();
+		AllTiles[_Index.Y][_Index.X].SpriteRenderer = CreateDefaultSubObject<USpriteRenderer>();
 	}
 
-	tile.SpriteRenderer->SetSprite(SpriteName, _SpriteIndex);
-	tile.SpriteRenderer->SetComponentScale(_SpriteScale);
-	tile.SpriteRenderer->SetOrder(_Index.Y);
+	AllTiles[_Index.Y][_Index.X].SpriteRenderer->SetSprite(SpriteName, _SpriteIndex);
+	AllTiles[_Index.Y][_Index.X].SpriteRenderer->SetComponentScale(_SpriteScale);
+	AllTiles[_Index.Y][_Index.X].SpriteRenderer->SetOrder(_Index.Y);
 
 	FVector2D loc = IndexToLocation(_Index);
 	FVector2D temp = TileSize.Half();
-	tile.SpriteRenderer->SetComponentLocation(loc + TileSize.Half() + _Pivot);
-	tile.Pivot = _Pivot;
-	tile.Scale = _SpriteScale;
-	tile.SpriteIndex = _SpriteIndex;
+	AllTiles[_Index.Y][_Index.X].SpriteRenderer->SetComponentLocation(loc + TileSize.Half() + _Pivot);
+	AllTiles[_Index.Y][_Index.X].Pivot = _Pivot;
+	AllTiles[_Index.Y][_Index.X].Scale = _SpriteScale;
+	AllTiles[_Index.Y][_Index.X].SpriteIndex = _SpriteIndex;
 }
 
 // from mouse or player location
@@ -108,7 +107,8 @@ bool ATileMap::IsIndexOver(FIntPoint _Index)
 
 Tile* ATileMap::GetTileRef(FVector2D _Location)
 {
-	FIntPoint Point = LocationToIndex(_Location);
+	FVector2D loc = GetActorLocation();
+	FIntPoint Point = LocationToIndex(_Location - loc);
 
 	return GetTileRef(Point);
 }
