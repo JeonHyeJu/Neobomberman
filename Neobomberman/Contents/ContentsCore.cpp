@@ -10,6 +10,9 @@
 #include "Player.h"
 #include "GlobalVar.h"
 
+// Temp. TODO: remove
+#include "TileMapGameMode.h"
+
 ContentsCore::ContentsCore()
 {
 }
@@ -23,9 +26,14 @@ void ContentsCore::BeginPlay()
 	UEngineAPICore* pCore = UEngineAPICore::GetCore();
 
 	pCore->GetMainWindow().SetWindowTitle("Neobomberman");
-	pCore->GetMainWindow().SetWindowPosAndScale({ 0, 0 }, GlobalVar::WINDOW_SIZE);	// You must call this.
+	pCore->GetMainWindow().SetWindowPosAndScale({ 0, 0 }, FVector2D(GlobalVar::WINDOW_SIZE));	// You must call this.
 
 	InitResources();
+
+	// Temp. For tilemap.
+	pCore->CreateLevel<ATileMapGameMode, AActor>("TileMap");
+	pCore->OpenLevel("TileMap");
+	return;
 
 	pCore->CreateLevel<APlayGameMode, APlayer>("Play");
 	pCore->CreateLevel<ATitleGameMode, AActor>("Title");
@@ -43,20 +51,22 @@ void ContentsCore::InitResources()
 	UImageManager& imageManager = UImageManager::GetInst();
 
 	/** Load resources **/
-	LoadResourceNotRecursively("Resources");
-	LoadResourceNotRecursively("Resources", "Background");
-	LoadResourceNotRecursively("Resources", "Riding_32x32");
-	LoadResourceNotRecursively("Resources", "Enemies_32x32");
+	LoadResource("Resources", "", false);
+	LoadResource("Resources", "Background", false);
+	LoadResource("Resources", "Character_32x64", false);
+	LoadResource("Resources", "Riding_32x32", false);
+	LoadResource("Resources", "Enemies_32x32", false);
 
 	LoadResourceFolders("Resources", "BombOrg_16x16");
 	LoadResourceFolders("Resources", "BombRed_16x16");
 	LoadResourceFolders("Resources", "Opening");
+	LoadResourceFolders("Resources\\Tiles\\TileStage_1");
 
 	/** Cutting **/
 	imageManager.CuttingSprite("MainCharater_White.png", GlobalVar::BOMBERMAN_SIZE);
 }
 
-void ContentsCore::LoadResourceNotRecursively(std::string_view _path, std::string_view _append)
+void ContentsCore::LoadResource(std::string_view _path, std::string_view _append, bool _isRecursive)
 {
 	UEngineDirectory dir;
 	dir.MoveParentToDirectory(_path);

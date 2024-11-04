@@ -57,6 +57,12 @@
     <ClInclude Include="Bomb.h">
       <Filter>Actor</Filter>
     </ClInclude>
+    <ClInclude Include="TileMap.h">
+      <Filter>Actor</Filter>
+    </ClInclude>
+    <ClInclude Include="TileMapGameMode.h">
+      <Filter>GameMode</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Player.cpp">
@@ -88,6 +94,12 @@
     </ClCompile>
     <ClCompile Include="Bomb.cpp">
       <Filter>Actor</Filter>
+    </ClCompile>
+    <ClCompile Include="TileMap.cpp">
+      <Filter>Actor</Filter>
+    </ClCompile>
+    <ClCompile Include="TileMapGameMode.cpp">
+      <Filter>GameMode</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

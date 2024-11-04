@@ -64,7 +64,6 @@ void UImageManager::LoadFolder(std::string_view Path)
 	LoadFolder(DirName, Path);
 }
 
-
 void UImageManager::Load(std::string_view _KeyName, std::string_view Path)
 {
 	UEnginePath EnginePath = UEnginePath(Path);
@@ -97,7 +96,6 @@ void UImageManager::Load(std::string_view _KeyName, std::string_view Path)
 		return;
 	}
 
-	// 만들었다고 끝이 아닙니다.
 	UEngineWinImage* NewImage = new UEngineWinImage();
 	NewImage->Load(WindowImage, Path);
 
@@ -213,6 +211,8 @@ void UImageManager::CuttingSprite(std::string_view _KeyName, FVector2D _CuttingS
 	UEngineWinImage* Image = Images[UpperName];
 
 	Sprite->ClearSpriteData();
+	Sprite->SetName(UpperName);
+	Image->SetName(UpperName);
 
 	if (0 != (Image->GetImageScale().iX() % _CuttingSize.iX()))
 	{
@@ -320,6 +320,8 @@ void UImageManager::CreateCutSprite(std::string_view _SearchKeyName, std::string
 
 	UEngineSprite* Sprite = Sprites[SearchName];
 	UEngineWinImage* Image = Images[SearchName];
+	Sprite->SetName(SearchName);
+	Image->SetName(SearchName);
 
 	Sprite->ClearSpriteData();
 

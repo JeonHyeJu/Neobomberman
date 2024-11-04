@@ -52,3 +52,26 @@ AActor::~AActor()
 
 	Components.clear();
 }
+
+
+void AActor::ReleaseCheck(float _DeltaTime)
+{
+	UObject::ReleaseCheck(_DeltaTime);
+
+	std::list<UActorComponent*>::iterator StartIter = Components.begin();
+	std::list<UActorComponent*>::iterator EndIter = Components.end();
+	for (; StartIter != EndIter; )
+	{
+		UActorComponent* Component = *StartIter;
+
+		if (false == Component->IsDestroy())
+		{
+			Component->ReleaseCheck(_DeltaTime);
+			++StartIter;
+			continue;
+		}
+
+		delete Component;
+		StartIter = Components.erase(StartIter);
+	}
+}

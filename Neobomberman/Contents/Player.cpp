@@ -14,7 +14,7 @@ APlayer::APlayer()
 {
 	FVector2D playerSize = GlobalVar::BOMBERMAN_SIZE;
 
-	SetActorLocation({100, 100});	// temp
+	SetActorLocation({ 100, 100 });	// temp
 
 	{
 		SpriteRendererHead = CreateDefaultSubObject<USpriteRenderer>();

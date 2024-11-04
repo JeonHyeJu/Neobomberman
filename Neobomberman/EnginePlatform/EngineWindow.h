@@ -55,6 +55,7 @@ public:
 
 	void SetWindowPosAndScale(FVector2D _Pos, FVector2D _Scale);
 
+	FVector2D GetMousePos();
 
 protected:
 

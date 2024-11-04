@@ -1,11 +1,69 @@
 #pragma once
 
+class FIntPoint
+{
+public:
+	int X = 0;
+	int Y = 0;
+
+	static const FIntPoint LEFT;
+	static const FIntPoint RIGHT;
+	static const FIntPoint UP;
+	static const FIntPoint DOWN;
+
+	FIntPoint()
+	{
+
+	}
+
+	FIntPoint(int _X, int _Y) : X(_X), Y(_Y)
+	{
+
+	}
+
+	FIntPoint operator+(FIntPoint _Other) const
+	{
+		FIntPoint Result;
+		Result.X = X + _Other.X;
+		Result.Y = Y + _Other.Y;
+		return Result;
+	}
+	
+	FIntPoint operator-(FIntPoint _Other) const
+	{
+		FIntPoint Result;
+		Result.X = X - _Other.X;
+		Result.Y = Y - _Other.Y;
+		return Result;
+	}
+
+	FIntPoint operator/(int _Value) const
+	{
+		FIntPoint Result;
+		Result.X = X / _Value;
+		Result.Y = Y / _Value;
+		return Result;
+	}
+
+
+	bool operator==(FIntPoint _Other) const
+	{
+		return X == _Other.X && Y == _Other.Y;
+	}
+
+	FIntPoint& operator+=(FIntPoint _Other)
+	{
+		X += _Other.X;
+		Y += _Other.Y;
+		return *this;
+	}
+};
 
 class FVector2D
 {
 public:
-	float X = 0.0f;
-	float Y = 0;
+	float X = 0.f;
+	float Y = 0.f;
 
 	static const FVector2D ZERO;
 	static const FVector2D LEFT;
@@ -21,6 +79,12 @@ public:
 	FVector2D(float _X, float _Y) : X(_X), Y(_Y)
 	{
 
+	}
+
+	FVector2D(const FIntPoint& _pt)
+	{
+		X = static_cast<float>(_pt.X);
+		Y = static_cast<float>(_pt.Y);
 	}
 
 	FVector2D(int _X, int _Y) : X(static_cast<float>(_X)), Y(static_cast<float>(_Y))
@@ -69,6 +133,11 @@ public:
 		return;
 	}
 
+	float Dot(const FVector2D& other) const
+	{
+		return X * other.X + Y * other.Y;
+	}
+
 	FVector2D operator*(float _Value) const
 	{
 		FVector2D Result;
@@ -98,6 +167,14 @@ public:
 		FVector2D Result;
 		Result.X = X / _Value;
 		Result.Y = Y / _Value;
+		return Result;
+	}
+
+	FVector2D operator/(const FVector2D& Other) const
+	{
+		FVector2D Result;
+		Result.X = X / Other.X;
+		Result.Y = Y / Other.Y;
 		return Result;
 	}
 
@@ -146,59 +223,6 @@ public:
 	{
 		return Location + Scale.Half();
 	}
-};
-
-class FIntPoint
-{
-public:
-	int X = 0;
-	int Y = 0;
-
-	static const FIntPoint LEFT;
-	static const FIntPoint RIGHT;
-	static const FIntPoint UP;
-	static const FIntPoint DOWN;
-
-	FIntPoint()
-	{
-
-	}
-
-	FIntPoint(int _X, int _Y) : X(_X), Y(_Y)
-	{
-
-	}
-
-	FIntPoint operator+(FIntPoint _Other) const
-	{
-		FIntPoint Result; 
-		Result.X = X + _Other.X;
-		Result.Y = Y + _Other.Y;
-		return Result;
-	}
-
-	FIntPoint operator/(int _Value) const
-	{
-		FIntPoint Result;
-		Result.X = X / _Value;
-		Result.Y = Y / _Value;
-		return Result;
-	}
-
-
-	bool operator==(FIntPoint _Other) const
-	{
-		return X == _Other.X && Y == _Other.Y;
-	}
-
-	FIntPoint& operator+=(FIntPoint _Other)
-	{
-		X += _Other.X;
-		Y += _Other.Y;
-		return *this;
-	}
-
-
 };
 
 class EngineMath

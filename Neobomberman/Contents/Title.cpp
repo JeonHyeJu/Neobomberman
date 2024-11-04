@@ -51,7 +51,7 @@ void ATitle::Tick(float _DeltaTime)
 
 	if (true == UEngineInput::GetInst().IsDown('R'))
 	{
-		std::string&& nowAnimName = SpriteRenderer->GetNowAnimation();
+		std::string nowAnimName = UEngineString::ToUpper(SpriteRenderer->GetCurAnimName());
 		if (nowAnimName == UEngineString::ToUpper(ANIM_RUN_NAME))
 		{
 			OnEndAnimation();

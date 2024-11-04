@@ -40,11 +40,6 @@ public:
 		Transform.Location += _Direction;
 	}
 
-	void SetActorScale(FVector2D _Scale)
-	{
-		Transform.Scale = _Scale;
-	}
-
 	FTransform GetTransform()
 	{
 		return Transform;
@@ -72,6 +67,8 @@ private:
 
 	static bool IsNewActorCreate;
 	static std::list<class UActorComponent*> ComponentList;
+
+	void ReleaseCheck(float _DeltaTime) override;
 
 	class ULevel* World = nullptr;
 	FTransform Transform;

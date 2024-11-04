@@ -181,3 +181,13 @@ void UEngineWindow::SetWindowPosAndScale(FVector2D _Pos, FVector2D _Scale)
     
     ::SetWindowPos(WindowHandle, nullptr, _Pos.iX(), _Pos.iY(), Rc.right - Rc.left, Rc.bottom - Rc.top, SWP_NOZORDER);
 }
+
+FVector2D UEngineWindow::GetMousePos()
+{
+    POINT MousePoint;
+
+    GetCursorPos(&MousePoint);
+    ScreenToClient(WindowHandle, &MousePoint);
+
+    return FVector2D(MousePoint.x, MousePoint.y);
+}

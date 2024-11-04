@@ -145,6 +145,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="TileMap.h" />
     <ClInclude Include="Bomb.h" />
     <ClInclude Include="ContentsCore.h">
       <SubType>
@@ -157,11 +158,13 @@
     <ClInclude Include="PlayGameMode.h" />
     <ClInclude Include="PlayMap.h" />
     <ClInclude Include="PreCompile.h" />
+    <ClInclude Include="TileMapGameMode.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TitleGameMode.h" />
     <ClInclude Include="Title.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="TileMap.cpp" />
     <ClCompile Include="Bomb.cpp" />
     <ClCompile Include="ContentsCore.cpp">
       <SubType>
@@ -176,6 +179,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TileMapGameMode.cpp" />
     <ClCompile Include="TitleGameMode.cpp" />
     <ClCompile Include="Title.cpp" />
   </ItemGroup>

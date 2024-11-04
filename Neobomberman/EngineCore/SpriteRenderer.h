@@ -19,6 +19,7 @@ public:
 		int ResultIndex = 0;
 		float CurTime = 0.0f;
 		bool Loop = true;
+		std::string Name = "";
 
 		void Reset()
 		{
@@ -60,19 +61,28 @@ public:
 	void ChangeAnimation(std::string_view _AnimationName, bool _Force = false);
 	void SetAnimationEvent(std::string_view _AnimationName, int _Frame, std::function<void()> _Function);
 
-	inline std::string GetNowAnimation() const
+	std::string GetCurSpriteName()
 	{
-		return NowAnimName;
+		return Sprite->GetName();
 	}
 
-	inline void Show()
+	bool IsActive() override
 	{
-		IsShow = true;
+		return UObject::IsActive() && GetActor()->IsActive();
 	}
 	
-	inline void Hide()
+	bool IsDestroy() override
 	{
-		IsShow = false;
+		return UObject::IsDestroy() || GetActor()->IsDestroy();
+	}
+
+	std::string GetCurAnimName()
+	{
+		std::string name = "";
+		if (CurAnimation) {
+			name = CurAnimation->Name;
+		}
+		return name;
 	}
 
 protected:
@@ -80,8 +90,6 @@ protected:
 public:
 	int Order = 0;
 	int CurIndex = 0;
-	bool IsShow = true;
-	std::string NowAnimName = "";
 
 	class UEngineSprite* Sprite = nullptr;
 
