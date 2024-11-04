@@ -56,7 +56,7 @@ void ContentsCore::InitResources()
 	imageManager.CuttingSprite("MainCharater_White.png", GlobalVar::BOMBERMAN_SIZE);
 }
 
-void ContentsCore::LoadResourceNotRecursively(const std::string_view& _path, const std::string_view& _append)
+void ContentsCore::LoadResourceNotRecursively(std::string_view _path, std::string_view _append)
 {
 	UEngineDirectory dir;
 	dir.MoveParentToDirectory(_path);
@@ -80,7 +80,7 @@ void ContentsCore::LoadResourceNotRecursively(const std::string_view& _path, con
 	}
 }
 
-void ContentsCore::LoadResourceFolders(const std::string_view& _path, const std::string_view& _append)
+void ContentsCore::LoadResourceFolders(std::string_view _path, std::string_view _append)
 {
 	UEngineDirectory dir;
 	dir.MoveParentToDirectory(_path);

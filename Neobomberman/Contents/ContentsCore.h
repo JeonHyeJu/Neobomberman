@@ -19,8 +19,8 @@ protected:
 
 private:
 	void InitResources();
-	void LoadResourceNotRecursively(const std::string_view& _path, const std::string_view& _append="");
-	void LoadResourceFolders(const std::string_view& _path, const std::string_view& _append="");
+	void LoadResourceNotRecursively(std::string_view _path, std::string_view _append="");
+	void LoadResourceFolders(std::string_view _path, std::string_view _append="");
 
 	ULevel* TitleLevel = nullptr;
 };
