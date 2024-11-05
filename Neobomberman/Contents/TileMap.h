@@ -20,40 +20,35 @@ public:
 	USpriteRenderer* SpriteRenderer;
 
 	bool IsMove = true;
-	int TileType = -1;
+	int SpriteIndex = -1;
+	std::string SpriteName = "";
 	FVector2D Scale;
 	FVector2D Pivot;
-	int SpriteIndex = -1;
 
 	void Serialize(UEngineSerializer& _Ser)
 	{
-		std::string SpriteName;
-		if (nullptr != SpriteRenderer)
+		if (SpriteRenderer != nullptr)
 		{
 			SpriteName = SpriteRenderer->GetCurSpriteName();
 		}
-		_Ser << SpriteName;
+
 		_Ser << IsMove;
-		_Ser << TileType;
+		_Ser << SpriteIndex;
+		_Ser << SpriteName;
 		_Ser << Scale;
 		_Ser << Pivot;
-		_Ser << SpriteIndex;
 	}
 
 	void DeSerialize(UEngineSerializer& _Ser)
 	{
-		//std::string SpriteName;
-		// _Ser >> SpriteName;
-
-		// SpriteRenderer->SetSprite(SpriteName);
-
-		std::string SpriteName;
-		_Ser >> SpriteName;
+		int type = -1;
 		_Ser >> IsMove;
-		_Ser >> TileType;
+		_Ser >> SpriteIndex;
+		_Ser >> SpriteName;
 		_Ser >> Scale;
 		_Ser >> Pivot;
-		_Ser >> SpriteIndex;
+		
+		//SpriteRenderer->SetSprite(SpriteName);	// This done in ATileMap
 	}
 };
 
@@ -87,6 +82,10 @@ public:
 	{
 		return FVector2D({ TileCount.X * TileSize.X, TileCount.Y * TileSize.Y });
 	}
+	inline TileType GetType() const
+	{
+		return WholeTileType;
+	}
 
 	Tile* GetTileRef(FIntPoint _Index);
 	Tile* GetTileRef(FVector2D _Location);
@@ -96,19 +95,12 @@ public:
 	void Serialize(UEngineSerializer& _Ser);
 	void DeSerialize(UEngineSerializer& _Ser);
 
-	inline TileType GetType() const
-	{
-		return Type;
-	}
-
 protected:
 
 private:
-	std::string SpriteName;
+	std::string SpriteName = "";
 	FIntPoint TileCount;
 	FVector2D TileSize;
+	TileType WholeTileType = TileType::Ground;
 	std::vector<std::vector<Tile>> AllTiles;
-	TileType Type;
 };
-
-

@@ -14,7 +14,7 @@ void ATileMap::Init(std::string_view _Sprite, const FIntPoint& _Count, const FVe
 	SpriteName = _Sprite;
 	TileCount = _Count;
 	TileSize = _TileSize;
-	Type = _type;
+	WholeTileType = _type;
 
 	AllTiles.resize(_Count.Y);
 
@@ -125,29 +125,39 @@ Tile* ATileMap::GetTileRef(FIntPoint _Index)
 
 void ATileMap::Serialize(UEngineSerializer& _Ser)
 {
+	int type = static_cast<int>(WholeTileType);
+
+	_Ser << SpriteName;
 	_Ser << TileCount;
 	_Ser << TileSize;
-	_Ser << SpriteName;
+	_Ser << type;
 	_Ser << AllTiles;
 }
 
 void ATileMap::DeSerialize(UEngineSerializer& _Ser)
 {
-	//clearTile();
-	_Ser >> TileCount;
-	_Ser >> TileSize;
-	_Ser >> SpriteName;
+	std::string loadSpriteName = "";
+	FIntPoint loadTileCount;
+	FVector2D loadTileSize;
+	int loadTileType;
+	std::vector<std::vector<Tile>> loadTiles;
 
-	std::vector<std::vector<Tile>> LoadTiles;
-	_Ser >> LoadTiles;
+	_Ser >> loadSpriteName;
+	_Ser >> loadTileCount;
+	_Ser >> loadTileSize;
+	_Ser >> loadTileType;
+	_Ser >> loadTiles;
 
-	Init(SpriteName, TileCount, TileSize, Type);
+	Init(loadSpriteName, loadTileCount, loadTileSize, static_cast<TileType>(loadTileType));
 
-	for (int y = 0; y < LoadTiles.size(); y++)
+	for (int y = 0; y < loadTiles.size(); y++)
 	{
-		for (int x = 0; x < LoadTiles[y].size(); x++)
+		for (int x = 0; x < loadTiles[y].size(); x++)
 		{
-			SetSpriteAndIndex({x, y}, LoadTiles[y][x].Pivot, LoadTiles[y][x].Scale, LoadTiles[y][x].SpriteIndex);
+			if (loadTiles[y][x].SpriteIndex != -1)
+			{
+				SetSpriteAndIndex({ x, y }, loadTiles[y][x].Pivot, loadTiles[y][x].Scale, loadTiles[y][x].SpriteIndex);
+			}
 		}
 	}
 }

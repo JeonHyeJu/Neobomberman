@@ -2,16 +2,16 @@
 #include <EngineCore/Actor.h>
 #include "ContentsEnum.h"
 
-class Bomb : public AActor
+class ABomb : public AActor
 {
 public:
-	Bomb();
-	~Bomb();
+	ABomb();
+	~ABomb();
 
-	Bomb(const Bomb& _other) = delete;
-	Bomb(Bomb&& _other) noexcept = delete;
-	Bomb& operator=(const Bomb& _other) = delete;
-	Bomb& operator=(Bomb&& _other) noexcept = delete;
+	ABomb(const ABomb& _other) = delete;
+	ABomb(ABomb&& _other) noexcept = delete;
+	ABomb& operator=(const ABomb& _other) = delete;
+	ABomb& operator=(ABomb&& _other) noexcept = delete;
 
 	void BeginPlay() override;
 	void Tick(float _DeltaTime) override;

@@ -7,10 +7,11 @@
 #endif
 
 #include "GlobalVar.h"
+#include "ContentsEnum.h"
 #include <EngineCore/SpriteRenderer.h>
 #include <EngineBase/EngineDebug.h>
 
-Bomb::Bomb()
+ABomb::ABomb()
 {
 	SpriteRenderer = CreateDefaultSubObject<USpriteRenderer>();
 	SpriteRenderer->SetSprite(RESOURCE_PLAINBOMB_PATH);
@@ -19,13 +20,14 @@ Bomb::Bomb()
 
 	SpriteRenderer->CreateAnimation("BombPlain_Run", RESOURCE_PLAINBOMB_PATH, 0, 4, .3f);
 	SpriteRenderer->CreateAnimation("BombRed_Run", RESOURCE_REDBOMB_PATH, 0, 4, .3f);
+	SpriteRenderer->SetOrder(ERenderOrder::BOMB);
 }
 
-Bomb::~Bomb()
+ABomb::~ABomb()
 {
 }
 
-void Bomb::BeginPlay()
+void ABomb::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -39,7 +41,7 @@ void Bomb::BeginPlay()
 	}
 }
 
-void Bomb::Tick(float _DeltaTime)
+void ABomb::Tick(float _DeltaTime)
 {
 	Super::Tick(_DeltaTime);
 
@@ -51,7 +53,7 @@ void Bomb::Tick(float _DeltaTime)
 	}
 }
 
-void Bomb::Explode()
+void ABomb::Explode()
 {
 	UEngineDebug::OutPutString("BOOM!!!!!!!!!!!!!!!!!!!!!!!!!!");
 }

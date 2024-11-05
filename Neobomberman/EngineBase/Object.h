@@ -66,9 +66,14 @@ public:
 		}
 	}
 
-	bool SetActive(bool _IsActive)
+	void SetActive(bool _IsActive)
 	{
 		IsActiveValue = _IsActive;
+	}
+
+	void SetActiveSwitch()
+	{
+		IsActiveValue = !IsActiveValue;
 	}
 
 

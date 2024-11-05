@@ -34,6 +34,8 @@ public:
 	void LevelChangeStart();
 	void LevelChangeEnd();
 
+	void SetCollisionImage(std::string_view _ColImageName);
+
 protected:
 
 private:
@@ -44,6 +46,8 @@ private:
 	class USpriteRenderer* SpriteRendererHead = nullptr;
 	class USpriteRenderer* SpriteRendererBody = nullptr;
 
-	std::vector<class Bomb*> Bombs;
+	class UEngineWinImage* CollisionImage = nullptr;
+
+	std::vector<class ABomb*> Bombs;
 	PlayerAbility Ability;
 };

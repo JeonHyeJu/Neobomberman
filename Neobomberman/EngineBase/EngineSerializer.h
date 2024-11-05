@@ -128,8 +128,6 @@ private:
 	std::vector<char> Data;
 };
 
-// 언리얼 에서 인터페이스라고 불리는 존재를 만들때
-// 앞에 I를 붙입니다.
 class ISerializObject
 {
 

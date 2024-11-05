@@ -30,10 +30,10 @@ void ContentsCore::BeginPlay()
 
 	InitResources();
 
-	// Temp. For tilemap.
-	pCore->CreateLevel<ATileMapGameMode, AActor>("TileMap");
-	pCore->OpenLevel("TileMap");
-	return;
+	/** Temp.For tilemap. **/
+	//pCore->CreateLevel<ATileMapGameMode, AActor>("TileMap");
+	//pCore->OpenLevel("TileMap");
+	//return;
 
 	pCore->CreateLevel<APlayGameMode, APlayer>("Play");
 	pCore->CreateLevel<ATitleGameMode, AActor>("Title");
@@ -61,6 +61,7 @@ void ContentsCore::InitResources()
 	LoadResourceFolders("Resources", "BombRed_16x16");
 	LoadResourceFolders("Resources", "Opening");
 	LoadResourceFolders("Resources\\Tiles\\TileStage_1");
+	LoadResourceFolders("Resources\\Tiles\\TileStage_1_Guide");
 
 	/** Cutting **/
 	imageManager.CuttingSprite("MainCharater_White.png", GlobalVar::BOMBERMAN_SIZE);

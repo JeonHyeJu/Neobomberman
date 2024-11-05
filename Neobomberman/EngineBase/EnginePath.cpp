@@ -117,5 +117,45 @@ bool UEnginePath::MoveParentToDirectory(std::string_view _Path)
 	return Result;
 }
 
+bool UEnginePath::MoveRelative(std::string_view _path, char delimiter)
+{
+	if (_path.size() == 0) return false;
 
+	std::vector<std::string> paths;			// relative paths
+	paths.reserve(128);						// Temp
 
+	std::string findPath = _path.data();
+	size_t idx = findPath.find(delimiter);
+	while (idx != findPath.npos)
+	{
+		std::string subStr = findPath.substr(0, idx);
+		paths.push_back(subStr.data());
+
+		findPath = findPath.substr(idx + 1, -1);
+		idx = findPath.find(delimiter);
+	}
+	if (findPath.size() != 0)
+	{
+		paths.push_back(findPath);
+	}
+
+	if (paths.size() == 0) return false;
+
+	for (size_t i = 0; i < paths.size(); ++i)
+	{
+		if (i == 0)
+		{
+			if (MoveParentToDirectory(paths[i]) == false)
+			{
+				MSGASSERT("상대경로를 찾지 못했습니다.");
+				return false;
+			}
+		}
+		else
+		{
+			Append(paths[i]);
+		}
+	}
+
+	return true;
+}

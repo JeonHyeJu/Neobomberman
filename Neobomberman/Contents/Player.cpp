@@ -1,4 +1,5 @@
 #include "PreCompile.h"
+#include "ContentsEnum.h"
 #include "Player.h"
 #include "Bomb.h"
 
@@ -56,6 +57,9 @@ APlayer::APlayer()
 
 	SpriteRendererHead->ChangeAnimation("Idle_Down_Head");
 	SpriteRendererBody->ChangeAnimation("Idle_Down_Body");
+
+	SpriteRendererHead->SetOrder(ERenderOrder::PLAYER);
+	SpriteRendererBody->SetOrder(ERenderOrder::PLAYER);
 }
 
 APlayer::~APlayer()
@@ -83,30 +87,31 @@ void APlayer::Tick(float _DeltaTime)
 	bool isPressedS = UEngineInput::GetInst().IsPress('S');
 	bool isPressedW = UEngineInput::GetInst().IsPress('W');
 	bool isDownSpace = UEngineInput::GetInst().IsDown(VK_SPACE);
+	FVector2D direction;
 
 	if (isPressedD)
 	{
 		SpriteRendererHead->ChangeAnimation("Run_Right_Head");
 		SpriteRendererBody->ChangeAnimation("Run_Right_Body");
-		AddActorLocation(FVector2D::RIGHT * _DeltaTime * Speed);
+		direction = FVector2D::RIGHT;
 	}
 	else if (isPressedA)
 	{
 		SpriteRendererHead->ChangeAnimation("Run_Left_Head");
 		SpriteRendererBody->ChangeAnimation("Run_Left_Body");
-		AddActorLocation(FVector2D::LEFT * _DeltaTime * Speed);
+		direction = FVector2D::LEFT;
 	}
 	else if (isPressedS)
 	{
 		SpriteRendererHead->ChangeAnimation("Run_Down_Head");
 		SpriteRendererBody->ChangeAnimation("Run_Down_Body");
-		AddActorLocation(FVector2D::DOWN * _DeltaTime * Speed);
+		direction = FVector2D::DOWN;
 	}
 	else if (isPressedW)
 	{
 		SpriteRendererHead->ChangeAnimation("Run_Up_Head");
 		SpriteRendererBody->ChangeAnimation("Run_Up_Body");
-		AddActorLocation(FVector2D::UP * _DeltaTime * Speed);
+		direction = FVector2D::UP;
 	}
 	else if (!isPressedD && !isPressedA && !isPressedS && !isPressedW)
 	{
@@ -130,11 +135,22 @@ void APlayer::Tick(float _DeltaTime)
 			SpriteRendererHead->ChangeAnimation("Idle_Up_Head");
 			SpriteRendererBody->ChangeAnimation("Idle_Up_Body");
 		}
+		direction = FVector2D::ZERO;
 	}
 
+	if (CollisionImage != nullptr)
+	{
+		FVector2D nextPos = GetActorLocation() + direction * _DeltaTime * Speed;
+		UColor color = CollisionImage->GetColor(nextPos, UColor::BLACK);
+		if (color == UColor::WHITE)
+		{
+			AddActorLocation(direction * _DeltaTime * Speed);
+		}
+	}
+	
 	if (isDownSpace)
 	{
-		Bomb* pBomb = GetWorld()->SpawnActor<Bomb>();
+		ABomb* pBomb = GetWorld()->SpawnActor<ABomb>();
 		pBomb->SetActorLocation(GetActorLocation());
 	}
 }
@@ -151,4 +167,9 @@ void APlayer::LevelChangeStart()
 void APlayer::LevelChangeEnd()
 {
 	Super::LevelChangeEnd();
+}
+
+void APlayer::SetCollisionImage(std::string_view _ColImageName)
+{
+	CollisionImage = UImageManager::GetInst().FindImage(_ColImageName);
 }

@@ -30,6 +30,8 @@ public:
 
 	void Append(std::string_view _AppendName);
 
+	bool MoveRelative(std::string_view _path, char delimiter='\\');
+
 protected:
 	std::filesystem::path Path;
 

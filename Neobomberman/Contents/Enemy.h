@@ -1,14 +1,14 @@
 #pragma once
 #include "EngineCore/Actor.h"
 
-class Enemy : public AActor
+class AEnemy : public AActor
 {
 public:
-	Enemy();
-	~Enemy();
+	AEnemy();
+	~AEnemy();
 
-	Enemy(const Enemy& _other) = delete;
-	Enemy(Enemy&& _other) noexcept = delete;
-	Enemy& operator=(const Enemy& _other) = delete;
-	Enemy& operator=(Enemy&& _other) noexcept = delete;
+	AEnemy(const AEnemy& _other) = delete;
+	AEnemy(AEnemy&& _other) noexcept = delete;
+	AEnemy& operator=(const AEnemy& _other) = delete;
+	AEnemy& operator=(AEnemy&& _other) noexcept = delete;
 };

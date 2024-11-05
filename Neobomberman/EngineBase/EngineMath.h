@@ -122,6 +122,8 @@ public:
 		return sqrtf(X * X + Y * Y);
 	}
 
+	class FIntPoint ConvertToPoint() const;
+
 	void Normalize()
 	{
 		float Len = Length();
@@ -234,6 +236,9 @@ class EngineMath
 class UColor
 {
 public:
+	static const UColor WHITE;
+	static const UColor BLACK;
+
 	union
 	{
 		int Color;
@@ -245,6 +250,18 @@ public:
 			unsigned char A;
 		};
 	};
+
+	UColor(unsigned long _Value)
+		:Color(_Value)
+	{
+
+	}
+
+	bool operator==(const UColor& _Other)
+	{
+		return R == _Other.R && G == _Other.G && B == _Other.B;
+	}
+
 
 	UColor(unsigned char _R, unsigned char _G, unsigned char _B, unsigned char _A)
 		:R(_R), G(_G), B(_B), A(_A)

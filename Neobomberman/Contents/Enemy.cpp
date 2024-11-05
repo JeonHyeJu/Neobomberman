@@ -2,13 +2,13 @@
 #include "Enemy.h"
 
 
-Enemy::Enemy()
+AEnemy::AEnemy()
 : AActor()
 {
 
 }
 
-Enemy::~Enemy()
+AEnemy::~AEnemy()
 {
 
 }

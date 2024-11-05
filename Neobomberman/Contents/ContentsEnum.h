@@ -1,12 +1,13 @@
 #pragma once
 
-
 enum class ERenderOrder
 {
-	BACKGROUND = -1000,
-	PLAYER = 0,
+	COLMAP = -1000,
+	BACKGROUND = -999,
+	PLAYER = 10000,
+	BOMB = 10001,
+	UI = 20000,
 };
-
 
 enum class EBombType
 {
