@@ -19,7 +19,6 @@ protected:
 private:
 	void OnEndAnimation();
 
-	const char* RESOURCE_PATH = "Opening";
 	const char* ANIM_IDLE_NAME = "Opening_Idle";
 	const char* ANIM_RUN_NAME = "Opening_Run";
 

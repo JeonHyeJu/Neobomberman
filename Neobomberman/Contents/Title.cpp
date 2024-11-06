@@ -14,7 +14,7 @@ ATitle::ATitle()
 	const float LONG_ANIM_SEC = 2.f;
 
 	SpriteRenderer = CreateDefaultSubObject<USpriteRenderer>();
-	SpriteRenderer->SetSprite(RESOURCE_PATH);
+	SpriteRenderer->SetSprite(GlobalPath::OPENING);
 	SpriteRenderer->SetComponentLocation(winSize * .5);
 	SpriteRenderer->SetComponentScale(winSize);
 
@@ -30,9 +30,9 @@ ATitle::ATitle()
 	}
 	frames[0] = LONG_ANIM_SEC;
 
-	SpriteRenderer->CreateAnimation(ANIM_IDLE_NAME, RESOURCE_PATH, ALL_FRAME_CNT, ALL_FRAME_CNT, 0.1f);
+	SpriteRenderer->CreateAnimation(ANIM_IDLE_NAME, GlobalPath::OPENING, ALL_FRAME_CNT, ALL_FRAME_CNT, 0.1f);
+	SpriteRenderer->CreateAnimation(ANIM_RUN_NAME, GlobalPath::OPENING, indexes, frames, false);
 
-	SpriteRenderer->CreateAnimation(ANIM_RUN_NAME, RESOURCE_PATH, indexes, frames, false);
 	SpriteRenderer->SetAnimationEvent(ANIM_RUN_NAME, ALL_FRAME_CNT-1, std::bind(&ATitle::OnEndAnimation, this));
 }
 

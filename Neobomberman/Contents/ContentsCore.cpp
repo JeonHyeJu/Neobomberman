@@ -48,23 +48,31 @@ void ContentsCore::Tick()
 
 void ContentsCore::InitResources()
 {
-	UImageManager& imageManager = UImageManager::GetInst();
+	GlobalPath path;
 
 	/** Load resources **/
-	LoadResource("Resources", "", false);
-	LoadResource("Resources", "Background", false);
-	LoadResource("Resources", "Character_32x64", false);
-	LoadResource("Resources", "Riding_32x32", false);
-	LoadResource("Resources", "Enemies_32x32", false);
+	LoadResource(GlobalPath::ROOT);
+	LoadResource(path.GetBackgroundPath());
+	LoadResource(path.GetCharacterPath());
+	LoadResource(path.GetRidingPath());
+	LoadResource(path.GetEnemyPath());
+	LoadResource("Resources\\Explode");		// Temp
 
-	LoadResourceFolders("Resources", "BombOrg_16x16");
-	LoadResourceFolders("Resources", "BombRed_16x16");
-	LoadResourceFolders("Resources", "Opening");
-	LoadResourceFolders("Resources\\Tiles\\TileStage_1");
-	LoadResourceFolders("Resources\\Tiles\\TileStage_1_Guide");
+	LoadResourceFolders(path.GetOrgBombPath());
+	LoadResourceFolders(path.GetRedBombPath());
+	LoadResourceFolders(path.GetOpeningPath());
+	LoadResourceFolders(path.GetTileStage1Path());
+	LoadResourceFolders(path.GetTileStage1GuidePath());
 
 	/** Cutting **/
-	imageManager.CuttingSprite("MainCharater_White.png", GlobalVar::BOMBERMAN_SIZE);
+	UImageManager& imgManager = UImageManager::GetInst();
+	imgManager.CuttingSprite("MainCharater_White.png", GlobalVar::BOMBERMAN_SIZE);
+
+	imgManager.CuttingSprite("ExplodeCenter.png", GlobalVar::BOMB_SIZE);
+	imgManager.CuttingSprite("ExplodeUp.png", GlobalVar::BOMB_SIZE);
+	imgManager.CuttingSprite("ExplodeDown.png", GlobalVar::BOMB_SIZE);
+	imgManager.CuttingSprite("ExplodeLeft.png", GlobalVar::BOMB_SIZE);
+	imgManager.CuttingSprite("ExplodeRight.png", GlobalVar::BOMB_SIZE);
 }
 
 void ContentsCore::LoadResource(std::string_view _path, std::string_view _append, bool _isRecursive)

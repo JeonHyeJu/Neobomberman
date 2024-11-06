@@ -35,6 +35,7 @@ public:
 	void LevelChangeEnd();
 
 	void SetCollisionImage(std::string_view _ColImageName);
+	void SetCurMap(class APlayMap* _map);
 
 protected:
 
@@ -48,6 +49,8 @@ private:
 
 	class UEngineWinImage* CollisionImage = nullptr;
 
-	std::vector<class ABomb*> Bombs;
+	class ABombManager* BombManager = nullptr;
+	class APlayMap* CurMap = nullptr;
+
 	PlayerAbility Ability;
 };

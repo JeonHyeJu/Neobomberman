@@ -19,9 +19,16 @@ protected:
 	void Tick(float _DeltaTime) override;
 
 private:
+	void InitMap();
 	void InitMouseRenderer();
 	void MoveMouseRenderer(ATileMap* _curMapPtr, const FVector2D& _mousePos);
 	void UpdateMouseRenderer();
+	void NextTile();
+	void AddTile(ATileMap* _curMapPtr, const FVector2D& _mousePos);
+	void RemoveTile(ATileMap* _curMapPtr, const FVector2D& _mousePos);
+	void SaveTileMap();
+	void LoadTileMap();
+
 	bool Serialize(ATileMap* _tileMap, std::string_view _savePath, std::string_view _saveName);
 	bool Deserialize(ATileMap* _tileMap, std::string_view _savePath, std::string_view _saveName);
 
@@ -30,10 +37,7 @@ private:
 	ATileMap* BoxTileMap = nullptr;
 
 	class USpriteRenderer* MouseSpriteRender = nullptr;
-
-	const char* TILE_DAT_PATH = "Resources\\Tiles\\Data";
-	const char* TILE_IMG_FOLDER_NAME = "TileStage_1";
-	const char* TILE_GUIDE_IMG_FOLDER_NAME = "TileStage_1_Guide";
+	std::string TileDataPath = "";
 
 	std::vector<ATileMap*> TilePtrs;
 	int CurTilePtrIdx = 0;

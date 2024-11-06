@@ -37,6 +37,9 @@
     <ClInclude Include="EngineRandom.h">
       <Filter>Math</Filter>
     </ClInclude>
+    <ClInclude Include="FSMStateManager.h">
+      <Filter>StateMachine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EngineDebug.cpp">
@@ -75,6 +78,9 @@
     <ClCompile Include="EngineRandom.cpp">
       <Filter>Math</Filter>
     </ClCompile>
+    <ClCompile Include="FSMStateManager.cpp">
+      <Filter>StateMachine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Debug">
@@ -97,6 +103,9 @@
     </Filter>
     <Filter Include="Object">
       <UniqueIdentifier>{b02abf04-2bd4-41a6-87d2-2d3cc8a6ee33}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="StateMachine">
+      <UniqueIdentifier>{01a1d411-4525-4a85-89ec-31ca988fcbfd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

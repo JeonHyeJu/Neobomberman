@@ -24,12 +24,26 @@ void ATileMap::Init(std::string_view _Sprite, const FIntPoint& _Count, const FVe
 	}
 }
 
-void ATileMap::SetSpriteAndIndex(const FIntPoint& _Index, int _SpriteIndex)
+void ATileMap::SetTile(const FIntPoint& _Index, int _SpriteIndex, bool _isMove)
 {
-	SetSpriteAndIndex(_Index, { 0, 0 }, TileSize, _SpriteIndex);
+	SetTile(_Index, { 0, 0 }, TileSize, _SpriteIndex, _isMove);
 }
 
-void ATileMap::SetSpriteAndIndex(const FIntPoint& _Index, const FVector2D& _Pivot, const FVector2D& _SpriteScale, int _SpriteIndex)
+// from mouse or player location
+void ATileMap::SetTileWithLoc(FVector2D _Location, int _SpriteIndex, bool _isMove)
+{
+	FVector2D TilePos = _Location - GetActorLocation();
+	FIntPoint Point = LocationToIndex(TilePos);
+
+	if (true == IsIndexOver(Point))
+	{
+		return;
+	}
+
+	SetTile(Point, _SpriteIndex, _isMove);
+}
+
+void ATileMap::SetTile(const FIntPoint& _Index, const FVector2D& _Pivot, const FVector2D& _SpriteScale, int _SpriteIndex, bool _isMove)
 {
 	if (IsIndexOver(_Index) == true)
 	{
@@ -46,27 +60,12 @@ void ATileMap::SetSpriteAndIndex(const FIntPoint& _Index, const FVector2D& _Pivo
 	AllTiles[_Index.Y][_Index.X].SpriteRenderer->SetOrder(_Index.Y);
 
 	FVector2D loc = IndexToLocation(_Index);
-	FVector2D temp = TileSize.Half();
 	AllTiles[_Index.Y][_Index.X].SpriteRenderer->SetComponentLocation(loc + TileSize.Half() + _Pivot);
 	AllTiles[_Index.Y][_Index.X].Pivot = _Pivot;
 	AllTiles[_Index.Y][_Index.X].Scale = _SpriteScale;
 	AllTiles[_Index.Y][_Index.X].SpriteIndex = _SpriteIndex;
+	AllTiles[_Index.Y][_Index.X].IsMove = _isMove;
 }
-
-// from mouse or player location
-void ATileMap::SetSpriteAndIndexWithLocation(FVector2D _Location, int _SpriteIndex)
-{
-	FVector2D TilePos = _Location - GetActorLocation();
-	FIntPoint Point = LocationToIndex(TilePos);
-
-	if (true == IsIndexOver(Point))
-	{
-		return;
-	}
-
-	SetSpriteAndIndex(Point, _SpriteIndex);
-}
-
 
 FVector2D ATileMap::IndexToLocation(const FIntPoint& _Index)
 {
@@ -156,9 +155,19 @@ void ATileMap::DeSerialize(UEngineSerializer& _Ser)
 		{
 			if (loadTiles[y][x].SpriteIndex != -1)
 			{
-				SetSpriteAndIndex({ x, y }, loadTiles[y][x].Pivot, loadTiles[y][x].Scale, loadTiles[y][x].SpriteIndex);
+				SetTile({ x, y }, loadTiles[y][x].Pivot, loadTiles[y][x].Scale, loadTiles[y][x].SpriteIndex, loadTiles[y][x].IsMove);
 			}
 		}
 	}
 }
 
+bool ATileMap::GetIsMovable(const FVector2D& _loc)
+{
+	Tile* tile = GetTileRef(_loc);
+	if (tile != nullptr)
+	{
+		return tile->IsMove;
+	}
+
+	return false;
+}

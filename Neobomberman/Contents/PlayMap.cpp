@@ -43,21 +43,20 @@ void APlayMap::InitMap()
 	FIntPoint titleIdxs = GlobalVar::BATTLE_GROUND_COUNT;
 	FVector2D tileSize = GlobalVar::BOMB_SIZE;
 
-	int marginH = 32;		// temp
 	FVector2D winSize = GlobalVar::WINDOW_SIZE;
 	FVector2D mapSize = { titleIdxs.X * tileSize.X, titleIdxs.Y * tileSize.Y };
 	FVector2D subSize = winSize - mapSize;
-	FIntPoint moveLoc{ static_cast<int>(subSize.X / 2), marginH };
+	FIntPoint moveLoc{ static_cast<int>(subSize.X / 2), GlobalVar::STAGE_H_MARGIN };
 
 	{
 		MapGround = GetWorld()->SpawnActor<ATileMap>();
-		MapGround->Init(TILE_IMG_FOLDER_NAME, titleIdxs, tileSize, TileType::Ground);
+		MapGround->Init(GlobalPath::TILE_STAGE_1, titleIdxs, tileSize, TileType::Ground);
 
 		for (int y = 0; y < titleIdxs.Y; y++)
 		{
 			for (int x = 0; x < titleIdxs.X; x++)
 			{
-				MapGround->SetSpriteAndIndex({ x, y }, static_cast<int>(TileType::Ground));
+				MapGround->SetTile({ x, y }, static_cast<int>(TileType::Ground), true);
 			}
 		}
 
@@ -66,18 +65,20 @@ void APlayMap::InitMap()
 
 	{
 		MapWall = GetWorld()->SpawnActor<ATileMap>();
-		MapWall->Init(TILE_IMG_FOLDER_NAME, titleIdxs, tileSize, TileType::Wall);
+		MapWall->Init(GlobalPath::TILE_STAGE_1, titleIdxs, tileSize, TileType::Wall);
 		MapWall->SetActorLocation(moveLoc);
 	}
 
 	{
 		MapBox = GetWorld()->SpawnActor<ATileMap>();
-		MapBox->Init(TILE_IMG_FOLDER_NAME, titleIdxs, tileSize, TileType::Box);
+		MapBox->Init(GlobalPath::TILE_STAGE_1, titleIdxs, tileSize, TileType::Box);
 		MapBox->SetActorLocation(moveLoc);
 	}
 
-	Deserialize(MapWall, TILE_DAT_PATH, "WallData.dat");
-	Deserialize(MapBox, TILE_DAT_PATH, "BoxData.dat");
+	GlobalPath path;
+	std::string tileDatPath = path.GetTileDataPath();
+	Deserialize(MapWall, tileDatPath, GlobalPath::MAP_WALL_DAT);
+	Deserialize(MapBox, tileDatPath, GlobalPath::MAP_BOX_DAT);
 }
 
 bool APlayMap::Deserialize(ATileMap* _tileMap, std::string_view _savePath, std::string_view _saveName)

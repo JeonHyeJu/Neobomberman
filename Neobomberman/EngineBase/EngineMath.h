@@ -197,6 +197,13 @@ public:
 		return *this;
 	}
 
+	FVector2D& operator*=(float _val)
+	{
+		X *= _val;
+		Y *= _val;
+		return *this;
+	}
+
 	std::string ToString()
 	{
 		std::string Stream;

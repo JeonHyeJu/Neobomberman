@@ -64,9 +64,9 @@ public:
 	ATileMap& operator=(ATileMap&& _Other) noexcept = delete;
 
 	void Init(std::string_view _Sprite, const FIntPoint& _Count, const FVector2D& _TileSize, const TileType& _type);
-	void SetSpriteAndIndex(const FIntPoint& _Index, int _SpriteIndex);
-	void SetSpriteAndIndex(const FIntPoint& _Index, const FVector2D& _Pivot, const FVector2D& _SpriteScale, int _SpriteIndex);
-	void SetSpriteAndIndexWithLocation(FVector2D _Location, int _SpriteIndex);
+	void SetTile(const FIntPoint& _Index, int _SpriteIndex, bool _isMove);
+	void SetTile(const FIntPoint& _Index, const FVector2D& _Pivot, const FVector2D& _SpriteScale, int _SpriteIndex, bool _isMove);
+	void SetTileWithLoc(FVector2D _Location, int _SpriteIndex, bool _isMove);
 	FVector2D IndexToLocation(const FIntPoint& _Index);
 	FIntPoint LocationToIndex(const FVector2D& _Location);
 
@@ -86,6 +86,7 @@ public:
 	{
 		return WholeTileType;
 	}
+	bool GetIsMovable(const FVector2D& _loc);
 
 	Tile* GetTileRef(FIntPoint _Index);
 	Tile* GetTileRef(FVector2D _Location);

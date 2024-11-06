@@ -21,5 +21,6 @@ void APlayGameMode::BeginPlay()
 	Player->SetCollisionImage("Bg_1-Col.png");
 
 	APlayMap* NewActor = GetWorld()->SpawnActor<APlayMap>();
+	Player->SetCurMap(NewActor);
 }
 

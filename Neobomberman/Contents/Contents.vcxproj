@@ -145,6 +145,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BombManager.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="TileMap.h" />
     <ClInclude Include="Bomb.h" />
     <ClInclude Include="ContentsCore.h">
@@ -164,6 +168,10 @@
     <ClInclude Include="Title.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BombManager.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="TileMap.cpp" />
     <ClCompile Include="Bomb.cpp" />
     <ClCompile Include="ContentsCore.cpp">
