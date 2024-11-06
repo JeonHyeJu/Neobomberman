@@ -8,7 +8,7 @@ class APlayer : public AActor
 public:
 	struct PlayerAbility
 	{
-		int Power = 1;
+		int Power = 2;
 		int Speed = 1;
 		int BombCount = 1;
 		bool HasGlove = false;
@@ -49,7 +49,6 @@ private:
 
 	class UEngineWinImage* CollisionImage = nullptr;
 
-	class ABombManager* BombManager = nullptr;
 	class APlayMap* CurMap = nullptr;
 
 	PlayerAbility Ability;

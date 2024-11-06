@@ -2,6 +2,7 @@
 #include "PlayMap.h"
 #include "ContentsEnum.h"
 #include "TileMap.h"
+#include "BombManager.h"
 #include "GlobalVar.h"
 
 #include <EngineBase/EngineDirectory.h>
@@ -36,6 +37,16 @@ APlayMap::~APlayMap()
 void APlayMap::BeginPlay()
 {
 	InitMap();
+	InitBombManager();
+}
+
+void APlayMap::Tick(float _deltaTime)
+{
+	bool hasExploded = BombManager->HasExplodedBomb();
+	if (hasExploded)
+	{
+		HandleExplode();
+	}
 }
 
 void APlayMap::InitMap()
@@ -79,6 +90,24 @@ void APlayMap::InitMap()
 	std::string tileDatPath = path.GetTileDataPath();
 	Deserialize(MapWall, tileDatPath, GlobalPath::MAP_WALL_DAT);
 	Deserialize(MapBox, tileDatPath, GlobalPath::MAP_BOX_DAT);
+}
+
+void APlayMap::InitBombManager()
+{
+	BombManager = GetWorld()->SpawnActor<ABombManager>();
+	BombManager->Init(GlobalVar::BATTLE_GROUND_COUNT, GlobalVar::BOMB_SIZE);
+}
+
+void APlayMap::HandleExplode()
+{
+	// TODO: check same address
+	std::vector<FIntPoint> vec = BombManager->GetExplodedTileIdxs();
+	for (size_t i = 0; i < vec.size(); ++i)
+	{
+		//vec[i];
+		// TODO: check bombs range
+	}
+	BombManager->ClearExplodeTileIdxs();
 }
 
 bool APlayMap::Deserialize(ATileMap* _tileMap, std::string_view _savePath, std::string_view _saveName)

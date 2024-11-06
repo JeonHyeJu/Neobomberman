@@ -2,8 +2,8 @@
 #include "ContentsEnum.h"
 #include "TileMap.h"
 #include "PlayMap.h"
-#include "Player.h"
 #include "BombManager.h"
+#include "Player.h"
 
 #include <EngineCore/EngineAPICore.h>
 #include <EngineCore/SpriteRenderer.h>
@@ -79,9 +79,6 @@ void APlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
-	BombManager = GetWorld()->SpawnActor<ABombManager>();
-	BombManager->Init(GlobalVar::BATTLE_GROUND_COUNT, GlobalVar::BOMB_SIZE);
-
 	// Set camera
 	//	FVector2D Size = UEngineAPICore::GetCore()->GetMainWindow().GetWindowSize();
 	//	GetWorld()->SetCameraPivot(Size.Half() * -1.0f);
@@ -91,7 +88,7 @@ void APlayer::Tick(float _DeltaTime)
 {
 	Super::Tick(_DeltaTime);
 
-	//UEngineDebug::CoreOutPutString("FPS : " + std::to_string(1.0f / _DeltaTime));
+	UEngineDebug::CoreOutPutString("FPS : " + std::to_string(1.0f / _DeltaTime));
 	//UEngineDebug::CoreOutPutString("PlayerPos : " + GetActorLocation().ToString());
 
 	bool isPressedD = UEngineInput::GetInst().IsPress('D');
@@ -163,7 +160,7 @@ void APlayer::Tick(float _DeltaTime)
 	{
 		case 1: extPos *= 16.f; break;
 		case 2: extPos *= 16.f; break;
-		case 3: extPos *= 9.f; break;
+		case 3: extPos *= 10.f; break;
 		case 4: extPos *= 9.f; break;
 		default: break;
 	}
@@ -212,7 +209,7 @@ void APlayer::Tick(float _DeltaTime)
 	
 	if (isDownSpace)
 	{
-		BombManager->SetBomb(GetActorLocation(), Ability.BombType, Ability.Power);
+		CurMap->GetBombManager()->SetBomb(GetActorLocation(), Ability.BombType, Ability.Power);
 	}
 }
 

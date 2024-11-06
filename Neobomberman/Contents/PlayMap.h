@@ -2,6 +2,7 @@
 #include <EngineCore/Actor.h>
 
 class ATileMap;
+class ABombManager;
 class APlayMap : public AActor
 {
 public:
@@ -22,15 +23,24 @@ public:
 	{
 		return MapBox;
 	}
+	
+	inline ABombManager* GetBombManager() const
+	{
+		return BombManager;
+	}
 
 protected:
 	 void BeginPlay() override;
+	 void Tick(float _deltaTime) override;
 
 private:
 	void InitMap();
+	void InitBombManager();
+	void HandleExplode();
 	bool Deserialize(ATileMap* _tileMap, std::string_view _savePath, std::string_view _saveName);
 
 	ATileMap* MapGround = nullptr;
 	ATileMap* MapWall = nullptr;
 	ATileMap* MapBox = nullptr;
+	ABombManager* BombManager = nullptr;
 };

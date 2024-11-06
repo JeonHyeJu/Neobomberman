@@ -69,10 +69,16 @@ void ContentsCore::InitResources()
 	imgManager.CuttingSprite("MainCharater_White.png", GlobalVar::BOMBERMAN_SIZE);
 
 	imgManager.CuttingSprite("ExplodeCenter.png", GlobalVar::BOMB_SIZE);
+
 	imgManager.CuttingSprite("ExplodeUp.png", GlobalVar::BOMB_SIZE);
 	imgManager.CuttingSprite("ExplodeDown.png", GlobalVar::BOMB_SIZE);
 	imgManager.CuttingSprite("ExplodeLeft.png", GlobalVar::BOMB_SIZE);
 	imgManager.CuttingSprite("ExplodeRight.png", GlobalVar::BOMB_SIZE);
+
+	imgManager.CuttingSprite("ExplodeUpMid.png", GlobalVar::BOMB_SIZE);
+	imgManager.CuttingSprite("ExplodeDownMid.png", GlobalVar::BOMB_SIZE);
+	imgManager.CuttingSprite("ExplodeLeftMid.png", GlobalVar::BOMB_SIZE);
+	imgManager.CuttingSprite("ExplodeRightMid.png", GlobalVar::BOMB_SIZE);
 }
 
 void ContentsCore::LoadResource(std::string_view _path, std::string_view _append, bool _isRecursive)

@@ -4,8 +4,8 @@ enum class ERenderOrder
 {
 	COLMAP = -1000,
 	BACKGROUND = -999,
+	BOMB = 9999,
 	PLAYER = 10000,
-	BOMB = 10001,
 	UI = 20000,
 };
 

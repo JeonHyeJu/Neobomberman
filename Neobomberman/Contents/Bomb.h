@@ -26,8 +26,8 @@ public:
 	ABomb& operator=(const ABomb& _other) = delete;
 	ABomb& operator=(ABomb&& _other) noexcept = delete;
 
-	void InitOrgBomb(int _power);
-	void InitRedBomb(int _power);
+	void InitOrgBomb(const FVector2D& _loc, int _power);
+	void InitRedBomb(const FVector2D& _loc, int _power);
 
 	void BeginPlay() override;
 	void Tick(float _DeltaTime) override;
@@ -42,13 +42,13 @@ public:
 	}
 
 private:
-	void InitSprite(std::string_view _spriteName, std::string_view _animName, std::string_view _explodeSpriteName, std::string_view _explodeAnimName);
+	void InitSpriteCenter(std::string_view _spriteName, std::string_view _animName, std::string_view _explodeSpriteName);
 	void InitExplodeSprites(int _power);
 	void InitExplodeSpriteVector(std::string_view _spriteName, std::string_view _animName, std::vector<USpriteRenderer*>& _vector, const FVector2D& _loc);
-	void InitExplodeSprite(USpriteRenderer* _spriteRenderer, std::string_view _spriteName, std::string_view _animName, const FVector2D& _loc);
+	void InitExplodeSprite(USpriteRenderer** _spriteRenderer, std::string_view _spriteName, std::string_view _animName, const FVector2D& _loc);
 	void Explode();
 	void OnEndAnimation();
-	void RunAnimHelper(std::vector<USpriteRenderer*>& _vec, std::string_view _animName, bool _isOff=true);
+	void _RunAnimHelper(std::vector<USpriteRenderer*>& _vec, std::string_view _animName, bool _isOff=true);
 
 	EBombType BombType = EBombType::PLAIN;
 	BombState State = BombState::None;
@@ -69,6 +69,8 @@ private:
 	std::vector<USpriteRenderer*> ExplodeSprites_Left;
 	std::vector<USpriteRenderer*> ExplodeSprites_Right;
 	USpriteRenderer* ExplodeSprites_Center = nullptr;
+
+	std::vector<FVector2D> ExplodeTileLocs;
 
 	float AccumulatedSeconds = 0.f;
 	int Power = 0;

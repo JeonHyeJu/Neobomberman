@@ -22,11 +22,21 @@ public:
 	ABomb* GetBombRef(const FVector2D& _Location);
 	bool IsIndexOver(const FIntPoint& _Index);
 
+	bool HasExplodedBomb();
+	inline const std::vector<FIntPoint>& GetExplodedTileIdxs() const
+	{
+		return ExplodeTileIdxs;
+	}
+	void ClearExplodeTileIdxs();
+
 protected:
 	void Tick(float _deltaTime) override;
 
 private:
+	void AddExplodeTileIdxs(const std::vector<FVector2D>& _locs);
+
 	FIntPoint TileCount;
 	FVector2D TileSize;
 	std::vector<std::vector<ABomb*>> BombMatrix;
+	std::vector<FIntPoint> ExplodeTileIdxs;
 };
