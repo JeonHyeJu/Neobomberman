@@ -36,7 +36,7 @@ protected:
 private:
 	void InitMap();
 	void InitBombManager();
-	void HandleExplode();
+	void checkExplodedBombs();
 	bool Deserialize(ATileMap* _tileMap, std::string_view _savePath, std::string_view _saveName);
 
 	ATileMap* MapGround = nullptr;

@@ -21,8 +21,10 @@ public:
 	static const char* TILE;
 	static const char* DATA;
 	static const char* OPENING;
+	static const char* EXPLODE;
 	static const char* TILE_STAGE_1;
 	static const char* TILE_STAGE_1_GUIDE;
+	static const char* ANIM_CRUMBLING_BOX;
 
 	static const char* BACKGROUND;
 	static const char* CHARACTER;
@@ -36,39 +38,9 @@ public:
 	static const char* MAP_BOX_DAT;
 
 	// These are not static because only be used once or twice.
-	inline std::string GetBackgroundPath() const
+	inline std::string GetAppendedRootPath(const char* _appendedStr) const
 	{
-		std::string ret = std::string(GlobalPath::ROOT) + "\\" + GlobalPath::BACKGROUND;
-		return ret;
-	}
-	inline std::string GetCharacterPath() const
-	{
-		std::string ret = std::string(GlobalPath::ROOT) + "\\" + GlobalPath::CHARACTER;
-		return ret;
-	}
-	inline std::string GetRidingPath() const
-	{
-		std::string ret = std::string(GlobalPath::ROOT) + "\\" + GlobalPath::RIDING;
-		return ret;
-	}
-	inline std::string GetEnemyPath() const
-	{
-		std::string ret = std::string(GlobalPath::ROOT) + "\\" + GlobalPath::ENEMY;
-		return ret;
-	}
-	inline std::string GetOpeningPath() const
-	{
-		std::string ret = std::string(GlobalPath::ROOT) + "\\" + GlobalPath::OPENING;
-		return ret;
-	}
-	inline std::string GetOrgBombPath() const
-	{
-		std::string ret = std::string(GlobalPath::ROOT) + "\\" + GlobalPath::BOMB_ORG;
-		return ret;
-	}
-	inline std::string GetRedBombPath() const
-	{
-		std::string ret = std::string(GlobalPath::ROOT) + "\\" + GlobalPath::BOMB_RED;
+		std::string ret = std::string(GlobalPath::ROOT) + "\\" + _appendedStr;
 		return ret;
 	}
 	inline std::string GetTileDataPath() const

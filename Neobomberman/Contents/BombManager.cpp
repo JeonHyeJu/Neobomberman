@@ -28,7 +28,7 @@ void ABombManager::Tick(float _deltaTime)
 			if (BombMatrix[y][x]->State == BombState::Exploding)
 			{
 				BombMatrix[y][x]->SetState(BombState::FinishExploding);
-				std::vector<FIntPoint> explodeIdxs = GetExplodeIdxs(FIntPoint{x, y}, BombMatrix[y][x]->Power);
+				std::vector<FIntPoint> explodeIdxs = GetExplodedIdxs(FIntPoint{x, y}, BombMatrix[y][x]->Power);
 				AppendExplodeTiles(explodeIdxs);
 			}
 			else if (BombMatrix[y][x]->State == BombState::Over)
@@ -53,71 +53,32 @@ void ABombManager::Init(const FIntPoint& _Count, const FVector2D& _TileSize)
 	}
 }
 
-FVector2D ABombManager::IndexToLocation(const FIntPoint& _Index)
+void ABombManager::SetBomb(const FVector2D& _realLoc, EBombType _bombType, int _power)
 {
-	return FVector2D(_Index.X * TileSize.X, _Index.Y * TileSize.Y);
-}
-
-FIntPoint ABombManager::LocationToIndex(const FVector2D& _Location)
-{
-	FVector2D Location = _Location / TileSize;
-
-	return FIntPoint(Location.iX(), Location.iY());
-}
-
-std::vector<FIntPoint> ABombManager::GetExplodeIdxs(const FIntPoint& _idx, int _power)
-{
-	std::vector<FIntPoint> vec;
-	vec.reserve(_power*4 + 1);
-	vec.push_back(_idx);
-
-	for (int i = 0; i < _power; ++i)
-	{
-		int addVal = i + 1;
-		FIntPoint up{ _idx.X, _idx.Y + addVal };
-		FIntPoint down{ _idx.X, _idx.Y - addVal };
-		FIntPoint left{ _idx.X - addVal, _idx.Y };
-		FIntPoint right{ _idx.X + addVal, _idx.Y };
-
-		vec.push_back(up);
-		vec.push_back(down);
-		vec.push_back(left);
-		vec.push_back(right);
-	}
-
-	return vec;
-}
-
-void ABombManager::SetBomb(const FIntPoint& _idx, EBombType _bombType, int _power)
-{
-	if (IsIndexOver(_idx) == true)
+	FIntPoint subtractedIdx = LocationToMatrixIdx(_realLoc);
+	if (IsIndexOver(subtractedIdx) == true)
 	{
 		return;
 	}
 
-	FIntPoint matrixIdx = _idx - FIntPoint{ 3, 2 };	// Temp
-	ABomb* pBomb = BombMatrix[matrixIdx.Y][matrixIdx.X];
+	ABomb* pBomb = BombMatrix[subtractedIdx.Y][subtractedIdx.X];
 	if (pBomb) return;
 
 	pBomb = GetWorld()->SpawnActor<ABomb>();
-	FVector2D loc = IndexToLocation(_idx);
-
-	if (_bombType == EBombType::RED)
-	{
-		pBomb->InitRedBomb(loc, _power);
-	}
-	else // EBombType::PLAIN
-	{
-		pBomb->InitOrgBomb(loc, _power);
-	}
-
-	BombMatrix[matrixIdx.Y][matrixIdx.X] = pBomb;
+	pBomb->Create(_realLoc, GlobalVar::BOMB_SIZE, _power, _bombType);
+	BombMatrix[subtractedIdx.Y][subtractedIdx.X] = pBomb;
 }
 
-void ABombManager::SetBomb(const FVector2D& _Location, EBombType _bombType, int _power)
+FIntPoint ABombManager::LocationToMatrixIdx(const FVector2D& _loc)
 {
-	FIntPoint idx = LocationToIndex(_Location);
-	SetBomb(idx, _bombType, _power);
+	FIntPoint idx = LocationToIndex(_loc - GetActorLocation());
+	return idx;
+}
+
+FVector2D ABombManager::MatrixIdxToLocation(const FIntPoint& _idx)
+{
+	FVector2D loc = IndexToLocation(_idx) + GetActorLocation();
+	return loc;
 }
 
 ABomb* ABombManager::GetBombRef(const FIntPoint& _idx)
@@ -129,11 +90,10 @@ ABomb* ABombManager::GetBombRef(const FIntPoint& _idx)
 	return BombMatrix[_idx.Y][_idx.X];
 }
 
-ABomb* ABombManager::GetBombRef(const FVector2D& _refLoc)
+ABomb* ABombManager::GetBombRef(const FVector2D& _realLoc)
 {
-	FVector2D actorLoc = GetActorLocation();
-	FIntPoint idx = LocationToIndex(_refLoc - actorLoc);
-	return GetBombRef(idx);
+	FIntPoint subtractedIdx = LocationToMatrixIdx(_realLoc);
+	return GetBombRef(subtractedIdx);
 }
 
 bool ABombManager::IsIndexOver(const FIntPoint& _Index)
@@ -161,12 +121,6 @@ bool ABombManager::IsIndexOver(const FIntPoint& _Index)
 	return false;
 }
 
-bool ABombManager::HasExplodedBomb()
-{
-	bool ret = (ExplodeTileIdxs.size() > 0);
-	return ret;
-}
-
 void ABombManager::AppendExplodeTiles(const std::vector<FIntPoint>& _appendIdxs)
 {
 	for (size_t i = 0; i < _appendIdxs.size(); ++i)
@@ -180,7 +134,37 @@ void ABombManager::AppendExplodeTiles(const std::vector<FIntPoint>& _appendIdxs)
 	}
 }
 
-void ABombManager::ClearExplodeTileIdxs()
+std::vector<FIntPoint> ABombManager::GetExplodedIdxs(const FIntPoint& _idx, int _power)
 {
-	ExplodeTileIdxs.clear();
+	std::vector<FIntPoint> vec;
+	vec.reserve(_power * 4 + 1);
+	vec.push_back(_idx);
+
+	for (int i = 0; i < _power; ++i)
+	{
+		int addVal = i + 1;
+		FIntPoint up{ _idx.X, _idx.Y + addVal };
+		FIntPoint down{ _idx.X, _idx.Y - addVal };
+		FIntPoint left{ _idx.X - addVal, _idx.Y };
+		FIntPoint right{ _idx.X + addVal, _idx.Y };
+
+		vec.push_back(up);
+		vec.push_back(down);
+		vec.push_back(left);
+		vec.push_back(right);
+	}
+
+	return vec;
+}
+
+FVector2D ABombManager::IndexToLocation(const FIntPoint& _Index)
+{
+	return FVector2D(_Index.X * TileSize.X, _Index.Y * TileSize.Y);
+}
+
+FIntPoint ABombManager::LocationToIndex(const FVector2D& _Location)
+{
+	FVector2D Location = _Location / TileSize;
+
+	return FIntPoint(Location.iX(), Location.iY());
 }

@@ -1,13 +1,9 @@
+
 #include "PreCompile.h"
 #include "Bomb.h"
-#include "Timer.h"
-
-#ifdef _DEBUG
-#include <iostream>
-#endif
-
 #include "GlobalVar.h"
 #include "ContentsEnum.h"
+
 #include <EngineCore/SpriteRenderer.h>
 #include <EngineBase/EngineDebug.h>
 #include <functional>
@@ -38,57 +34,102 @@ void ABomb::Tick(float _DeltaTime)
 		AccumulatedSeconds += _DeltaTime;
 		if (AccumulatedSeconds >= EXPLODE_SECONDS)
 		{
+			AccumulatedSeconds = 0;
 			Explode();
 		}
 	}
 }
 
-void ABomb::InitOrgBomb(const FVector2D& _loc, int _power)
+void ABomb::Create(const FVector2D& _loc, const FVector2D& _Size, int _power, EBombType _type)
 {
+	Size = _Size;
 	Power = _power;
-	SetActorLocation(_loc);
-	InitSpriteCenter(RESOURCE_PLAINBOMB_PATH, ANIM_RUNNING, TEMP_EXPLODE_SPRITE_NAME);	// TODO
-	InitExplodeSprites(_power);
-}
+	BombType = _type;
+	SetActorLocation(_loc - Size.Half());
 
-void ABomb::InitRedBomb(const FVector2D& _loc, int _power)
-{
-	Power = _power;
-	SetActorLocation(_loc);
-	InitSpriteCenter(RESOURCE_REDBOMB_PATH, ANIM_RUNNING, TEMP_EXPLODE_SPRITE_NAME);	// TODO
-	InitExplodeSprites(_power);
+	/* Initialize */
+	if (_type == EBombType::PLAIN)
+	{
+		InitSpriteCenter(GlobalPath::BOMB_ORG, ANIM_RUNNING, IMG_EXPLOSION_CENTER);
+	}
+	else  // EBombType::RED
+	{
+		InitSpriteCenter(GlobalPath::BOMB_RED, ANIM_RUNNING, IMG_EXPLOSION_CENTER);
+	}
+	InitSprite4Direction();
+
+	SetState(BombState::Running);
 }
 
 void ABomb::InitSpriteCenter(std::string_view _spriteName, std::string_view _runnigAnimName, std::string_view _explodeSpriteName)
 {
-	InitExplodeSprite(&ExplodeSprites_Center, _explodeSpriteName, "ExplodeCenter", {0, 0});
-	ExplodeSprites_Center->CreateAnimation(_runnigAnimName, _spriteName, 0, 3, .4f);
+	_InitDefaultSprite(&ExplodeSprite_Center, _explodeSpriteName, ANIM_EXPLODE_CENTER, { 0, 0 });
+	ExplodeSprite_Center->CreateAnimation(_runnigAnimName, _spriteName, 0, 3, .4f);
 
-	// Temp
-	ExplodeSprites_Center->SetAnimationEvent("ExplodeCenter", 1, std::bind(&ABomb::OnExploding, this));
-	ExplodeSprites_Center->SetAnimationEvent("ExplodeCenter", 19, std::bind(&ABomb::OnEndAnimation, this));
-	ExplodeSprites_Center->ChangeAnimation(_runnigAnimName);
-
-	State = BombState::Running;
+	ExplodeSprite_Center->SetAnimationEvent(ANIM_EXPLODE_CENTER, 1, std::bind(&ABomb::OnExploding, this));
+	ExplodeSprite_Center->SetAnimationEvent(ANIM_EXPLODE_CENTER, 19, std::bind(&ABomb::OnEndAnimation, this));
+	ExplodeSprite_Center->ChangeAnimation(_runnigAnimName);
 }
 
-void ABomb::InitExplodeSprite(USpriteRenderer** _spriteRenderer, std::string_view _spriteName, std::string_view _animName, const FVector2D& _loc)
+void ABomb::InitSprite4Direction()
 {
-	FVector2D size = GlobalVar::BOMB_SIZE;	// Temp
-	FVector2D sizeHalf = size.Half();
-	FVector2D loc = _loc + sizeHalf;
+	if (Power == GlobalVar::ORG_BOMB_POWER)
+	{
+		_InitDefaultSprite4D(IMG_EXPLOSION_UP, ANIM_EXPLODE_UP, ExplodeSprites_Up, { 0, -static_cast<int>(Size.Y) });
+		_InitDefaultSprite4D(IMG_EXPLOSION_DOWN, ANIM_EXPLODE_DOWN, ExplodeSprites_Down, { 0, static_cast<int>(Size.Y) });
+		_InitDefaultSprite4D(IMG_EXPLOSION_LEFT, ANIM_EXPLODE_LEFT, ExplodeSprites_Left, { -static_cast<int>(Size.X), 0 });
+		_InitDefaultSprite4D(IMG_EXPLOSION_RIGHT, ANIM_EXPLODE_RIGHT, ExplodeSprites_Right, { static_cast<int>(Size.X), 0 });
+	}
+	else
+	{
+		for (int i = 0; i < Power; i++)
+		{
+			int idx = i + 1;
+			if (i < (Power - 1))
+			{
+				_InitDefaultSprite4D(IMG_EXPLOSION_UPMID, ANIM_EXPLODE_UP, ExplodeSprites_Up, { 0, -static_cast<int>(idx * Size.Y) });
+				_InitDefaultSprite4D(IMG_EXPLOSION_DOWNMID, ANIM_EXPLODE_DOWN, ExplodeSprites_Down, { 0, static_cast<int>(idx * Size.Y) });
+				_InitDefaultSprite4D(IMG_EXPLOSION_LEFTMID, ANIM_EXPLODE_LEFT, ExplodeSprites_Left, { -static_cast<int>(idx * Size.X), 0 });
+				_InitDefaultSprite4D(IMG_EXPLOSION_RIGHTMID, ANIM_EXPLODE_RIGHT, ExplodeSprites_Right, { static_cast<int>(idx * Size.X), 0 });
+			}
+			else
+			{
+				_InitDefaultSprite4D(IMG_EXPLOSION_UP, ANIM_EXPLODE_UP, ExplodeSprites_Up, { 0, -static_cast<int>(idx * Size.Y) });
+				_InitDefaultSprite4D(IMG_EXPLOSION_DOWN, ANIM_EXPLODE_DOWN, ExplodeSprites_Down, { 0, static_cast<int>(idx * Size.Y) });
+				_InitDefaultSprite4D(IMG_EXPLOSION_LEFT, ANIM_EXPLODE_LEFT, ExplodeSprites_Left, { -static_cast<int>(idx * Size.X), 0 });
+				_InitDefaultSprite4D(IMG_EXPLOSION_RIGHT, ANIM_EXPLODE_RIGHT, ExplodeSprites_Right, { static_cast<int>(idx * Size.X), 0 });
+			}
+		}
+	}
+}
+
+void ABomb::_InitDefaultSprite4D(std::string_view _spriteName, std::string_view _animName, std::vector<USpriteRenderer*>& _vector, const FVector2D& _loc)
+{
+	USpriteRenderer* spriteRenderer = nullptr;
+
+	_InitDefaultSprite(&spriteRenderer, _spriteName, _animName, _loc);
+	spriteRenderer->SetActive(false);
+
+	_vector.push_back(spriteRenderer);
+}
+
+void ABomb::_InitDefaultSprite(USpriteRenderer** _spriteRenderer, std::string_view _spriteName, std::string_view _animName, const FVector2D& _animLoc)
+{
+	const int MAX_FRAME = 20;
+
+	FVector2D loc = _animLoc + Size.Half();
 
 	*_spriteRenderer = CreateDefaultSubObject<USpriteRenderer>();
 	(*_spriteRenderer)->SetSprite(_spriteName);
 
 	(*_spriteRenderer)->SetComponentLocation(loc);
-	(*_spriteRenderer)->SetComponentScale(size);
+	(*_spriteRenderer)->SetComponentScale(Size);
 	(*_spriteRenderer)->SetPivotType(PivotType::Center);
 	(*_spriteRenderer)->SetOrder(ERenderOrder::BOMB);
 
 	std::vector<int> idxs;
 	std::vector<float> secs;
-	for (int i = 0; i < 20; ++i)
+	for (int i = 0; i < MAX_FRAME; ++i)
 	{
 		idxs.push_back(i);
 		if (i < 13)
@@ -100,69 +141,41 @@ void ABomb::InitExplodeSprite(USpriteRenderer** _spriteRenderer, std::string_vie
 			secs.push_back(.1f);
 		}
 	}
+
 	(*_spriteRenderer)->CreateAnimation(_animName, _spriteName, idxs, secs, false);
-}
-
-void ABomb::InitExplodeSpriteVector(std::string_view _spriteName, std::string_view _animName, std::vector<USpriteRenderer*>& _vector, const FVector2D& _loc)
-{
-	USpriteRenderer* spriteRenderer = nullptr;
-
-	InitExplodeSprite(&spriteRenderer, _spriteName, _animName, _loc);
-	spriteRenderer->SetActive(false);
-
-	_vector.push_back(spriteRenderer);
-}
-
-// TODO: Move to BombManager
-void ABomb::InitExplodeSprites(int _power)
-{
-	FVector2D size = GlobalVar::BOMB_SIZE;	// Temp
-
-	// TODO: orginize
-	if (_power == 1)
-	{
-		InitExplodeSpriteVector("ExplodeUp.png", "ExplodeUp", ExplodeSprites_Up, { 0, -static_cast<int>(size.Y) });
-		InitExplodeSpriteVector("ExplodeDown.png", "ExplodeDown", ExplodeSprites_Down, { 0, static_cast<int>(size.Y) });
-		InitExplodeSpriteVector("ExplodeLeft.png", "ExplodeLeft", ExplodeSprites_Left, { -static_cast<int>(size.X), 0 });
-		InitExplodeSpriteVector("ExplodeRight.png", "ExplodeRight", ExplodeSprites_Right, { static_cast<int>(size.X), 0 });
-	}
-	else
-	{
-		for (int i = 0; i < _power; i++)
-		{
-			int idx = i + 1;
-			if (i < (_power - 1))
-			{
-				InitExplodeSpriteVector("ExplodeUpMid.png", "ExplodeUp", ExplodeSprites_Up, { 0, -static_cast<int>(idx * size.Y) });
-				InitExplodeSpriteVector("ExplodeDownMid.png", "ExplodeDown", ExplodeSprites_Down, { 0, static_cast<int>(idx * size.Y) });
-				InitExplodeSpriteVector("ExplodeLeftMid.png", "ExplodeLeft", ExplodeSprites_Left, { -static_cast<int>(idx * size.X), 0 });
-				InitExplodeSpriteVector("ExplodeRightMid.png", "ExplodeRight", ExplodeSprites_Right, { static_cast<int>(idx * size.X), 0 });
-			}
-			else
-			{
-				InitExplodeSpriteVector("ExplodeUp.png", "ExplodeUp", ExplodeSprites_Up, { 0, -static_cast<int>(idx * size.Y) });
-				InitExplodeSpriteVector("ExplodeDown.png", "ExplodeDown", ExplodeSprites_Down, { 0, static_cast<int>(idx * size.Y) });
-				InitExplodeSpriteVector("ExplodeLeft.png", "ExplodeLeft", ExplodeSprites_Left, { -static_cast<int>(idx * size.X), 0 });
-				InitExplodeSpriteVector("ExplodeRight.png", "ExplodeRight", ExplodeSprites_Right, { static_cast<int>(idx * size.X), 0 });
-			}
-		}
-	}
 }
 
 void ABomb::Explode()
 {
 	if (State == BombState::Running)
 	{
-		State = BombState::StartExploding;
-		ExplodeSprites_Center->ChangeAnimation("ExplodeCenter");
-		
-		_RunAnimHelper(ExplodeSprites_Up, "ExplodeUp");
-		_RunAnimHelper(ExplodeSprites_Down, "ExplodeDown");
-		_RunAnimHelper(ExplodeSprites_Left, "ExplodeLeft");
-		_RunAnimHelper(ExplodeSprites_Right, "ExplodeRight");
+		SetState(BombState::StartExploding);
+
+		_RunAnimHelper(ExplodeSprite_Center, ANIM_EXPLODE_CENTER);
+		_RunAnimHelper(ExplodeSprites_Up, ANIM_EXPLODE_UP);
+		_RunAnimHelper(ExplodeSprites_Down, ANIM_EXPLODE_DOWN);
+		_RunAnimHelper(ExplodeSprites_Left, ANIM_EXPLODE_LEFT);
+		_RunAnimHelper(ExplodeSprites_Right, ANIM_EXPLODE_RIGHT);
 	}
 }
 
+/* Helpers */
+void ABomb::_RunAnimHelper(USpriteRenderer* _centerSprite, std::string_view _animName, bool _isOn)
+{
+	_centerSprite->ChangeAnimation(_animName);
+	_centerSprite->SetActive(_isOn);
+}
+
+void ABomb::_RunAnimHelper(std::vector<USpriteRenderer*>& _vec, std::string_view _animName, bool _isOn)
+{
+	for (int i = 0; i < _vec.size(); ++i)
+	{
+		_vec[i]->ChangeAnimation(_animName);
+		_vec[i]->SetActive(_isOn);
+	}
+}
+
+/** slots **/
 void ABomb::OnExploding()
 {
 	if (State == BombState::StartExploding)
@@ -177,24 +190,11 @@ void ABomb::OnEndAnimation()
 	{
 		SetState(BombState::Over);
 
-		bool isOff = false;
-
-		// Off animation
-		ExplodeSprites_Center->ChangeAnimation("ExplodeCenter");
-		ExplodeSprites_Center->SetActive(isOff);
-
-		_RunAnimHelper(ExplodeSprites_Up, "ExplodeUp", isOff);
-		_RunAnimHelper(ExplodeSprites_Down, "ExplodeDown", isOff);
-		_RunAnimHelper(ExplodeSprites_Left, "ExplodeLeft", isOff);
-		_RunAnimHelper(ExplodeSprites_Right, "ExplodeRight", isOff);
-	}
-}
-
-void ABomb::_RunAnimHelper(std::vector<USpriteRenderer*>& _vec, std::string_view _animName, bool _isOn)
-{
-	for (int i = 0; i < _vec.size(); ++i)
-	{
-		_vec[i]->ChangeAnimation(_animName);
-		_vec[i]->SetActive(_isOn);
+		bool isOn = false;
+		_RunAnimHelper(ExplodeSprite_Center, ANIM_EXPLODE_CENTER, isOn);
+		_RunAnimHelper(ExplodeSprites_Up, ANIM_EXPLODE_UP, isOn);
+		_RunAnimHelper(ExplodeSprites_Down, ANIM_EXPLODE_DOWN, isOn);
+		_RunAnimHelper(ExplodeSprites_Left, ANIM_EXPLODE_LEFT, isOn);
+		_RunAnimHelper(ExplodeSprites_Right, ANIM_EXPLODE_RIGHT, isOn);
 	}
 }

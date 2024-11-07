@@ -52,18 +52,18 @@ void ContentsCore::InitResources()
 
 	/** Load resources **/
 	LoadResource(GlobalPath::ROOT);
-	LoadResource(path.GetBackgroundPath());
-	LoadResource(path.GetCharacterPath());
-	LoadResource(path.GetRidingPath());
-	LoadResource(path.GetEnemyPath());
-	LoadResource("Resources\\Explode");		// Temp
+	LoadResource(path.GetAppendedRootPath(GlobalPath::BACKGROUND));
+	LoadResource(path.GetAppendedRootPath(GlobalPath::CHARACTER));
+	LoadResource(path.GetAppendedRootPath(GlobalPath::RIDING));
+	LoadResource(path.GetAppendedRootPath(GlobalPath::ENEMY));
+	LoadResource(path.GetAppendedRootPath(GlobalPath::EXPLODE));
 
-	LoadResourceFolders(path.GetOrgBombPath());
-	LoadResourceFolders(path.GetRedBombPath());
-	LoadResourceFolders(path.GetOpeningPath());
+	LoadResourceFolders(path.GetAppendedRootPath(GlobalPath::BOMB_ORG));
+	LoadResourceFolders(path.GetAppendedRootPath(GlobalPath::BOMB_RED));
+	LoadResourceFolders(path.GetAppendedRootPath(GlobalPath::OPENING));
 	LoadResourceFolders(path.GetTileStage1Path());
 	LoadResourceFolders(path.GetTileStage1GuidePath());
-	LoadResourceFolders("Resources\\CrumblingBox");		// Temp
+	LoadResourceFolders(path.GetAppendedRootPath(GlobalPath::ANIM_CRUMBLING_BOX));		// Temp
 
 	/** Cutting **/
 	UImageManager& imgManager = UImageManager::GetInst();

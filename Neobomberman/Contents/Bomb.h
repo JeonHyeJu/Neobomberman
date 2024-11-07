@@ -1,10 +1,8 @@
 #pragma once
 #include <EngineCore/Actor.h>
-#include <array>
-
 #include "ContentsEnum.h"
 
-enum BombState
+enum class BombState
 {
 	None = 0,
 	Running,
@@ -28,19 +26,17 @@ public:
 	ABomb& operator=(const ABomb& _other) = delete;
 	ABomb& operator=(ABomb&& _other) noexcept = delete;
 
-	void InitOrgBomb(const FVector2D& _loc, int _power);
-	void InitRedBomb(const FVector2D& _loc, int _power);
-
 	void BeginPlay() override;
 	void Tick(float _DeltaTime) override;
 
+	void Create(const FVector2D& _loc, const FVector2D& _size, int _power, EBombType _type);
 	inline EBombType GetBombType() const
 	{
 		return BombType;
 	}
-	inline void SetBombType(const EBombType& _bombType)
+	inline BombState GetState() const
 	{
-		BombType = _bombType;
+		return State;
 	}
 	inline void SetState(BombState _state)
 	{
@@ -49,34 +45,46 @@ public:
 
 private:
 	void InitSpriteCenter(std::string_view _spriteName, std::string_view _animName, std::string_view _explodeSpriteName);
-	void InitExplodeSprites(int _power);
-	void InitExplodeSpriteVector(std::string_view _spriteName, std::string_view _animName, std::vector<USpriteRenderer*>& _vector, const FVector2D& _loc);
-	void InitExplodeSprite(USpriteRenderer** _spriteRenderer, std::string_view _spriteName, std::string_view _animName, const FVector2D& _loc);
+	void InitSprite4Direction();
+	void _InitDefaultSprite4D(std::string_view _spriteName, std::string_view _animName, std::vector<USpriteRenderer*>& _vector, const FVector2D& _loc);
+	void _InitDefaultSprite(USpriteRenderer** _spriteRenderer, std::string_view _spriteName, std::string_view _animName, const FVector2D& _animLoc);
+
 	void Explode();
+
+	void _RunAnimHelper(USpriteRenderer* _centerSprite, std::string_view _animName, bool _isOn=true);
+	void _RunAnimHelper(std::vector<USpriteRenderer*>& _vec, std::string_view _animName, bool _isOff=true);
+
 	void OnExploding();
 	void OnEndAnimation();
-	void _RunAnimHelper(std::vector<USpriteRenderer*>& _vec, std::string_view _animName, bool _isOff=true);
 
 	EBombType BombType = EBombType::PLAIN;
 	BombState State = BombState::None;
 
-	std::string ExplodeAnimName = "";
-
-	const char* TEMP_EXPLODE_SPRITE_NAME = "ExplodeCenter.png";
-	const char* ANIM_RUNNING = "Bomb_Run";
-	const char* ANIM_EXPLODE = "Bomb_Explode";
-
-	const char* RESOURCE_PLAINBOMB_PATH = "BombOrg_16x16";	// 16x16
-	const char* RESOURCE_REDBOMB_PATH = "BombRed_16x16";	// 16x16
 	const float EXPLODE_SECONDS = 2.f;
+	float AccumulatedSeconds = 0.f;
+	int Power = 0;
+	FVector2D Size;
 
-	// Fixed size = GlobalVar::MAX_BOMB_POWER
+	USpriteRenderer* ExplodeSprite_Center = nullptr;
 	std::vector<USpriteRenderer*> ExplodeSprites_Up;
 	std::vector<USpriteRenderer*> ExplodeSprites_Down;
 	std::vector<USpriteRenderer*> ExplodeSprites_Left;
 	std::vector<USpriteRenderer*> ExplodeSprites_Right;
-	USpriteRenderer* ExplodeSprites_Center = nullptr;
 
-	float AccumulatedSeconds = 0.f;
-	int Power = 0;
+	const char* IMG_EXPLOSION_CENTER = "ExplodeCenter.png";
+	const char* IMG_EXPLOSION_UP = "ExplodeUp.png";
+	const char* IMG_EXPLOSION_DOWN = "ExplodeDown.png";
+	const char* IMG_EXPLOSION_LEFT = "ExplodeLeft.png";
+	const char* IMG_EXPLOSION_RIGHT = "ExplodeRight.png";
+	const char* IMG_EXPLOSION_UPMID = "ExplodeUpMid.png";
+	const char* IMG_EXPLOSION_DOWNMID = "ExplodeDownMid.png";
+	const char* IMG_EXPLOSION_LEFTMID = "ExplodeLeftMid.png";
+	const char* IMG_EXPLOSION_RIGHTMID = "ExplodeRightMid.png";
+
+	const char* ANIM_RUNNING = "Bomb_Run";
+	const char* ANIM_EXPLODE_CENTER = "ExplodeCenter";
+	const char* ANIM_EXPLODE_UP = "ExplodeUp";
+	const char* ANIM_EXPLODE_DOWN = "ExplodeDown";
+	const char* ANIM_EXPLODE_LEFT = "ExplodeLeft";
+	const char* ANIM_EXPLODE_RIGHT = "ExplodeRight";
 };

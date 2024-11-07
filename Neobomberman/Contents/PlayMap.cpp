@@ -36,17 +36,17 @@ APlayMap::~APlayMap()
 
 void APlayMap::BeginPlay()
 {
+	Super::BeginPlay();
+
 	InitMap();
 	InitBombManager();
 }
 
 void APlayMap::Tick(float _deltaTime)
 {
-	bool hasExploded = BombManager->HasExplodedBomb();
-	if (hasExploded)
-	{
-		HandleExplode();
-	}
+	Super::Tick(_deltaTime);
+
+	checkExplodedBombs();
 }
 
 void APlayMap::InitMap()
@@ -92,8 +92,9 @@ void APlayMap::InitMap()
 	Deserialize(MapWall, tileDatPath, GlobalPath::MAP_WALL_DAT);
 	Deserialize(MapBox, tileDatPath, GlobalPath::MAP_BOX_DAT);
 
+	// 241108 TODO: saved with tilemap.dat
 	// Temp
-	MapBox->SetTilesAnim("CrumblingBox", "CrumblingBox");
+	MapBox->SetTilesAnim(GlobalPath::ANIM_CRUMBLING_BOX, GlobalPath::ANIM_CRUMBLING_BOX);
 }
 
 void APlayMap::InitBombManager()
@@ -112,14 +113,19 @@ void APlayMap::InitBombManager()
 	BombManager->SetActorLocation(moveLoc);
 }
 
-void APlayMap::HandleExplode()
+void APlayMap::checkExplodedBombs()
 {
-	const std::vector<FIntPoint>& vec = BombManager->GetExplodedTileIdxs();
-	for (size_t i = 0; i < vec.size(); ++i)
+	bool hasExploded = BombManager->HasExplodedBomb();
+	if (hasExploded)
 	{
-		MapBox->LaunchTileAnim(vec[i], "CrumblingBox");	// temp
+		const std::vector<FIntPoint>& vec = BombManager->GetExplodedTileIdxs();
+		for (size_t i = 0; i < vec.size(); ++i)
+		{
+			FIntPoint boxIdx = vec[i];
+			MapBox->LaunchTileAnim(boxIdx, GlobalPath::ANIM_CRUMBLING_BOX);	// temp
+		}
+		BombManager->ClearExplodeTileIdxs();
 	}
-	BombManager->ClearExplodeTileIdxs();
 }
 
 bool APlayMap::Deserialize(ATileMap* _tileMap, std::string_view _savePath, std::string_view _saveName)
