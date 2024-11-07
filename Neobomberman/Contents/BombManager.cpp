@@ -19,17 +19,22 @@ void ABombManager::Tick(float _deltaTime)
 
 	if (BombMatrix.size() == 0) return;
 
-	for (int i = 0; i < BombMatrix.size(); ++i)
+	for (int y = 0; y < BombMatrix.size(); ++y)
 	{
-		for (int j = 0; j < BombMatrix[i].size(); ++j)
+		for (int x = 0; x < BombMatrix[y].size(); ++x)
 		{
-			if (BombMatrix[i][j] == nullptr) continue;
+			if (BombMatrix[y][x] == nullptr) continue;
 
-			if (BombMatrix[i][j]->State == BombState::Over)
+			if (BombMatrix[y][x]->State == BombState::Exploding)
 			{
-				AddExplodeTileIdxs(BombMatrix[i][j]->ExplodeTileLocs);
-				BombMatrix[i][j]->Destroy();
-				BombMatrix[i][j] = nullptr;
+				BombMatrix[y][x]->SetState(BombState::FinishExploding);
+				std::vector<FIntPoint> explodeIdxs = GetExplodeIdxs(FIntPoint{x, y}, BombMatrix[y][x]->Power);
+				AppendExplodeTiles(explodeIdxs);
+			}
+			else if (BombMatrix[y][x]->State == BombState::Over)
+			{
+				BombMatrix[y][x]->Destroy();
+				BombMatrix[y][x] = nullptr;
 			}
 		}
 	}
@@ -60,6 +65,29 @@ FIntPoint ABombManager::LocationToIndex(const FVector2D& _Location)
 	return FIntPoint(Location.iX(), Location.iY());
 }
 
+std::vector<FIntPoint> ABombManager::GetExplodeIdxs(const FIntPoint& _idx, int _power)
+{
+	std::vector<FIntPoint> vec;
+	vec.reserve(_power*4 + 1);
+	vec.push_back(_idx);
+
+	for (int i = 0; i < _power; ++i)
+	{
+		int addVal = i + 1;
+		FIntPoint up{ _idx.X, _idx.Y + addVal };
+		FIntPoint down{ _idx.X, _idx.Y - addVal };
+		FIntPoint left{ _idx.X - addVal, _idx.Y };
+		FIntPoint right{ _idx.X + addVal, _idx.Y };
+
+		vec.push_back(up);
+		vec.push_back(down);
+		vec.push_back(left);
+		vec.push_back(right);
+	}
+
+	return vec;
+}
+
 void ABombManager::SetBomb(const FIntPoint& _idx, EBombType _bombType, int _power)
 {
 	if (IsIndexOver(_idx) == true)
@@ -67,7 +95,8 @@ void ABombManager::SetBomb(const FIntPoint& _idx, EBombType _bombType, int _powe
 		return;
 	}
 
-	ABomb* pBomb = BombMatrix[_idx.Y][_idx.X];
+	FIntPoint matrixIdx = _idx - FIntPoint{ 3, 2 };	// Temp
+	ABomb* pBomb = BombMatrix[matrixIdx.Y][matrixIdx.X];
 	if (pBomb) return;
 
 	pBomb = GetWorld()->SpawnActor<ABomb>();
@@ -82,7 +111,7 @@ void ABombManager::SetBomb(const FIntPoint& _idx, EBombType _bombType, int _powe
 		pBomb->InitOrgBomb(loc, _power);
 	}
 
-	BombMatrix[_idx.Y][_idx.X] = pBomb;
+	BombMatrix[matrixIdx.Y][matrixIdx.X] = pBomb;
 }
 
 void ABombManager::SetBomb(const FVector2D& _Location, EBombType _bombType, int _power)
@@ -138,12 +167,16 @@ bool ABombManager::HasExplodedBomb()
 	return ret;
 }
 
-void ABombManager::AddExplodeTileIdxs(const std::vector<FVector2D>& _locs)
+void ABombManager::AppendExplodeTiles(const std::vector<FIntPoint>& _appendIdxs)
 {
-	for (size_t i = 0; i < _locs.size(); ++i)
+	for (size_t i = 0; i < _appendIdxs.size(); ++i)
 	{
-		FIntPoint idx = LocationToIndex(_locs[i]);
-		ExplodeTileIdxs.push_back(idx);
+		if (_appendIdxs[i].X < 0 || _appendIdxs[i].Y < 0)
+		{
+			continue;
+		}
+
+		ExplodeTileIdxs.push_back(_appendIdxs[i]);
 	}
 }
 

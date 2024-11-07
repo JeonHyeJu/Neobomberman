@@ -63,6 +63,7 @@ void ContentsCore::InitResources()
 	LoadResourceFolders(path.GetOpeningPath());
 	LoadResourceFolders(path.GetTileStage1Path());
 	LoadResourceFolders(path.GetTileStage1GuidePath());
+	LoadResourceFolders("Resources\\CrumblingBox");		// Temp
 
 	/** Cutting **/
 	UImageManager& imgManager = UImageManager::GetInst();

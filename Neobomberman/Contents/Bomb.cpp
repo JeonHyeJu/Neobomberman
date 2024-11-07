@@ -18,8 +18,6 @@ ABomb::ABomb()
 	ExplodeSprites_Down.reserve(GlobalVar::MAX_BOMB_POWER);
 	ExplodeSprites_Left.reserve(GlobalVar::MAX_BOMB_POWER);
 	ExplodeSprites_Right.reserve(GlobalVar::MAX_BOMB_POWER);
-
-	ExplodeTileLocs.reserve(GlobalVar::MAX_BOMB_POWER * 4);
 }
 
 ABomb::~ABomb()
@@ -47,6 +45,7 @@ void ABomb::Tick(float _DeltaTime)
 
 void ABomb::InitOrgBomb(const FVector2D& _loc, int _power)
 {
+	Power = _power;
 	SetActorLocation(_loc);
 	InitSpriteCenter(RESOURCE_PLAINBOMB_PATH, ANIM_RUNNING, TEMP_EXPLODE_SPRITE_NAME);	// TODO
 	InitExplodeSprites(_power);
@@ -54,6 +53,7 @@ void ABomb::InitOrgBomb(const FVector2D& _loc, int _power)
 
 void ABomb::InitRedBomb(const FVector2D& _loc, int _power)
 {
+	Power = _power;
 	SetActorLocation(_loc);
 	InitSpriteCenter(RESOURCE_REDBOMB_PATH, ANIM_RUNNING, TEMP_EXPLODE_SPRITE_NAME);	// TODO
 	InitExplodeSprites(_power);
@@ -65,6 +65,7 @@ void ABomb::InitSpriteCenter(std::string_view _spriteName, std::string_view _run
 	ExplodeSprites_Center->CreateAnimation(_runnigAnimName, _spriteName, 0, 3, .4f);
 
 	// Temp
+	ExplodeSprites_Center->SetAnimationEvent("ExplodeCenter", 1, std::bind(&ABomb::OnExploding, this));
 	ExplodeSprites_Center->SetAnimationEvent("ExplodeCenter", 19, std::bind(&ABomb::OnEndAnimation, this));
 	ExplodeSprites_Center->ChangeAnimation(_runnigAnimName);
 
@@ -100,8 +101,6 @@ void ABomb::InitExplodeSprite(USpriteRenderer** _spriteRenderer, std::string_vie
 		}
 	}
 	(*_spriteRenderer)->CreateAnimation(_animName, _spriteName, idxs, secs, false);
-
-	ExplodeTileLocs.push_back(GetActorLocation() + loc);
 }
 
 void ABomb::InitExplodeSpriteVector(std::string_view _spriteName, std::string_view _animName, std::vector<USpriteRenderer*>& _vector, const FVector2D& _loc)
@@ -114,9 +113,9 @@ void ABomb::InitExplodeSpriteVector(std::string_view _spriteName, std::string_vi
 	_vector.push_back(spriteRenderer);
 }
 
+// TODO: Move to BombManager
 void ABomb::InitExplodeSprites(int _power)
 {
-	Power = _power;
 	FVector2D size = GlobalVar::BOMB_SIZE;	// Temp
 
 	// TODO: orginize
@@ -154,7 +153,7 @@ void ABomb::Explode()
 {
 	if (State == BombState::Running)
 	{
-		State = BombState::Exploding;
+		State = BombState::StartExploding;
 		ExplodeSprites_Center->ChangeAnimation("ExplodeCenter");
 		
 		_RunAnimHelper(ExplodeSprites_Up, "ExplodeUp");
@@ -164,11 +163,19 @@ void ABomb::Explode()
 	}
 }
 
+void ABomb::OnExploding()
+{
+	if (State == BombState::StartExploding)
+	{
+		SetState(BombState::Exploding);
+	}
+}
+
 void ABomb::OnEndAnimation()
 {
-	if (State == BombState::Exploding)
+	if (State == BombState::FinishExploding)
 	{
-		State = BombState::Over;
+		SetState(BombState::Over);
 
 		bool isOff = false;
 

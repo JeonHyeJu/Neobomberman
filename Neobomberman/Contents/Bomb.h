@@ -8,7 +8,9 @@ enum BombState
 {
 	None = 0,
 	Running,
+	StartExploding,
 	Exploding,
+	FinishExploding,
 	Over
 };
 
@@ -40,6 +42,10 @@ public:
 	{
 		BombType = _bombType;
 	}
+	inline void SetState(BombState _state)
+	{
+		State = _state;
+	}
 
 private:
 	void InitSpriteCenter(std::string_view _spriteName, std::string_view _animName, std::string_view _explodeSpriteName);
@@ -47,6 +53,7 @@ private:
 	void InitExplodeSpriteVector(std::string_view _spriteName, std::string_view _animName, std::vector<USpriteRenderer*>& _vector, const FVector2D& _loc);
 	void InitExplodeSprite(USpriteRenderer** _spriteRenderer, std::string_view _spriteName, std::string_view _animName, const FVector2D& _loc);
 	void Explode();
+	void OnExploding();
 	void OnEndAnimation();
 	void _RunAnimHelper(std::vector<USpriteRenderer*>& _vec, std::string_view _animName, bool _isOff=true);
 
@@ -69,8 +76,6 @@ private:
 	std::vector<USpriteRenderer*> ExplodeSprites_Left;
 	std::vector<USpriteRenderer*> ExplodeSprites_Right;
 	USpriteRenderer* ExplodeSprites_Center = nullptr;
-
-	std::vector<FVector2D> ExplodeTileLocs;
 
 	float AccumulatedSeconds = 0.f;
 	int Power = 0;

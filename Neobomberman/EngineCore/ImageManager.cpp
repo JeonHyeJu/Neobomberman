@@ -1,5 +1,6 @@
 #include "PreCompile.h"
 #include "ImageManager.h"
+#include  <algorithm>
 
 #include <EngineBase/EnginePath.h>
 #include <EngineBase/EngineDebug.h>
@@ -7,6 +8,41 @@
 #include <EngineBase/EngineFile.h>
 #include <EngineBase/EngineDirectory.h>
 #include <EngineCore/EngineAPICore.h>
+
+// Custom function
+void Sort(std::vector<UEngineFile>& _vec)
+{
+	std::sort(_vec.begin(), _vec.end(),
+		[](UEngineFile& f1, UEngineFile& f2)
+		{
+			std::string s1 = f1.GetPathToString();
+			std::string s2 = f2.GetPathToString();
+
+			if (s1.size() < s2.size()) {
+				return true;
+			}
+			else if (s1.size() > s2.size())
+			{
+				return false;
+			}
+
+			// only this case.. s1.size() == s2.size()
+			size_t size = s1.size();
+			for (size_t i = 0; i < size; ++i)
+			{
+				char c1 = std::tolower(s1[i]);
+				char c2 = std::tolower(s2[i]);
+				if (c1 < c2)
+				{
+					return true;
+				}
+				else if (c1 > c2) {
+					return false;
+				}
+			}
+			return true;
+		});
+}
 
 UImageManager::UImageManager()
 {
@@ -140,6 +176,8 @@ void UImageManager::LoadFolder(std::string_view _KeyName, std::string_view _Path
 
 	UEngineDirectory Dir = _Path;
 	std::vector<UEngineFile> ImageFiles = Dir.GetAllFile();
+	Sort(ImageFiles);
+
 	for (size_t i = 0; i < ImageFiles.size(); i++)
 	{
 		std::string FilePath = ImageFiles[i].GetPathToString();

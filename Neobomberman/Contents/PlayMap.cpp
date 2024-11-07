@@ -88,24 +88,36 @@ void APlayMap::InitMap()
 
 	GlobalPath path;
 	std::string tileDatPath = path.GetTileDataPath();
+
 	Deserialize(MapWall, tileDatPath, GlobalPath::MAP_WALL_DAT);
 	Deserialize(MapBox, tileDatPath, GlobalPath::MAP_BOX_DAT);
+
+	// Temp
+	MapBox->SetTilesAnim("CrumblingBox", "CrumblingBox");
 }
 
 void APlayMap::InitBombManager()
 {
+	// TODO: Intergrate with upper code
+	FIntPoint titleIdxs = GlobalVar::BATTLE_GROUND_COUNT;
+	FVector2D tileSize = GlobalVar::BOMB_SIZE;
+
+	FVector2D winSize = GlobalVar::WINDOW_SIZE;
+	FVector2D mapSize = { titleIdxs.X * tileSize.X, titleIdxs.Y * tileSize.Y };
+	FVector2D subSize = winSize - mapSize;
+	FIntPoint moveLoc{ static_cast<int>(subSize.X / 2), GlobalVar::STAGE_H_MARGIN };
+
 	BombManager = GetWorld()->SpawnActor<ABombManager>();
 	BombManager->Init(GlobalVar::BATTLE_GROUND_COUNT, GlobalVar::BOMB_SIZE);
+	BombManager->SetActorLocation(moveLoc);
 }
 
 void APlayMap::HandleExplode()
 {
-	// TODO: check same address
-	std::vector<FIntPoint> vec = BombManager->GetExplodedTileIdxs();
+	const std::vector<FIntPoint>& vec = BombManager->GetExplodedTileIdxs();
 	for (size_t i = 0; i < vec.size(); ++i)
 	{
-		//vec[i];
-		// TODO: check bombs range
+		MapBox->LaunchTileAnim(vec[i], "CrumblingBox");	// temp
 	}
 	BombManager->ClearExplodeTileIdxs();
 }

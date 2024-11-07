@@ -33,7 +33,8 @@ protected:
 	void Tick(float _deltaTime) override;
 
 private:
-	void AddExplodeTileIdxs(const std::vector<FVector2D>& _locs);
+	std::vector<FIntPoint> GetExplodeIdxs(const FIntPoint& _idx, int _power);
+	void AppendExplodeTiles(const std::vector<FIntPoint>& _vec);
 
 	FIntPoint TileCount;
 	FVector2D TileSize;

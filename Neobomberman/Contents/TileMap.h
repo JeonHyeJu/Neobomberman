@@ -17,7 +17,7 @@ enum class TileType
 class Tile : public ISerializObject
 {
 public:
-	USpriteRenderer* SpriteRenderer;
+	USpriteRenderer* SpriteRenderer = nullptr;
 
 	bool IsMove = true;
 	int SpriteIndex = -1;
@@ -93,12 +93,17 @@ public:
 
 	bool IsIndexOver(FIntPoint _Index);
 
+	void SetTilesAnim(std::string_view _animName, std::string_view _spriteName);
+	void LaunchTileAnim(const FIntPoint& _pt, std::string_view _animName);
+
 	void Serialize(UEngineSerializer& _Ser);
 	void DeSerialize(UEngineSerializer& _Ser);
 
 protected:
 
 private:
+	void OnEndTileAnim(const FIntPoint& _idx);
+
 	std::string SpriteName = "";
 	FIntPoint TileCount;
 	FVector2D TileSize;
