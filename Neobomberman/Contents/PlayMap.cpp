@@ -13,13 +13,6 @@
 
 APlayMap::APlayMap()
 {
-	//USpriteRenderer* SpriteRenderer = CreateDefaultSubObject<USpriteRenderer>();
-	//SpriteRenderer->SetOrder(ERenderOrder::BACKGROUND);
-	//SpriteRenderer->SetSprite("Bg_1-1.png");
-
-	//FVector2D MapScale = SpriteRenderer->SetSpriteScale(1.0f);
-	//SpriteRenderer->SetComponentLocation(MapScale.Half());
-
 	USpriteRenderer* OuterLineRenderer = CreateDefaultSubObject<USpriteRenderer>();
 	OuterLineRenderer->SetOrder(ERenderOrder::COLMAP);
 	OuterLineRenderer->SetSprite("Bg_1-Col.png");
@@ -38,8 +31,16 @@ void APlayMap::BeginPlay()
 {
 	Super::BeginPlay();
 
-	InitMap();
-	InitBombManager();
+	FIntPoint tileIdxs = GlobalVar::BATTLE_GROUND_COUNT;
+	FVector2D tileSize = GlobalVar::BOMB_SIZE;
+
+	FVector2D winSize = GlobalVar::WINDOW_SIZE;
+	FVector2D mapSize = { tileIdxs.X * tileSize.X, tileIdxs.Y * tileSize.Y };
+	FVector2D subSize = winSize - mapSize;
+	FIntPoint moveLoc{ static_cast<int>(subSize.X / 2), GlobalVar::STAGE_H_MARGIN };
+
+	InitMap(tileIdxs, tileSize, moveLoc);
+	InitBombManager(tileIdxs, tileSize, moveLoc);
 }
 
 void APlayMap::Tick(float _deltaTime)
@@ -49,42 +50,26 @@ void APlayMap::Tick(float _deltaTime)
 	checkExplodedBombs();
 }
 
-void APlayMap::InitMap()
+void APlayMap::InitMap(const FIntPoint& _tileIdxs, const FVector2D& _tileSize, const FIntPoint& _moveLoc)
 {
-	FIntPoint titleIdxs = GlobalVar::BATTLE_GROUND_COUNT;
-	FVector2D tileSize = GlobalVar::BOMB_SIZE;
-
-	FVector2D winSize = GlobalVar::WINDOW_SIZE;
-	FVector2D mapSize = { titleIdxs.X * tileSize.X, titleIdxs.Y * tileSize.Y };
-	FVector2D subSize = winSize - mapSize;
-	FIntPoint moveLoc{ static_cast<int>(subSize.X / 2), GlobalVar::STAGE_H_MARGIN };
-
+	MapGround = GetWorld()->SpawnActor<ATileMap>();
+	MapGround->Init(GlobalPath::TILE_STAGE_1, _tileIdxs, _tileSize, TileType::Ground);
+	for (int y = 0; y < _tileIdxs.Y; y++)
 	{
-		MapGround = GetWorld()->SpawnActor<ATileMap>();
-		MapGround->Init(GlobalPath::TILE_STAGE_1, titleIdxs, tileSize, TileType::Ground);
-
-		for (int y = 0; y < titleIdxs.Y; y++)
+		for (int x = 0; x < _tileIdxs.X; x++)
 		{
-			for (int x = 0; x < titleIdxs.X; x++)
-			{
-				MapGround->SetTile({ x, y }, static_cast<int>(TileType::Ground), true);
-			}
+			MapGround->SetTile({ x, y }, static_cast<int>(TileType::Ground), true);
 		}
-
-		MapGround->SetActorLocation(moveLoc);
 	}
+	MapGround->SetActorLocation(_moveLoc);
 
-	{
-		MapWall = GetWorld()->SpawnActor<ATileMap>();
-		MapWall->Init(GlobalPath::TILE_STAGE_1, titleIdxs, tileSize, TileType::Wall);
-		MapWall->SetActorLocation(moveLoc);
-	}
+	MapWall = GetWorld()->SpawnActor<ATileMap>();
+	MapWall->Init(GlobalPath::TILE_STAGE_1, _tileIdxs, _tileSize, TileType::Wall);
+	MapWall->SetActorLocation(_moveLoc);
 
-	{
-		MapBox = GetWorld()->SpawnActor<ATileMap>();
-		MapBox->Init(GlobalPath::TILE_STAGE_1, titleIdxs, tileSize, TileType::Box);
-		MapBox->SetActorLocation(moveLoc);
-	}
+	MapBox = GetWorld()->SpawnActor<ATileMap>();
+	MapBox->Init(GlobalPath::TILE_STAGE_1, _tileIdxs, _tileSize, TileType::Box);
+	MapBox->SetActorLocation(_moveLoc);
 
 	GlobalPath path;
 	std::string tileDatPath = path.GetTileDataPath();
@@ -92,25 +77,14 @@ void APlayMap::InitMap()
 	Deserialize(MapWall, tileDatPath, GlobalPath::MAP_WALL_DAT);
 	Deserialize(MapBox, tileDatPath, GlobalPath::MAP_BOX_DAT);
 
-	// 241108 TODO: saved with tilemap.dat
-	// Temp
-	MapBox->SetTilesAnim(GlobalPath::ANIM_CRUMBLING_BOX, GlobalPath::ANIM_CRUMBLING_BOX);
+	MapBox->SetTilesAnimAfterLoad(GlobalPath::ANIM_CRUMBLING_BOX, GlobalPath::ANIM_CRUMBLING_BOX);
 }
 
-void APlayMap::InitBombManager()
+void APlayMap::InitBombManager(const FIntPoint& _tileIdxs, const FVector2D& _tileSize, const FIntPoint& _moveLoc)
 {
-	// TODO: Intergrate with upper code
-	FIntPoint titleIdxs = GlobalVar::BATTLE_GROUND_COUNT;
-	FVector2D tileSize = GlobalVar::BOMB_SIZE;
-
-	FVector2D winSize = GlobalVar::WINDOW_SIZE;
-	FVector2D mapSize = { titleIdxs.X * tileSize.X, titleIdxs.Y * tileSize.Y };
-	FVector2D subSize = winSize - mapSize;
-	FIntPoint moveLoc{ static_cast<int>(subSize.X / 2), GlobalVar::STAGE_H_MARGIN };
-
 	BombManager = GetWorld()->SpawnActor<ABombManager>();
-	BombManager->Init(GlobalVar::BATTLE_GROUND_COUNT, GlobalVar::BOMB_SIZE);
-	BombManager->SetActorLocation(moveLoc);
+	BombManager->Init(_tileIdxs, _tileSize);
+	BombManager->SetActorLocation(_moveLoc);
 }
 
 void APlayMap::checkExplodedBombs()
@@ -122,7 +96,7 @@ void APlayMap::checkExplodedBombs()
 		for (size_t i = 0; i < vec.size(); ++i)
 		{
 			FIntPoint boxIdx = vec[i];
-			MapBox->LaunchTileAnim(boxIdx, GlobalPath::ANIM_CRUMBLING_BOX);	// temp
+			MapBox->LaunchTileAnimAfterLoad(boxIdx, GlobalPath::ANIM_CRUMBLING_BOX);	// temp
 		}
 		BombManager->ClearExplodeTileIdxs();
 	}

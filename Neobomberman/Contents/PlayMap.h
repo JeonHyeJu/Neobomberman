@@ -34,8 +34,8 @@ protected:
 	 void Tick(float _deltaTime) override;
 
 private:
-	void InitMap();
-	void InitBombManager();
+	void InitMap(const FIntPoint& _tileIdxs, const FVector2D& _tileSize, const FIntPoint& _moveLoc);
+	void InitBombManager(const FIntPoint& _tileIdxs, const FVector2D& _tileSize, const FIntPoint& _moveLoc);
 	void checkExplodedBombs();
 	bool Deserialize(ATileMap* _tileMap, std::string_view _savePath, std::string_view _saveName);
 

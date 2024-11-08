@@ -64,9 +64,10 @@ public:
 	ATileMap& operator=(ATileMap&& _Other) noexcept = delete;
 
 	void Init(std::string_view _Sprite, const FIntPoint& _Count, const FVector2D& _TileSize, const TileType& _type);
+	void SetTileWithLoc(FVector2D _Location, int _SpriteIndex, bool _isMove);
 	void SetTile(const FIntPoint& _Index, int _SpriteIndex, bool _isMove);
 	void SetTile(const FIntPoint& _Index, const FVector2D& _Pivot, const FVector2D& _SpriteScale, int _SpriteIndex, bool _isMove);
-	void SetTileWithLoc(FVector2D _Location, int _SpriteIndex, bool _isMove);
+
 	FVector2D IndexToLocation(const FIntPoint& _Index);
 	FIntPoint LocationToIndex(const FVector2D& _Location);
 
@@ -93,8 +94,8 @@ public:
 
 	bool IsIndexOver(FIntPoint _Index);
 
-	void SetTilesAnim(std::string_view _animName, std::string_view _spriteName);
-	void LaunchTileAnim(const FIntPoint& _pt, std::string_view _animName);
+	void SetTilesAnimAfterLoad(std::string_view _animName, std::string_view _spriteName);
+	void LaunchTileAnimAfterLoad(const FIntPoint& _pt, std::string_view _animName);
 
 	void Serialize(UEngineSerializer& _Ser);
 	void DeSerialize(UEngineSerializer& _Ser);
@@ -102,7 +103,7 @@ public:
 protected:
 
 private:
-	void OnEndTileAnim(const FIntPoint& _idx);
+	void DestroySpriteAfterLoad(const FIntPoint& _idx);
 
 	std::string SpriteName = "";
 	FIntPoint TileCount;

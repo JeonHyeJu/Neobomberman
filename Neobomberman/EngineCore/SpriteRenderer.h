@@ -74,6 +74,15 @@ public:
 		return Sprite->GetName();
 	}
 
+	std::string GetCurAnimName()
+	{
+		std::string name = "";
+		if (CurAnimation) {
+			name = CurAnimation->Name;
+		}
+		return name;
+	}
+
 	bool IsActive() override
 	{
 		return UObject::IsActive() && GetActor()->IsActive();
@@ -84,15 +93,6 @@ public:
 		return UObject::IsDestroy() || GetActor()->IsDestroy();
 	}
 
-	std::string GetCurAnimName()
-	{
-		std::string name = "";
-		if (CurAnimation) {
-			name = CurAnimation->Name;
-		}
-		return name;
-	}
-	
 	void SetCameraEffect(bool _Value)
 	{
 		IsCameraEffect = _Value;

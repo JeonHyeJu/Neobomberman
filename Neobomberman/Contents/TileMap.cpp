@@ -10,41 +10,6 @@ ATileMap::~ATileMap()
 {
 }
 
-
-void ATileMap::SetTilesAnim(std::string_view _animName, std::string_view _spriteName)
-{
-	size_t ySize = AllTiles.size();
-	for (size_t y = 0; y < ySize; y++)
-	{
-		size_t xSize = AllTiles[y].size();
-		for (size_t x = 0; x < xSize; x++)
-		{
-			if (AllTiles[y][x].SpriteRenderer == nullptr)
-			{
-				continue;
-			}
-
-			// Temp
-			AllTiles[y][x].SpriteRenderer->CreateAnimation(_animName, _spriteName, 0, 10, 0.25f, false);
-			AllTiles[y][x].SpriteRenderer->SetAnimationEvent(_animName, 10, [=]() { OnEndTileAnim(FIntPoint({ static_cast<int>(x), static_cast<int>(y) })); });
-			AllTiles[y][x].SpriteRenderer->SetOrder(ERenderOrder::CRUMBLING_BOX);
-		}
-	}
-}
-
-void ATileMap::LaunchTileAnim(const FIntPoint& _idx, std::string_view _animName)
-{
-	if (IsIndexOver(_idx) == true)
-	{
-		return;
-	}
-
-	if (AllTiles[_idx.Y][_idx.X].SpriteRenderer != nullptr)
-	{
-		AllTiles[_idx.Y][_idx.X].SpriteRenderer->ChangeAnimation(_animName);
-	}
-}
-
 void ATileMap::Init(std::string_view _Sprite, const FIntPoint& _Count, const FVector2D& _TileSize, const TileType& _type)
 {
 	SpriteName = _Sprite;
@@ -60,11 +25,6 @@ void ATileMap::Init(std::string_view _Sprite, const FIntPoint& _Count, const FVe
 	}
 }
 
-void ATileMap::SetTile(const FIntPoint& _Index, int _SpriteIndex, bool _isMove)
-{
-	SetTile(_Index, { 0, 0 }, TileSize, _SpriteIndex, _isMove);
-}
-
 // from mouse or player location
 void ATileMap::SetTileWithLoc(FVector2D _Location, int _SpriteIndex, bool _isMove)
 {
@@ -77,6 +37,11 @@ void ATileMap::SetTileWithLoc(FVector2D _Location, int _SpriteIndex, bool _isMov
 	}
 
 	SetTile(Point, _SpriteIndex, _isMove);
+}
+
+void ATileMap::SetTile(const FIntPoint& _Index, int _SpriteIndex, bool _isMove)
+{
+	SetTile(_Index, { 0, 0 }, TileSize, _SpriteIndex, _isMove);
 }
 
 void ATileMap::SetTile(const FIntPoint& _Index, const FVector2D& _Pivot, const FVector2D& _SpriteScale, int _SpriteIndex, bool _isMove)
@@ -208,7 +173,42 @@ bool ATileMap::GetIsMovable(const FVector2D& _loc)
 	return false;
 }
 
-void ATileMap::OnEndTileAnim(const FIntPoint& _idx)
+/* after loading */
+void ATileMap::SetTilesAnimAfterLoad(std::string_view _animName, std::string_view _spriteName)
+{
+	size_t ySize = AllTiles.size();
+	for (size_t y = 0; y < ySize; y++)
+	{
+		size_t xSize = AllTiles[y].size();
+		for (size_t x = 0; x < xSize; x++)
+		{
+			if (AllTiles[y][x].SpriteRenderer == nullptr)
+			{
+				continue;
+			}
+
+			// Temp
+			AllTiles[y][x].SpriteRenderer->CreateAnimation(_animName, _spriteName, 0, 10, 0.25f, false);
+			AllTiles[y][x].SpriteRenderer->SetAnimationEvent(_animName, 10, [=]() { DestroySpriteAfterLoad(FIntPoint({ static_cast<int>(x), static_cast<int>(y) })); });
+			AllTiles[y][x].SpriteRenderer->SetOrder(ERenderOrder::CRUMBLING_BOX);
+		}
+	}
+}
+
+void ATileMap::LaunchTileAnimAfterLoad(const FIntPoint& _idx, std::string_view _animName)
+{
+	if (IsIndexOver(_idx) == true)
+	{
+		return;
+	}
+
+	if (AllTiles[_idx.Y][_idx.X].SpriteRenderer != nullptr)
+	{
+		AllTiles[_idx.Y][_idx.X].SpriteRenderer->ChangeAnimation(_animName);
+	}
+}
+
+void ATileMap::DestroySpriteAfterLoad(const FIntPoint& _idx)
 {
 	if (IsIndexOver(_idx) == true)
 	{
@@ -217,7 +217,6 @@ void ATileMap::OnEndTileAnim(const FIntPoint& _idx)
 
 	// AllTiles[_idx.Y][_idx.X].SpriteRenderer will not be nullptr.
 	// SetTilesAnim() set animation to exist renderer.
-
 	AllTiles[_idx.Y][_idx.X].SpriteRenderer->Destroy();
 	AllTiles[_idx.Y][_idx.X].SpriteRenderer = nullptr;
 	AllTiles[_idx.Y][_idx.X].IsMove = true;
