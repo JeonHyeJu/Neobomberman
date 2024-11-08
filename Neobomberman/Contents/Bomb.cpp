@@ -7,6 +7,7 @@
 #include <EngineCore/SpriteRenderer.h>
 #include <EngineBase/EngineDebug.h>
 #include <functional>
+#include <algorithm>
 
 ABomb::ABomb()
 {
@@ -40,12 +41,14 @@ void ABomb::Tick(float _DeltaTime)
 	}
 }
 
-void ABomb::Create(const FVector2D& _loc, const FVector2D& _Size, int _power, EBombType _type)
+void ABomb::Create(const FVector2D& _loc, const FIntPoint& _matrixIdx, const FVector2D& _Size, int _power, EBombType _type, const SBombTails& _tailInfo)
 {
 	Size = _Size;
 	Power = _power;
 	BombType = _type;
-	SetActorLocation(_loc - Size.Half());
+	MatrixIdx = _matrixIdx;
+
+	SetActorLocation(_loc);
 
 	/* Initialize */
 	if (_type == EBombType::PLAIN)
@@ -56,9 +59,51 @@ void ABomb::Create(const FVector2D& _loc, const FVector2D& _Size, int _power, EB
 	{
 		InitSpriteCenter(GlobalPath::BOMB_RED, ANIM_RUNNING, IMG_EXPLOSION_CENTER);
 	}
-	InitSprite4Direction();
+
+	/* Create explosion animations */
+	CreateTail(IMG_EXPLOSION_UP, IMG_EXPLOSION_UPMID, ANIM_EXPLODE_UP, { 0, -static_cast<int>(Size.Y) }, _tailInfo.Up, &ExplodeSprites_Up);
+	CreateTail(IMG_EXPLOSION_DOWN, IMG_EXPLOSION_DOWNMID, ANIM_EXPLODE_DOWN, { 0, static_cast<int>(Size.Y) }, _tailInfo.Up, &ExplodeSprites_Down);
+	CreateTail(IMG_EXPLOSION_LEFT, IMG_EXPLOSION_LEFTMID, ANIM_EXPLODE_LEFT, { -static_cast<int>(Size.X), 0 }, _tailInfo.Up, &ExplodeSprites_Left);
+	CreateTail(IMG_EXPLOSION_RIGHT, IMG_EXPLOSION_RIGHTMID, ANIM_EXPLODE_RIGHT, { static_cast<int>(Size.X), 0 }, _tailInfo.Up, &ExplodeSprites_Right);
+
+	// Temp
+	ExplodeIdxs.push_back(_matrixIdx);
+	for (size_t i = 0, size = _tailInfo.Up.size(); i < size; ++i)
+	{
+		ExplodeIdxs.push_back(_matrixIdx + FIntPoint::UP * (static_cast<int>(i) + 1));
+	}
+	for (size_t i = 0, size = _tailInfo.Down.size(); i < size; ++i)
+	{
+		ExplodeIdxs.push_back(_matrixIdx + FIntPoint::DOWN * (static_cast<int>(i) + 1));
+	}
+	for (size_t i = 0, size = _tailInfo.Left.size(); i < size; ++i)
+	{
+		ExplodeIdxs.push_back(_matrixIdx + FIntPoint::LEFT * (static_cast<int>(i) + 1));
+	}
+	for (size_t i = 0, size = _tailInfo.Right.size(); i < size; ++i)
+	{
+		ExplodeIdxs.push_back(_matrixIdx + FIntPoint::RIGHT * (static_cast<int>(i) + 1));
+	}
 
 	SetState(BombState::Running);
+}
+
+void ABomb::CreateTail(const char* _img, const char* _imgMid, const char* _animName, const FVector2D& loc, const std::vector<EBombTailType>& _tails, std::vector<USpriteRenderer*>* _pAnimVec)
+{
+	for (size_t i = 0, size = _tails.size(); i < size; ++i)
+	{
+		if (_pAnimVec == nullptr) continue;
+
+		int idx = static_cast<int>(i) + 1;
+		if (_tails[i] == EBombTailType::CONNECT)
+		{
+			_InitDefaultSprite4D(_imgMid, _animName, *_pAnimVec, loc * static_cast<float>(idx));
+		}
+		else if (_tails[i] == EBombTailType::END)
+		{
+			_InitDefaultSprite4D(_img, _animName, *_pAnimVec, loc * static_cast<float>(idx));
+		}
+	}
 }
 
 void ABomb::InitSpriteCenter(std::string_view _spriteName, std::string_view _runnigAnimName, std::string_view _explodeSpriteName)
@@ -69,38 +114,6 @@ void ABomb::InitSpriteCenter(std::string_view _spriteName, std::string_view _run
 	ExplodeSprite_Center->SetAnimationEvent(ANIM_EXPLODE_CENTER, 1, std::bind(&ABomb::OnExploding, this));
 	ExplodeSprite_Center->SetAnimationEvent(ANIM_EXPLODE_CENTER, 19, std::bind(&ABomb::OnEndAnimation, this));
 	ExplodeSprite_Center->ChangeAnimation(_runnigAnimName);
-}
-
-void ABomb::InitSprite4Direction()
-{
-	if (Power == GlobalVar::ORG_BOMB_POWER)
-	{
-		_InitDefaultSprite4D(IMG_EXPLOSION_UP, ANIM_EXPLODE_UP, ExplodeSprites_Up, { 0, -static_cast<int>(Size.Y) });
-		_InitDefaultSprite4D(IMG_EXPLOSION_DOWN, ANIM_EXPLODE_DOWN, ExplodeSprites_Down, { 0, static_cast<int>(Size.Y) });
-		_InitDefaultSprite4D(IMG_EXPLOSION_LEFT, ANIM_EXPLODE_LEFT, ExplodeSprites_Left, { -static_cast<int>(Size.X), 0 });
-		_InitDefaultSprite4D(IMG_EXPLOSION_RIGHT, ANIM_EXPLODE_RIGHT, ExplodeSprites_Right, { static_cast<int>(Size.X), 0 });
-	}
-	else
-	{
-		for (int i = 0; i < Power; i++)
-		{
-			int idx = i + 1;
-			if (i < (Power - 1))
-			{
-				_InitDefaultSprite4D(IMG_EXPLOSION_UPMID, ANIM_EXPLODE_UP, ExplodeSprites_Up, { 0, -static_cast<int>(idx * Size.Y) });
-				_InitDefaultSprite4D(IMG_EXPLOSION_DOWNMID, ANIM_EXPLODE_DOWN, ExplodeSprites_Down, { 0, static_cast<int>(idx * Size.Y) });
-				_InitDefaultSprite4D(IMG_EXPLOSION_LEFTMID, ANIM_EXPLODE_LEFT, ExplodeSprites_Left, { -static_cast<int>(idx * Size.X), 0 });
-				_InitDefaultSprite4D(IMG_EXPLOSION_RIGHTMID, ANIM_EXPLODE_RIGHT, ExplodeSprites_Right, { static_cast<int>(idx * Size.X), 0 });
-			}
-			else
-			{
-				_InitDefaultSprite4D(IMG_EXPLOSION_UP, ANIM_EXPLODE_UP, ExplodeSprites_Up, { 0, -static_cast<int>(idx * Size.Y) });
-				_InitDefaultSprite4D(IMG_EXPLOSION_DOWN, ANIM_EXPLODE_DOWN, ExplodeSprites_Down, { 0, static_cast<int>(idx * Size.Y) });
-				_InitDefaultSprite4D(IMG_EXPLOSION_LEFT, ANIM_EXPLODE_LEFT, ExplodeSprites_Left, { -static_cast<int>(idx * Size.X), 0 });
-				_InitDefaultSprite4D(IMG_EXPLOSION_RIGHT, ANIM_EXPLODE_RIGHT, ExplodeSprites_Right, { static_cast<int>(idx * Size.X), 0 });
-			}
-		}
-	}
 }
 
 void ABomb::_InitDefaultSprite4D(std::string_view _spriteName, std::string_view _animName, std::vector<USpriteRenderer*>& _vector, const FVector2D& _loc)
@@ -157,6 +170,17 @@ void ABomb::Explode()
 		_RunAnimHelper(ExplodeSprites_Left, ANIM_EXPLODE_LEFT);
 		_RunAnimHelper(ExplodeSprites_Right, ANIM_EXPLODE_RIGHT);
 	}
+}
+
+void ABomb::ExplodeIntermediatly()
+{
+	SetState(BombState::FinishExploding);
+
+	_RunAnimHelper(ExplodeSprite_Center, ANIM_EXPLODE_CENTER);
+	_RunAnimHelper(ExplodeSprites_Up, ANIM_EXPLODE_UP);
+	_RunAnimHelper(ExplodeSprites_Down, ANIM_EXPLODE_DOWN);
+	_RunAnimHelper(ExplodeSprites_Left, ANIM_EXPLODE_LEFT);
+	_RunAnimHelper(ExplodeSprites_Right, ANIM_EXPLODE_RIGHT);
 }
 
 /* Helpers */

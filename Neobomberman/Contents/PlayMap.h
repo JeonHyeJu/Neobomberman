@@ -1,5 +1,6 @@
 #pragma once
 #include <EngineCore/Actor.h>
+#include "ContentsEnum.h"
 
 class ATileMap;
 class ABombManager;
@@ -28,6 +29,7 @@ public:
 	{
 		return BombManager;
 	}
+	void SetBomb(const FVector2D& _loc, EBombType _bombType, int _power);
 
 protected:
 	 void BeginPlay() override;
@@ -38,6 +40,7 @@ private:
 	void InitBombManager(const FIntPoint& _tileIdxs, const FVector2D& _tileSize, const FIntPoint& _moveLoc);
 	void checkExplodedBombs();
 	bool Deserialize(ATileMap* _tileMap, std::string_view _savePath, std::string_view _saveName);
+	void _AddExplosion(const FIntPoint& _orgIdx, const FIntPoint& direc, int _idx, std::vector<EBombTailType>& _vec, bool* isUpEnd);
 
 	ATileMap* MapGround = nullptr;
 	ATileMap* MapWall = nullptr;

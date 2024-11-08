@@ -66,6 +66,9 @@ public:
 	FVector2D SetSpriteScale(float _Ratio = 1.0f, int _CurIndex = 0);
 	void CreateAnimation(std::string_view _AnimationName, std::string_view _SpriteName, int _Start, int _End, float Time = 0.1f, bool _Loop = true);
 	void CreateAnimation(std::string_view _AnimationName, std::string_view _SpriteName, std::vector<int> _Indexs, std::vector<float> _Frame, bool _Loop = true);
+
+	void CreateAnimation(std::string_view _AnimationName, std::string_view _SpriteName, std::vector<int> _Indexs, float _Frame, bool _Loop = true);
+
 	void ChangeAnimation(std::string_view _AnimationName, bool _Force = false);
 	void SetAnimationEvent(std::string_view _AnimationName, int _Frame, std::function<void()> _Function);
 
@@ -81,16 +84,6 @@ public:
 			name = CurAnimation->Name;
 		}
 		return name;
-	}
-
-	bool IsActive() override
-	{
-		return UObject::IsActive() && GetActor()->IsActive();
-	}
-	
-	bool IsDestroy() override
-	{
-		return UObject::IsDestroy() || GetActor()->IsDestroy();
 	}
 
 	void SetCameraEffect(bool _Value)

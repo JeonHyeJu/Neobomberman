@@ -1,8 +1,9 @@
 #pragma once
 #include <EngineCore/Actor.h>
 #include "ContentsEnum.h"
+#include "GlobalVar.h"
+#include "Bomb.h"
 
-class ABomb;
 class ABombManager : public AActor
 {
 public:
@@ -14,16 +15,12 @@ public:
 	ABombManager& operator=(const ABombManager& _other) = delete;
 	ABombManager& operator=(ABombManager&& _other) noexcept = delete;
 
-	void Init(const FIntPoint& _Count, const FVector2D& _TileSize);
-	void SetBomb(const FVector2D& _Location, EBombType _bombType, int _power);
+	//void Init(const FIntPoint& _Count, const FVector2D& _TileSize);
+	void SetBomb(const FVector2D& _Location, const SBombTails& _tailInfo, EBombType _bombType, int _power);
 
 	FIntPoint LocationToMatrixIdx(const FVector2D& _loc);
 	FVector2D MatrixIdxToLocation(const FIntPoint& _idx);
-	bool IsIndexOver(const FIntPoint& _Index);
 
-	ABomb* GetBombRef(const FIntPoint& _Index);
-	ABomb* GetBombRef(const FVector2D& _Location);
-	
 	inline const std::vector<FIntPoint>& GetExplodedTileIdxs() const
 	{
 		return ExplodeTileIdxs;
@@ -42,6 +39,7 @@ protected:
 	void Tick(float _deltaTime) override;
 
 private:
+	void CheckExplosion();
 	std::vector<FIntPoint> GetExplodedIdxs(const FIntPoint& _idx, int _power);
 	void AppendExplodeTiles(const std::vector<FIntPoint>& _vec);
 	FVector2D IndexToLocation(const FIntPoint& _Index);
@@ -49,6 +47,9 @@ private:
 
 	FIntPoint TileCount;
 	FVector2D TileSize;
-	std::vector<std::vector<ABomb*>> BombMatrix;
+	//std::vector<std::vector<ABomb*>> BombMatrix;
+
+	std::list<ABomb*> BombList;
+
 	std::vector<FIntPoint> ExplodeTileIdxs;
 };

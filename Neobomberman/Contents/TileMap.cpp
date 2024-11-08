@@ -123,6 +123,23 @@ Tile* ATileMap::GetTileRef(FIntPoint _Index)
 	return &AllTiles[_Index.Y][_Index.X];
 }
 
+bool ATileMap::IsBlocked(const FVector2D& _loc)
+{
+	FIntPoint idx = LocationToIndex(_loc - GetActorLocation());
+	return IsBlocked(idx);
+}
+
+bool ATileMap::IsBlocked(const FIntPoint& _idx)
+{
+	if (IsIndexOver(_idx) == true)
+	{
+		return true;
+	}
+
+	bool hasTile = AllTiles[_idx.Y][_idx.X].SpriteRenderer != nullptr;	// Temp
+	return hasTile;
+}
+
 void ATileMap::Serialize(UEngineSerializer& _Ser)
 {
 	int type = static_cast<int>(WholeTileType);

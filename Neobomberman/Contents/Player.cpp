@@ -78,10 +78,6 @@ APlayer::~APlayer()
 void APlayer::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// Set camera
-	//	FVector2D Size = UEngineAPICore::GetCore()->GetMainWindow().GetWindowSize();
-	//	GetWorld()->SetCameraPivot(Size.Half() * -1.0f);
 }
 
 void APlayer::Tick(float _DeltaTime)
@@ -96,36 +92,31 @@ void APlayer::Tick(float _DeltaTime)
 	bool isPressedS = UEngineInput::GetInst().IsPress('S');
 	bool isPressedW = UEngineInput::GetInst().IsPress('W');
 	bool isDownSpace = UEngineInput::GetInst().IsDown(VK_SPACE);
-	FVector2D direction;
-	int tempDir = 0;
+	EDirectionType dirctionType;
 
 	if (isPressedD)
 	{
 		SpriteRendererHead->ChangeAnimation("Run_Right_Head");
 		SpriteRendererBody->ChangeAnimation("Run_Right_Body");
-		direction = FVector2D::RIGHT;
-		tempDir = 1;
+		dirctionType = EDirectionType::RIGHT;
 	}
 	else if (isPressedA)
 	{
 		SpriteRendererHead->ChangeAnimation("Run_Left_Head");
 		SpriteRendererBody->ChangeAnimation("Run_Left_Body");
-		direction = FVector2D::LEFT;
-		tempDir = 2;
+		dirctionType = EDirectionType::LEFT;
 	}
 	else if (isPressedS)
 	{
 		SpriteRendererHead->ChangeAnimation("Run_Down_Head");
 		SpriteRendererBody->ChangeAnimation("Run_Down_Body");
-		direction = FVector2D::DOWN;
-		tempDir = 3;
+		dirctionType = EDirectionType::DOWN;
 	}
 	else if (isPressedW)
 	{
 		SpriteRendererHead->ChangeAnimation("Run_Up_Head");
 		SpriteRendererBody->ChangeAnimation("Run_Up_Body");
-		direction = FVector2D::UP;
-		tempDir = 4;
+		dirctionType = EDirectionType::UP;
 	}
 	else if (!isPressedD && !isPressedA && !isPressedS && !isPressedW)
 	{
@@ -149,22 +140,37 @@ void APlayer::Tick(float _DeltaTime)
 			SpriteRendererHead->ChangeAnimation("Idle_Up_Head");
 			SpriteRendererBody->ChangeAnimation("Idle_Up_Body");
 		}
-		direction = FVector2D::ZERO;
+		
+		dirctionType = EDirectionType::NONE;
 	}
 
 	bool isMove = false;
 
-	// TODO: tempDir
-	FVector2D extPos = direction;
-	switch (tempDir)
+	// temp. TODO. additionalPos with precision
+	FVector2D additionalPos;
+	FVector2D directionPos;
+	switch (dirctionType)
 	{
-		case 1: extPos *= 16.f; break;
-		case 2: extPos *= 16.f; break;
-		case 3: extPos *= 10.f; break;
-		case 4: extPos *= 9.f; break;
-		default: break;
+		case EDirectionType::RIGHT:
+			directionPos = FVector2D::RIGHT;
+			additionalPos = directionPos * 16.f;
+			break;
+		case EDirectionType::LEFT:
+			directionPos = FVector2D::LEFT;
+			additionalPos = directionPos * 16.f;
+			break;
+		case EDirectionType::DOWN:
+			directionPos = FVector2D::DOWN;
+			additionalPos = directionPos * 10.f;
+			break;
+		case EDirectionType::UP:
+			directionPos = FVector2D::UP;
+			additionalPos = directionPos * 9.f;
+			break;
+		default:
+			break;
 	}
-	FVector2D nextPos = GetActorLocation() + extPos + (direction * _DeltaTime * Speed);
+	FVector2D nextPos = GetActorLocation() + (directionPos * _DeltaTime * Speed) + additionalPos;
 
 	// Temp
 	const int POS_X_MIN = 96;	// 48
@@ -179,7 +185,7 @@ void APlayer::Tick(float _DeltaTime)
 
 	//if (CollisionImage != nullptr)
 	//{
-	//	UColor color = CollisionImage->GetColor(nextPos, UColor::BLACK);
+	//	UColor color = CollisionImage->GetColor(additionalPos, UColor::BLACK);
 	//	if (color == UColor::WHITE)
 	//	{
 	//		isMove = true;
@@ -188,8 +194,8 @@ void APlayer::Tick(float _DeltaTime)
 
 	//FVector2D nowPos = GetActorLocation();
 	//std::string nowPosStr = (std::to_string(nowPos.X) + ", " + std::to_string(nowPos.Y));
-	//std::string nextPosStr = (std::to_string(nextPos.X) + ", " + std::to_string(nextPos.Y) + "\n");
-	//OutputDebugString((nowPosStr + " -> " + nextPosStr).c_str());
+	//std::string additionalPosStr = (std::to_string(additionalPos.X) + ", " + std::to_string(additionalPos.Y) + "\n");
+	//OutputDebugString((nowPosStr + " -> " + additionalPosStr).c_str());
 
 	if (CurMap != nullptr)
 	{
@@ -204,12 +210,12 @@ void APlayer::Tick(float _DeltaTime)
 
 	if (isMove)
 	{
-		AddActorLocation(direction * _DeltaTime * Speed);
+		AddActorLocation(directionPos * _DeltaTime * Speed);
 	}
 	
 	if (isDownSpace)
 	{
-		CurMap->GetBombManager()->SetBomb(GetActorLocation(), Ability.BombType, Ability.Power);
+		CurMap->SetBomb(GetActorLocation(), Ability.BombType, Ability.Power);
 	}
 }
 

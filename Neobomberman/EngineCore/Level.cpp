@@ -7,6 +7,7 @@
 #include <EnginePlatform/EngineWinImage.h>
 
 #include "SpriteRenderer.h"
+#include "2DCollision.h"
 
 #include "EngineCoreDebug.h"
 
@@ -48,25 +49,55 @@ ULevel::~ULevel()
 
 void ULevel::LevelChangeStart()
 {
-	std::list<AActor*>::iterator StartIter = AllActors.begin();
-	std::list<AActor*>::iterator EndIter = AllActors.end();
-
-	for (; StartIter != EndIter; ++StartIter)
 	{
-		AActor* CurActor = *StartIter;
-		CurActor->LevelChangeStart();
+		{
+			std::list<AActor*>::iterator StartIter = AllActors.begin();
+			std::list<AActor*>::iterator EndIter = AllActors.end();
+
+			for (; StartIter != EndIter; ++StartIter)
+			{
+				AActor* CurActor = *StartIter;
+				CurActor->LevelChangeStart();
+			}
+		}
+
+		{
+			std::list<AActor*>::iterator StartIter = BeginPlayList.begin();
+			std::list<AActor*>::iterator EndIter = BeginPlayList.end();
+
+			for (; StartIter != EndIter; ++StartIter)
+			{
+				AActor* CurActor = *StartIter;
+				CurActor->LevelChangeStart();
+			}
+		}
 	}
 }
 
 void ULevel::LevelChangeEnd()
 {
-	std::list<AActor*>::iterator StartIter = AllActors.begin();
-	std::list<AActor*>::iterator EndIter = AllActors.end();
-
-	for (; StartIter != EndIter; ++StartIter)
 	{
-		AActor* CurActor = *StartIter;
-		CurActor->LevelChangeEnd();
+		{
+			std::list<AActor*>::iterator StartIter = AllActors.begin();
+			std::list<AActor*>::iterator EndIter = AllActors.end();
+
+			for (; StartIter != EndIter; ++StartIter)
+			{
+				AActor* CurActor = *StartIter;
+				CurActor->LevelChangeEnd();
+			}
+		}
+
+		{
+			std::list<AActor*>::iterator StartIter = BeginPlayList.begin();
+			std::list<AActor*>::iterator EndIter = BeginPlayList.end();
+
+			for (; StartIter != EndIter; ++StartIter)
+			{
+				AActor* CurActor = *StartIter;
+				CurActor->LevelChangeEnd();
+			}
+		}
 	}
 }
 
@@ -136,15 +167,40 @@ void ULevel::Render(float _DeltaTime)
 		}
 	}
 
-	UEngineDebug::PrintEngineDebugText();
+	UEngineDebug::PrintEngineDebugRender();
 
 	DoubleBuffering();
 }
 
 void ULevel::Release(float _DeltaTime)
 {
-	std::map<int, std::list<class USpriteRenderer*>>::iterator StartOrderIter = Renderers.begin();
-	std::map<int, std::list<class USpriteRenderer*>>::iterator EndOrderIter = Renderers.end();
+	{
+		std::map<int, std::list<class U2DCollision*>>::iterator StartOrderIter = Collisions.begin();
+		std::map<int, std::list<class U2DCollision*>>::iterator EndOrderIter = Collisions.end();
+
+		for (; StartOrderIter != EndOrderIter; ++StartOrderIter)
+		{
+			std::list<class U2DCollision*>& CollisionList = StartOrderIter->second;
+
+			std::list<class U2DCollision*>::iterator CollisionStartIter = CollisionList.begin();
+			std::list<class U2DCollision*>::iterator CollisionEndIter = CollisionList.end();
+			
+			for (; CollisionStartIter != CollisionEndIter; )
+			{
+				if (false == (*CollisionStartIter)->IsDestroy())
+				{
+					++CollisionStartIter;
+					continue;
+				}
+
+				CollisionStartIter = CollisionList.erase(CollisionStartIter);
+			}
+		}
+	}
+
+	{
+		std::map<int, std::list<class USpriteRenderer*>>::iterator StartOrderIter = Renderers.begin();
+		std::map<int, std::list<class USpriteRenderer*>>::iterator EndOrderIter = Renderers.end();
 
 	for (; StartOrderIter != EndOrderIter; ++StartOrderIter)
 	{
@@ -161,9 +217,8 @@ void ULevel::Release(float _DeltaTime)
 				continue;
 			}
 
-			// Actor owned Render.
-			// Render will not remove here.
-			RenderStartIter = RendererList.erase(RenderStartIter);
+				RenderStartIter = RendererList.erase(RenderStartIter);
+			}
 		}
 	}
 
@@ -183,7 +238,6 @@ void ULevel::Release(float _DeltaTime)
 				continue;
 			}
 
-			// 레벨은 액터의 삭제권한을 가지고 있으니 액터는 진짜 지워 준다.
 			delete CurActor;
 			StartIter = AllActors.erase(StartIter);
 		}
@@ -224,6 +278,12 @@ void ULevel::PushRenderer(class USpriteRenderer* _Renderer)
 	int Order = _Renderer->GetOrder();
 
 	Renderers[Order].push_back(_Renderer);
+}
+
+void ULevel::PushCollision(U2DCollision* _Collision)
+{
+	int Order = _Collision->GetGroup();
+	Collisions[Order].push_back(_Collision);
 }
 
 void ULevel::ChangeRenderOrder(class USpriteRenderer* _Renderer, int _PrevOrder)

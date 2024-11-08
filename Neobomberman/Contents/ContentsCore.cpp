@@ -6,12 +6,10 @@
 #include <EngineCore/ImageManager.h>
 #include "ContentsCore.h"
 #include "TitleGameMode.h"
+#include "TileMapGameMode.h"
 #include "PlayGameMode.h"
 #include "Player.h"
 #include "GlobalVar.h"
-
-// Temp. TODO: remove
-#include "TileMapGameMode.h"
 
 ContentsCore::ContentsCore()
 {
@@ -30,7 +28,7 @@ void ContentsCore::BeginPlay()
 
 	InitResources();
 
-	/** Temp.For tilemap. **/
+	/** For creating tilemap. **/
 	//pCore->CreateLevel<ATileMapGameMode, AActor>("TileMap");
 	//pCore->OpenLevel("TileMap");
 	//return;
@@ -63,7 +61,7 @@ void ContentsCore::InitResources()
 	LoadResourceFolders(path.GetAppendedRootPath(GlobalPath::OPENING));
 	LoadResourceFolders(path.GetTileStage1Path());
 	LoadResourceFolders(path.GetTileStage1GuidePath());
-	LoadResourceFolders(path.GetAppendedRootPath(GlobalPath::ANIM_CRUMBLING_BOX));		// Temp
+	LoadResourceFolders(path.GetAppendedRootPath(GlobalPath::ANIM_CRUMBLING_BOX));
 
 	/** Cutting **/
 	UImageManager& imgManager = UImageManager::GetInst();

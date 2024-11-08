@@ -91,6 +91,8 @@ public:
 
 	Tile* GetTileRef(FIntPoint _Index);
 	Tile* GetTileRef(FVector2D _Location);
+	bool IsBlocked(const FVector2D& _loc);
+	bool IsBlocked(const FIntPoint& _idx);
 
 	bool IsIndexOver(FIntPoint _Index);
 

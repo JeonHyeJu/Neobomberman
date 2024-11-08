@@ -17,56 +17,103 @@ void ABombManager::Tick(float _deltaTime)
 {
 	Super::Tick(_deltaTime);
 
-	if (BombMatrix.size() == 0) return;
+	CheckExplosion();
+}
 
-	for (int y = 0; y < BombMatrix.size(); ++y)
+//void ABombManager::CheckExplosion()
+//{
+//	if (BombMatrix.size() == 0) return;
+//
+//	// TODO: Optimize
+//	for (int y = 0; y < BombMatrix.size(); ++y)
+//	{
+//		for (int x = 0; x < BombMatrix[y].size(); ++x)
+//		{
+//			if (BombMatrix[y][x] == nullptr) continue;
+//
+//			if (BombMatrix[y][x]->State == BombState::Exploding)
+//			{
+//				BombMatrix[y][x]->SetState(BombState::FinishExploding);
+//				std::vector<FIntPoint> explodeIdxs = GetExplodedIdxs(FIntPoint{ x, y }, BombMatrix[y][x]->Power);
+//				AppendExplodeTiles(explodeIdxs);
+//			}
+//			else if (BombMatrix[y][x]->State == BombState::Over)
+//			{
+//				BombMatrix[y][x]->Destroy();
+//				BombMatrix[y][x] = nullptr;
+//			}
+//		}
+//	}
+//}
+
+//void ABombManager::Init(const FIntPoint& _Count, const FVector2D& _TileSize)
+//{
+//	TileCount = _Count;
+//	TileSize = _TileSize;
+//
+//	BombMatrix.resize(_Count.Y);
+//
+//	for (size_t y = 0; y < BombMatrix.size(); y++)
+//	{
+//		BombMatrix[y].resize(_Count.X);
+//	}
+//}
+
+void ABombManager::CheckExplosion()
+{
+	std::list<ABomb*>::iterator it = BombList.begin();
+	std::list<ABomb*>::iterator itEnd = BombList.end();
+
+	for (; it != itEnd; ++it)
 	{
-		for (int x = 0; x < BombMatrix[y].size(); ++x)
-		{
-			if (BombMatrix[y][x] == nullptr) continue;
+		ABomb* pBomb = *it;
+		if (pBomb == nullptr) continue;
 
-			if (BombMatrix[y][x]->State == BombState::Exploding)
+		if (pBomb->State == BombState::Exploding)
+		{
+			pBomb->SetState(BombState::FinishExploding);
+
+			// Temp.. TODO!!
+			for (size_t i = 0, size = pBomb->ExplodeIdxs.size(); i < size; ++i)
 			{
-				BombMatrix[y][x]->SetState(BombState::FinishExploding);
-				std::vector<FIntPoint> explodeIdxs = GetExplodedIdxs(FIntPoint{x, y}, BombMatrix[y][x]->Power);
-				AppendExplodeTiles(explodeIdxs);
+				if (pBomb->ExplodeIdxs[i] == pBomb->MatrixIdx)
+				{
+					pBomb->ExplodeIntermediatly();
+				}
 			}
-			else if (BombMatrix[y][x]->State == BombState::Over)
-			{
-				BombMatrix[y][x]->Destroy();
-				BombMatrix[y][x] = nullptr;
-			}
+			AppendExplodeTiles(pBomb->ExplodeIdxs);
+		}
+		else if (pBomb->State == BombState::Over)
+		{
+			pBomb->Destroy();
+			BombList.remove(pBomb);
+			pBomb = nullptr;
 		}
 	}
 }
 
-void ABombManager::Init(const FIntPoint& _Count, const FVector2D& _TileSize)
+void ABombManager::SetBomb(const FVector2D& _realLoc, const SBombTails& _tailInfo, EBombType _bombType, int _power)
 {
-	TileCount = _Count;
-	TileSize = _TileSize;
+	FIntPoint idx = LocationToMatrixIdx(_realLoc);
 
-	BombMatrix.resize(_Count.Y);
+	FIntPoint realIdx = LocationToIndex(_realLoc);
+	FVector2D orderedLoc = IndexToLocation(realIdx);
 
-	for (size_t y = 0; y < BombMatrix.size(); y++)
+	std::list<ABomb*>::iterator it = BombList.begin();
+	std::list<ABomb*>::iterator itEnd = BombList.end();
+
+	for (; it != itEnd; ++it)
 	{
-		BombMatrix[y].resize(_Count.X);
-	}
-}
-
-void ABombManager::SetBomb(const FVector2D& _realLoc, EBombType _bombType, int _power)
-{
-	FIntPoint subtractedIdx = LocationToMatrixIdx(_realLoc);
-	if (IsIndexOver(subtractedIdx) == true)
-	{
-		return;
+		if (idx == (*it)->MatrixIdx)
+		{
+			// If a bomb already exists, don't make it.
+			return;
+		}
 	}
 
-	ABomb* pBomb = BombMatrix[subtractedIdx.Y][subtractedIdx.X];
-	if (pBomb) return;
-
-	pBomb = GetWorld()->SpawnActor<ABomb>();
-	pBomb->Create(_realLoc, GlobalVar::BOMB_SIZE, _power, _bombType);
-	BombMatrix[subtractedIdx.Y][subtractedIdx.X] = pBomb;
+	ABomb* pBomb = GetWorld()->SpawnActor<ABomb>();
+	pBomb->Create(orderedLoc, idx, GlobalVar::BOMB_SIZE, _power, _bombType, _tailInfo);
+	BombList.push_back(pBomb);
 }
 
 FIntPoint ABombManager::LocationToMatrixIdx(const FVector2D& _loc)
@@ -79,46 +126,6 @@ FVector2D ABombManager::MatrixIdxToLocation(const FIntPoint& _idx)
 {
 	FVector2D loc = IndexToLocation(_idx) + GetActorLocation();
 	return loc;
-}
-
-ABomb* ABombManager::GetBombRef(const FIntPoint& _idx)
-{
-	if (IsIndexOver(_idx) == true)
-	{
-		return nullptr;
-	}
-	return BombMatrix[_idx.Y][_idx.X];
-}
-
-ABomb* ABombManager::GetBombRef(const FVector2D& _realLoc)
-{
-	FIntPoint subtractedIdx = LocationToMatrixIdx(_realLoc);
-	return GetBombRef(subtractedIdx);
-}
-
-bool ABombManager::IsIndexOver(const FIntPoint& _Index)
-{
-	if (0 > _Index.X)
-	{
-		return true;
-	}
-
-	if (0 > _Index.Y)
-	{
-		return true;
-	}
-
-	if (TileCount.X - 1 < _Index.X)
-	{
-		return true;
-	}
-
-	if (TileCount.Y - 1 < _Index.Y)
-	{
-		return true;
-	}
-
-	return false;
 }
 
 void ABombManager::AppendExplodeTiles(const std::vector<FIntPoint>& _appendIdxs)

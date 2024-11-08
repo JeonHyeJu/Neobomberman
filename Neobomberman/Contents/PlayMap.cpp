@@ -3,6 +3,7 @@
 #include "ContentsEnum.h"
 #include "TileMap.h"
 #include "BombManager.h"
+#include "Bomb.h"
 #include "GlobalVar.h"
 
 #include <EngineBase/EngineDirectory.h>
@@ -10,6 +11,23 @@
 #include <EngineCore/EngineAPICore.h>
 #include <EngineCore/SpriteRenderer.h>
 #include <EngineCore/ImageManager.h>
+
+void _ReorginizeExplosion(std::vector<EBombTailType>& _bombTrails)
+{
+	for (size_t i = 0, size = _bombTrails.size(); i < size - 1; ++i)
+	{
+		if (i + 1 >= size) break;
+
+		if (_bombTrails[i] == EBombTailType::END && _bombTrails[i + 1] == EBombTailType::END)
+		{
+			_bombTrails[i] = EBombTailType::CONNECT;
+		}
+		else if (_bombTrails[i] == EBombTailType::END && _bombTrails[i + 1] == EBombTailType::CONNECT)
+		{
+			_bombTrails[i] = EBombTailType::CONNECT;
+		}
+	}
+}
 
 APlayMap::APlayMap()
 {
@@ -83,8 +101,60 @@ void APlayMap::InitMap(const FIntPoint& _tileIdxs, const FVector2D& _tileSize, c
 void APlayMap::InitBombManager(const FIntPoint& _tileIdxs, const FVector2D& _tileSize, const FIntPoint& _moveLoc)
 {
 	BombManager = GetWorld()->SpawnActor<ABombManager>();
-	BombManager->Init(_tileIdxs, _tileSize);
+	//BombManager->Init(_tileIdxs, _tileSize);
 	BombManager->SetActorLocation(_moveLoc);
+}
+
+void APlayMap::_AddExplosion(const FIntPoint& _orgIdx, const FIntPoint& direc, int _idx, std::vector<EBombTailType>& _vec, bool* isEnd)
+{
+	FIntPoint nextIdx = _orgIdx + direc * _idx;
+
+	bool hasWall = MapWall->IsBlocked(nextIdx);
+	bool hasBox = MapBox->IsBlocked(nextIdx);
+
+	if (hasWall == false && *isEnd == false)
+	{
+		if (hasBox == true)
+		{
+			*isEnd = true;
+			_vec.push_back(EBombTailType::CONNECT);
+		}
+		else
+		{
+			_vec.push_back(EBombTailType::END);
+		}
+	}
+	else
+	{
+		*isEnd = true;
+	}
+}
+
+void APlayMap::SetBomb(const FVector2D& _loc, EBombType _bombType, int _power)
+{
+	FVector2D size = GlobalVar::BOMB_SIZE;		// temp
+	FIntPoint orgIdx = BombManager->LocationToMatrixIdx(_loc);
+
+	bool isUpEnd = false;
+	bool isDownEnd = false;
+	bool isLeftEnd = false;
+	bool isRightEnd = false;
+
+	SBombTails bombExplosion;
+	for (int i = 1; i <= _power; i++)
+	{
+		_AddExplosion(orgIdx, FIntPoint::UP, i, bombExplosion.Up, &isUpEnd);
+		_AddExplosion(orgIdx, FIntPoint::DOWN, i, bombExplosion.Down, &isDownEnd);
+		_AddExplosion(orgIdx, FIntPoint::LEFT, i, bombExplosion.Left, &isLeftEnd);
+		_AddExplosion(orgIdx, FIntPoint::RIGHT, i, bombExplosion.Right, &isRightEnd);
+	}
+
+	_ReorginizeExplosion(bombExplosion.Up);
+	_ReorginizeExplosion(bombExplosion.Down);
+	_ReorginizeExplosion(bombExplosion.Left);
+	_ReorginizeExplosion(bombExplosion.Right);
+
+	BombManager->SetBomb(_loc, bombExplosion, _bombType, _power);
 }
 
 void APlayMap::checkExplodedBombs()
@@ -96,7 +166,7 @@ void APlayMap::checkExplodedBombs()
 		for (size_t i = 0; i < vec.size(); ++i)
 		{
 			FIntPoint boxIdx = vec[i];
-			MapBox->LaunchTileAnimAfterLoad(boxIdx, GlobalPath::ANIM_CRUMBLING_BOX);	// temp
+			MapBox->LaunchTileAnimAfterLoad(boxIdx, GlobalPath::ANIM_CRUMBLING_BOX);
 		}
 		BombManager->ClearExplodeTileIdxs();
 	}
