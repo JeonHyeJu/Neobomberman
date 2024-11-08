@@ -2,7 +2,6 @@
 #include "ContentsEnum.h"
 #include "TileMap.h"
 #include "PlayMap.h"
-#include "BombManager.h"
 #include "Player.h"
 
 #include <EngineCore/EngineAPICore.h>

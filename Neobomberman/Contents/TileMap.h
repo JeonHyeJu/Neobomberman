@@ -68,8 +68,10 @@ public:
 	void SetTile(const FIntPoint& _Index, int _SpriteIndex, bool _isMove);
 	void SetTile(const FIntPoint& _Index, const FVector2D& _Pivot, const FVector2D& _SpriteScale, int _SpriteIndex, bool _isMove);
 
-	FVector2D IndexToLocation(const FIntPoint& _Index);
-	FIntPoint LocationToIndex(const FVector2D& _Location);
+	FIntPoint LocationToMatrixIdx(const FVector2D& _loc);
+	FVector2D MatrixIdxToLocation(const FIntPoint& _idx);
+	FIntPoint LocationToIndex(const FVector2D& _loc);
+	FVector2D IndexToLocation(const FIntPoint& _idx);
 
 	inline FIntPoint GetTileIndex() const
 	{
@@ -89,8 +91,8 @@ public:
 	}
 	bool GetIsMovable(const FVector2D& _loc);
 
-	Tile* GetTileRef(FIntPoint _Index);
-	Tile* GetTileRef(FVector2D _Location);
+	Tile* GetTileRef(FIntPoint _idx);
+	Tile* GetTileRef(FVector2D _loc);
 	bool IsBlocked(const FVector2D& _loc);
 	bool IsBlocked(const FIntPoint& _idx);
 

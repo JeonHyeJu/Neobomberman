@@ -1,24 +1,6 @@
 #pragma once
 #include <EngineCore/Actor.h>
-#include "ContentsEnum.h"
-#include "GlobalVar.h"
-
-// TODO: move
-struct SBombTails
-{
-	std::vector<EBombTailType> Up;
-	std::vector<EBombTailType> Down;
-	std::vector<EBombTailType> Left;
-	std::vector<EBombTailType> Right;
-
-	SBombTails()
-	{
-		Up.reserve(GlobalVar::MAX_BOMB_POWER);
-		Down.reserve(GlobalVar::MAX_BOMB_POWER);
-		Left.reserve(GlobalVar::MAX_BOMB_POWER);
-		Right.reserve(GlobalVar::MAX_BOMB_POWER);
-	}
-};
+#include "ContentsStruct.h"
 
 enum class BombState
 {
@@ -33,7 +15,7 @@ enum class BombState
 class USpriteRenderer;
 class ABomb : public AActor
 {
-	friend class ABombManager;
+	friend class APlayMap;
 
 public:
 	ABomb();
@@ -47,8 +29,7 @@ public:
 	void BeginPlay() override;
 	void Tick(float _DeltaTime) override;
 
-	// Temp
-	void Create(const FVector2D& _loc, const FIntPoint& _matrixIdx, const FVector2D& _size, int _power, EBombType _type, const SBombTails& _tailInfo);
+	void InitSpriteAndAnim(const SBombTailTypes& _tailInfo);
 	void CreateTail(const char* _img, const char* _imgMid, const char* _animName, const FVector2D& loc, const std::vector<EBombTailType>& _tails, std::vector<USpriteRenderer*>* _pAnimVec);
 
 	inline EBombType GetBombType() const
@@ -86,7 +67,7 @@ private:
 	int Power = 0;
 	FVector2D Size;
 	FIntPoint MatrixIdx;
-	SBombTails BombTails;
+	SBombTailTypes BombTails;
 	std::vector<FIntPoint> ExplodeIdxs;
 
 	USpriteRenderer* ExplodeSprite_Center = nullptr;

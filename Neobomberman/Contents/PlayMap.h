@@ -1,9 +1,8 @@
 #pragma once
 #include <EngineCore/Actor.h>
-#include "ContentsEnum.h"
+#include "ContentsStruct.h"
 
 class ATileMap;
-class ABombManager;
 class APlayMap : public AActor
 {
 public:
@@ -25,10 +24,6 @@ public:
 		return MapBox;
 	}
 	
-	inline ABombManager* GetBombManager() const
-	{
-		return BombManager;
-	}
 	void SetBomb(const FVector2D& _loc, EBombType _bombType, int _power);
 
 protected:
@@ -36,14 +31,19 @@ protected:
 	 void Tick(float _deltaTime) override;
 
 private:
-	void InitMap(const FIntPoint& _tileIdxs, const FVector2D& _tileSize, const FIntPoint& _moveLoc);
-	void InitBombManager(const FIntPoint& _tileIdxs, const FVector2D& _tileSize, const FIntPoint& _moveLoc);
-	void checkExplodedBombs();
+	void InitMap();
 	bool Deserialize(ATileMap* _tileMap, std::string_view _savePath, std::string_view _saveName);
-	void _AddExplosion(const FIntPoint& _orgIdx, const FIntPoint& direc, int _idx, std::vector<EBombTailType>& _vec, bool* isUpEnd);
+	void CheckExplodedBomb();
+	void CheckExplodedBox();
+	SBombTailTypes GetBombTailTypes(const FIntPoint& _matIdx, EBombType _bombType, int _power);
+	EBombTailType GetBombTailType(const FIntPoint& _nextIdx, bool* isEnd);
+	std::vector<FIntPoint> GetBombRange(const FIntPoint& _matIdx, const SBombTailTypes& _tailInfo);
+	void AppendExplodeTiles(const std::vector<FIntPoint>& _appendIdxs);
 
 	ATileMap* MapGround = nullptr;
 	ATileMap* MapWall = nullptr;
 	ATileMap* MapBox = nullptr;
-	ABombManager* BombManager = nullptr;
+
+	std::list<class ABomb*> BombList;
+	std::vector<FIntPoint> ExplodeTileIdxs;
 };

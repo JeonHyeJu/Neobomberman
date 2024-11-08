@@ -41,17 +41,10 @@ void ABomb::Tick(float _DeltaTime)
 	}
 }
 
-void ABomb::Create(const FVector2D& _loc, const FIntPoint& _matrixIdx, const FVector2D& _Size, int _power, EBombType _type, const SBombTails& _tailInfo)
+void ABomb::InitSpriteAndAnim(const SBombTailTypes& _tailInfo)
 {
-	Size = _Size;
-	Power = _power;
-	BombType = _type;
-	MatrixIdx = _matrixIdx;
-
-	SetActorLocation(_loc);
-
 	/* Initialize */
-	if (_type == EBombType::PLAIN)
+	if (BombType == EBombType::PLAIN)
 	{
 		InitSpriteCenter(GlobalPath::BOMB_ORG, ANIM_RUNNING, IMG_EXPLOSION_CENTER);
 	}
@@ -62,28 +55,9 @@ void ABomb::Create(const FVector2D& _loc, const FIntPoint& _matrixIdx, const FVe
 
 	/* Create explosion animations */
 	CreateTail(IMG_EXPLOSION_UP, IMG_EXPLOSION_UPMID, ANIM_EXPLODE_UP, { 0, -static_cast<int>(Size.Y) }, _tailInfo.Up, &ExplodeSprites_Up);
-	CreateTail(IMG_EXPLOSION_DOWN, IMG_EXPLOSION_DOWNMID, ANIM_EXPLODE_DOWN, { 0, static_cast<int>(Size.Y) }, _tailInfo.Up, &ExplodeSprites_Down);
-	CreateTail(IMG_EXPLOSION_LEFT, IMG_EXPLOSION_LEFTMID, ANIM_EXPLODE_LEFT, { -static_cast<int>(Size.X), 0 }, _tailInfo.Up, &ExplodeSprites_Left);
-	CreateTail(IMG_EXPLOSION_RIGHT, IMG_EXPLOSION_RIGHTMID, ANIM_EXPLODE_RIGHT, { static_cast<int>(Size.X), 0 }, _tailInfo.Up, &ExplodeSprites_Right);
-
-	// Temp
-	ExplodeIdxs.push_back(_matrixIdx);
-	for (size_t i = 0, size = _tailInfo.Up.size(); i < size; ++i)
-	{
-		ExplodeIdxs.push_back(_matrixIdx + FIntPoint::UP * (static_cast<int>(i) + 1));
-	}
-	for (size_t i = 0, size = _tailInfo.Down.size(); i < size; ++i)
-	{
-		ExplodeIdxs.push_back(_matrixIdx + FIntPoint::DOWN * (static_cast<int>(i) + 1));
-	}
-	for (size_t i = 0, size = _tailInfo.Left.size(); i < size; ++i)
-	{
-		ExplodeIdxs.push_back(_matrixIdx + FIntPoint::LEFT * (static_cast<int>(i) + 1));
-	}
-	for (size_t i = 0, size = _tailInfo.Right.size(); i < size; ++i)
-	{
-		ExplodeIdxs.push_back(_matrixIdx + FIntPoint::RIGHT * (static_cast<int>(i) + 1));
-	}
+	CreateTail(IMG_EXPLOSION_DOWN, IMG_EXPLOSION_DOWNMID, ANIM_EXPLODE_DOWN, { 0, static_cast<int>(Size.Y) }, _tailInfo.Down, &ExplodeSprites_Down);
+	CreateTail(IMG_EXPLOSION_LEFT, IMG_EXPLOSION_LEFTMID, ANIM_EXPLODE_LEFT, { -static_cast<int>(Size.X), 0 }, _tailInfo.Left, &ExplodeSprites_Left);
+	CreateTail(IMG_EXPLOSION_RIGHT, IMG_EXPLOSION_RIGHTMID, ANIM_EXPLODE_RIGHT, { static_cast<int>(Size.X), 0 }, _tailInfo.Right, &ExplodeSprites_Right);
 
 	SetState(BombState::Running);
 }

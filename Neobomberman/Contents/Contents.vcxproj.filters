@@ -63,8 +63,8 @@
     <ClInclude Include="TileMapGameMode.h">
       <Filter>GameMode</Filter>
     </ClInclude>
-    <ClInclude Include="BombManager.h">
-      <Filter>Actor</Filter>
+    <ClInclude Include="ContentsStruct.h">
+      <Filter>Util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -103,9 +103,6 @@
     </ClCompile>
     <ClCompile Include="TileMapGameMode.cpp">
       <Filter>GameMode</Filter>
-    </ClCompile>
-    <ClCompile Include="BombManager.cpp">
-      <Filter>Actor</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

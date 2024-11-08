@@ -68,18 +68,6 @@ void ATileMap::SetTile(const FIntPoint& _Index, const FVector2D& _Pivot, const F
 	AllTiles[_Index.Y][_Index.X].IsMove = _isMove;
 }
 
-FVector2D ATileMap::IndexToLocation(const FIntPoint& _Index)
-{
-	return FVector2D(_Index.X * TileSize.X, _Index.Y * TileSize.Y);
-}
-
-FIntPoint ATileMap::LocationToIndex(const FVector2D& _Location)
-{
-	FVector2D Location = _Location / TileSize;
-
-	return FIntPoint(Location.iX(), Location.iY());
-}
-
 bool ATileMap::IsIndexOver(FIntPoint _Index)
 {
 	if (0 > _Index.X)
@@ -105,22 +93,21 @@ bool ATileMap::IsIndexOver(FIntPoint _Index)
 	return false;
 }
 
-Tile* ATileMap::GetTileRef(FVector2D _Location)
+Tile* ATileMap::GetTileRef(FVector2D _loc)
 {
-	FVector2D loc = GetActorLocation();
-	FIntPoint Point = LocationToIndex(_Location - loc);
+	FIntPoint idx = LocationToMatrixIdx(_loc);
 
-	return GetTileRef(Point);
+	return GetTileRef(idx);
 }
 
-Tile* ATileMap::GetTileRef(FIntPoint _Index)
+Tile* ATileMap::GetTileRef(FIntPoint _idx)
 {
-	if (true == IsIndexOver(_Index))
+	if (true == IsIndexOver(_idx))
 	{
 		return nullptr;
 	}
 
-	return &AllTiles[_Index.Y][_Index.X];
+	return &AllTiles[_idx.Y][_idx.X];
 }
 
 bool ATileMap::IsBlocked(const FVector2D& _loc)
@@ -188,6 +175,30 @@ bool ATileMap::GetIsMovable(const FVector2D& _loc)
 	}
 
 	return false;
+}
+
+FIntPoint ATileMap::LocationToMatrixIdx(const FVector2D& _loc)
+{
+	FIntPoint idx = LocationToIndex(_loc - GetActorLocation());
+	return idx;
+}
+
+FVector2D ATileMap::MatrixIdxToLocation(const FIntPoint& _idx)
+{
+	FVector2D loc = IndexToLocation(_idx) + GetActorLocation();
+	return loc;
+}
+
+FVector2D ATileMap::IndexToLocation(const FIntPoint& _idx)
+{
+	return FVector2D(_idx.X * TileSize.X, _idx.Y * TileSize.Y);
+}
+
+FIntPoint ATileMap::LocationToIndex(const FVector2D& _loc)
+{
+	FVector2D Location = _loc / TileSize;
+
+	return FIntPoint(Location.iX(), Location.iY());
 }
 
 /* after loading */
