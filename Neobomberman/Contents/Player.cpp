@@ -50,17 +50,17 @@ APlayer::APlayer()
 		SpriteRendererBody->SetComponentScale(playerSize);
 		SpriteRendererBody->SetPivotType(PivotType::Bot);
 
-		SpriteRendererBody->CreateAnimation("Idle_Up_Body", PLAYER_SPRITE_PATH, 49, 49, 0.1f);
-		SpriteRendererBody->CreateAnimation("Run_Up_Body", PLAYER_SPRITE_PATH, 50, 54, 0.1f);
+		SpriteRendererBody->CreateAnimation("Idle_Up_Body", PLAYER_SPRITE_PATH, 48, 48, 0.1f);
+		SpriteRendererBody->CreateAnimation("Run_Up_Body", PLAYER_SPRITE_PATH, 49, 54, 0.1f);
 
-		SpriteRendererBody->CreateAnimation("Idle_Down_Body", PLAYER_SPRITE_PATH, 33, 33, 0.1f);
-		SpriteRendererBody->CreateAnimation("Run_Down_Body", PLAYER_SPRITE_PATH, 34, 38, 0.1f);
+		SpriteRendererBody->CreateAnimation("Idle_Down_Body", PLAYER_SPRITE_PATH, 32, 32, 0.1f);
+		SpriteRendererBody->CreateAnimation("Run_Down_Body", PLAYER_SPRITE_PATH, 33, 38, 0.1f);
 
-		SpriteRendererBody->CreateAnimation("Idle_Left_Body", PLAYER_SPRITE_PATH, 41, 41, 0.1f);
-		SpriteRendererBody->CreateAnimation("Run_Left_Body", PLAYER_SPRITE_PATH, 42, 46, 0.1f);
+		SpriteRendererBody->CreateAnimation("Idle_Left_Body", PLAYER_SPRITE_PATH, 40, 40, 0.1f);
+		SpriteRendererBody->CreateAnimation("Run_Left_Body", PLAYER_SPRITE_PATH, 41, 46, 0.1f);
 
-		SpriteRendererBody->CreateAnimation("Idle_Right_Body", PLAYER_SPRITE_PATH, 57, 57, 0.1f);
-		SpriteRendererBody->CreateAnimation("Run_Right_Body", PLAYER_SPRITE_PATH, 58, 62, 0.1f);
+		SpriteRendererBody->CreateAnimation("Idle_Right_Body", PLAYER_SPRITE_PATH, 56, 56, 0.1f);
+		SpriteRendererBody->CreateAnimation("Run_Right_Body", PLAYER_SPRITE_PATH, 57, 62, 0.1f);
 	}
 
 	SpriteRendererHead->ChangeAnimation("Idle_Down_Head");
