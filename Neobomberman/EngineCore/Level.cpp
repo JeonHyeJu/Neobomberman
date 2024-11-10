@@ -250,13 +250,7 @@ void ULevel::ScreenClear()
 	UEngineWinImage* BackBufferImage = MainWindow.GetBackBuffer();
 	FVector2D Size = MainWindow.GetWindowSize();
 
-	HBRUSH hbrush = CreateSolidBrush(RGB(0, 0, 0));		// Set black color
-	RECT rect(-1, -1, Size.iX() + 1, Size.iY() + 1);
-
-	FillRect(BackBufferImage->GetDC(), &rect, hbrush);
-	DeleteObject(hbrush);
-
-	//Rectangle(BackBufferImage->GetDC(), -1, -1, Size.iX() + 2, Size.iY() + 2);
+	Rectangle(BackBufferImage->GetDC(), -1, -1, Size.iX() + 2, Size.iY() + 2);
 }
 
 void ULevel::DoubleBuffering()

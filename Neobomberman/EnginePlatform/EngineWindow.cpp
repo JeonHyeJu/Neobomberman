@@ -159,6 +159,16 @@ void UEngineWindow::Open(std::string_view _TitleName /*= "Window"*/)
 	// ShowWindow(WindowHandle, SW_HIDE);
 }
 
+void UEngineWindow::SetBackgroundColor(const COLORREF& _color)
+{
+    if (BackBufferImage != nullptr && BackBufferImage->GetDC() != nullptr)
+    {
+        HBRUSH newBrush = (HBRUSH)CreateSolidBrush(RGB(0, 0, 0));
+        HBRUSH oldBrush = (HBRUSH)SelectObject(BackBufferImage->GetDC(), newBrush);
+        DeleteObject(oldBrush);
+    }
+}
+
 void UEngineWindow::SetWindowPosAndScale(FVector2D _Pos, FVector2D _Scale)
 {
     if (false == WindowSize.EqualToInt(_Scale))
@@ -171,6 +181,7 @@ void UEngineWindow::SetWindowPosAndScale(FVector2D _Pos, FVector2D _Scale)
 
         BackBufferImage = new UEngineWinImage();
         BackBufferImage->Create(WindowImage, _Scale);
+        SetBackgroundColor(RGB(0, 0, 0));
     }
 
     WindowSize = _Scale;
