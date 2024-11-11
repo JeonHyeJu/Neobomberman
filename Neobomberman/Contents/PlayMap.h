@@ -25,6 +25,10 @@ public:
 	}
 	
 	void SetBomb(const FVector2D& _loc, EBombType _bombType, int _power);
+	void SetPortalLoc(const FIntPoint& _idx)
+	{
+		PortalIdx = _idx;
+	}
 
 protected:
 	 void BeginPlay() override;
@@ -32,9 +36,10 @@ protected:
 
 private:
 	void InitMap();
+
 	bool Deserialize(ATileMap* _tileMap, std::string_view _savePath, std::string_view _saveName);
 	SBombTailTypes GetBombTailTypes(const FIntPoint& _matIdx, EBombType _bombType, int _power);
-	EBombTailType GetBombTailType(const FIntPoint& _nextIdx, bool* isEnd);
+	EBombTailType GetBombTailType(const FIntPoint& _nextIdx, bool* _isEnd, bool _isLast);
 	std::vector<FIntPoint> GetBombRange(const FIntPoint& _matIdx, const SBombTailTypes& _tailInfo);
 	void AppendExplodeTiles(const std::vector<FIntPoint>& _appendIdxs);
 
@@ -43,10 +48,14 @@ private:
 	void HandleExplodedBox();
 	void ClearExplosionInfo();
 
+	const int ENEMY_CNT_STAGE_1 = 4;
+
 	ATileMap* MapGround = nullptr;
 	ATileMap* MapWall = nullptr;
 	ATileMap* MapBox = nullptr;
 
 	std::list<class ABomb*> BombList;
 	std::vector<FIntPoint> ExplodeTileIdxs;
+
+	FIntPoint PortalIdx = { 6, 10 };	// Init with first stage loc.
 };

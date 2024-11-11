@@ -36,7 +36,7 @@
     <ClInclude Include="PlayGameMode.h">
       <Filter>GameMode</Filter>
     </ClInclude>
-    <ClInclude Include="Enemy.h">
+    <ClInclude Include="Monster.h">
       <Filter>Actor</Filter>
     </ClInclude>
     <ClInclude Include="PlayMap.h">
@@ -66,6 +66,12 @@
     <ClInclude Include="ContentsStruct.h">
       <Filter>Util</Filter>
     </ClInclude>
+    <ClInclude Include="Mushroom.h">
+      <Filter>Actor</Filter>
+    </ClInclude>
+    <ClInclude Include="Balloon.h">
+      <Filter>Actor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Player.cpp">
@@ -80,7 +86,7 @@
     <ClCompile Include="PlayGameMode.cpp">
       <Filter>GameMode</Filter>
     </ClCompile>
-    <ClCompile Include="Enemy.cpp">
+    <ClCompile Include="Monster.cpp">
       <Filter>Actor</Filter>
     </ClCompile>
     <ClCompile Include="PlayMap.cpp">
@@ -103,6 +109,12 @@
     </ClCompile>
     <ClCompile Include="TileMapGameMode.cpp">
       <Filter>GameMode</Filter>
+    </ClCompile>
+    <ClCompile Include="Mushroom.cpp">
+      <Filter>Actor</Filter>
+    </ClCompile>
+    <ClCompile Include="Balloon.cpp">
+      <Filter>Actor</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

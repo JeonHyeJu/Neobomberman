@@ -68,6 +68,30 @@ void ATileMap::SetTile(const FIntPoint& _Index, const FVector2D& _Pivot, const F
 	AllTiles[_Index.Y][_Index.X].IsMove = _isMove;
 }
 
+void ATileMap::SetPortal(const FIntPoint& _Index, const FVector2D& _Pivot, const FVector2D& _SpriteScale, std::string_view _spriteName)
+{
+	if (IsIndexOver(_Index) == true)
+	{
+		return;
+	}
+
+	if (AllTiles[_Index.Y][_Index.X].SpriteRenderer == nullptr)
+	{
+		AllTiles[_Index.Y][_Index.X].SpriteRenderer = CreateDefaultSubObject<USpriteRenderer>();
+	}
+
+	AllTiles[_Index.Y][_Index.X].SpriteRenderer->SetSprite(_spriteName);
+	AllTiles[_Index.Y][_Index.X].SpriteRenderer->SetComponentScale(_SpriteScale);
+	AllTiles[_Index.Y][_Index.X].SpriteRenderer->SetOrder(_Index.Y);
+
+	FVector2D loc = IndexToLocation(_Index);
+	AllTiles[_Index.Y][_Index.X].SpriteRenderer->SetComponentLocation(loc + TileSize.Half() + _Pivot);
+	AllTiles[_Index.Y][_Index.X].Pivot = _Pivot;
+	AllTiles[_Index.Y][_Index.X].Scale = _SpriteScale;
+	AllTiles[_Index.Y][_Index.X].SpriteIndex = 0;
+	AllTiles[_Index.Y][_Index.X].IsMove = true;
+}
+
 bool ATileMap::IsIndexOver(FIntPoint _Index)
 {
 	if (0 > _Index.X)
@@ -93,29 +117,14 @@ bool ATileMap::IsIndexOver(FIntPoint _Index)
 	return false;
 }
 
-bool ATileMap::IsIndexOver(FIntPoint _Index, int* _refSub)
+bool ATileMap::IsEdge(FIntPoint _Index)
 {
-	if (0 > _Index.X)
+	if (_Index.X == 0 || _Index.Y == 0)
 	{
-		*_refSub = std::abs(_Index.X);
 		return true;
 	}
-
-	if (0 > _Index.Y)
+	if (_Index.X == (TileCount.X - 1) || _Index.Y == (TileCount.Y - 1))
 	{
-		*_refSub = std::abs(_Index.Y);
-		return true;
-	}
-
-	if (TileCount.X - 1 < _Index.X)
-	{
-		*_refSub = _Index.X - (TileCount.X - 1);
-		return true;
-	}
-
-	if (TileCount.Y - 1 < _Index.Y)
-	{
-		*_refSub = _Index.Y - (TileCount.Y - 1);
 		return true;
 	}
 

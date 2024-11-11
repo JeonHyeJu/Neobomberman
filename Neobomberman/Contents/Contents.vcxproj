@@ -145,7 +145,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Balloon.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="ContentsStruct.h" />
+    <ClInclude Include="Mushroom.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="TileMap.h" />
     <ClInclude Include="Bomb.h" />
     <ClInclude Include="ContentsCore.h">
@@ -153,7 +161,7 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="ContentsEnum.h" />
-    <ClInclude Include="Enemy.h" />
+    <ClInclude Include="Monster.h" />
     <ClInclude Include="GlobalVar.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="PlayGameMode.h" />
@@ -165,13 +173,21 @@
     <ClInclude Include="Title.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Balloon.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="Mushroom.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="TileMap.cpp" />
     <ClCompile Include="Bomb.cpp" />
     <ClCompile Include="ContentsCore.cpp">
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="Enemy.cpp" />
+    <ClCompile Include="Monster.cpp" />
     <ClCompile Include="GlobalVar.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="PlayGameMode.cpp" />

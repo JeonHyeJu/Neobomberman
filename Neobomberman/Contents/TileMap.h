@@ -68,6 +68,7 @@ public:
 	void SetTileWithLoc(FVector2D _Location, int _SpriteIndex, bool _isMove);
 	void SetTile(const FIntPoint& _Index, int _SpriteIndex, bool _isMove);
 	void SetTile(const FIntPoint& _Index, const FVector2D& _Pivot, const FVector2D& _SpriteScale, int _SpriteIndex, bool _isMove);
+	void SetPortal(const FIntPoint& _Index, const FVector2D& _Pivot, const FVector2D& _SpriteScale, std::string_view _spriteName);
 
 	FIntPoint LocationToMatrixIdx(const FVector2D& _loc);
 	FVector2D MatrixIdxToLocation(const FIntPoint& _idx);
@@ -98,7 +99,7 @@ public:
 	bool IsBlocked(const FIntPoint& _idx);
 
 	bool IsIndexOver(FIntPoint _Index);
-	bool IsIndexOver(FIntPoint _Index, int* _refSub);
+	bool IsEdge(FIntPoint _Index);
 
 	void SetTilesAnimAfterLoad(std::string_view _animName, std::string_view _spriteName);
 	void LaunchTileAnimAfterLoad(const FIntPoint& _pt, std::string_view _animName);

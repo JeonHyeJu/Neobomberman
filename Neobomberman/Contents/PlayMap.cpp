@@ -28,7 +28,6 @@ void _ReorginizeExplosion(std::vector<EBombTailType>& _bombTrails)
 
 APlayMap::APlayMap()
 {
-	
 }
 
 APlayMap::~APlayMap()
@@ -39,8 +38,10 @@ void APlayMap::BeginPlay()
 {
 	Super::BeginPlay();
 
-	InitMap();
 	BombList.clear();
+	ExplodeTileIdxs.clear();
+
+	InitMap();
 }
 
 void APlayMap::Tick(float _deltaTime)
@@ -89,6 +90,8 @@ void APlayMap::InitMap()
 	Deserialize(MapBox, tileDatPath, GlobalPath::MAP_BOX_DAT);
 
 	MapBox->SetTilesAnimAfterLoad(GlobalPath::ANIM_CRUMBLING_BOX, GlobalPath::ANIM_CRUMBLING_BOX);
+
+	MapGround->SetPortal(PortalIdx, { 0, 0 }, GlobalVar::BOMB_SIZE, "ClosedPortal.png");	// Temp
 }
 
 void APlayMap::SetBomb(const FVector2D& _loc, EBombType _bombType, int _power)
@@ -137,10 +140,11 @@ SBombTailTypes APlayMap::GetBombTailTypes(const FIntPoint& _matIdx, EBombType _b
 
 	for (int i = 1; i <= _power; i++)
 	{
-		EBombTailType upType = GetBombTailType(_matIdx + FIntPoint::UP * i, &isUpEnd);
-		EBombTailType downType = GetBombTailType(_matIdx + FIntPoint::DOWN * i, &isDownEnd);
-		EBombTailType leftType = GetBombTailType(_matIdx + FIntPoint::LEFT * i, &isLeftEnd);
-		EBombTailType rightType = GetBombTailType(_matIdx + FIntPoint::RIGHT * i, &isRightEnd);
+		bool isLast = (i == _power);
+		EBombTailType upType = GetBombTailType(_matIdx + FIntPoint::UP * i, &isUpEnd, isLast);
+		EBombTailType downType = GetBombTailType(_matIdx + FIntPoint::DOWN * i, &isDownEnd, isLast);
+		EBombTailType leftType = GetBombTailType(_matIdx + FIntPoint::LEFT * i, &isLeftEnd, isLast);
+		EBombTailType rightType = GetBombTailType(_matIdx + FIntPoint::RIGHT * i, &isRightEnd, isLast);
 
 		if (upType != EBombTailType::NONE) bombTailTypes.Up.push_back(upType);
 		if (downType != EBombTailType::NONE) bombTailTypes.Down.push_back(downType);
@@ -156,37 +160,35 @@ SBombTailTypes APlayMap::GetBombTailTypes(const FIntPoint& _matIdx, EBombType _b
 	return bombTailTypes;
 }
 
-EBombTailType APlayMap::GetBombTailType(const FIntPoint& _nextIdx, bool* isEnd)
+EBombTailType APlayMap::GetBombTailType(const FIntPoint& _nextIdx, bool* _isEnd, bool _isLast)
 {
 	bool hasWall = MapWall->IsBlocked(_nextIdx);
 	bool hasBox = MapBox->IsBlocked(_nextIdx);
 
 	OutputDebugString((std::to_string(_nextIdx.X) + ", " + std::to_string(_nextIdx.Y) + " .. " + (hasWall ? "Wall: O " : "Wall: X ") + "\n").c_str());
 
-	if (hasWall == false && *isEnd == false)
+	if (hasWall == false && *_isEnd == false)
 	{
 		if (hasBox == true)
 		{
-			*isEnd = true;
+			*_isEnd = true;
 			return EBombTailType::CONNECT;
 		}
 		else
 		{
-			return EBombTailType::END;
-		}
-	}
-	else
-	{
-		*isEnd = true;
-
-		int sub = -1;
-		if (MapWall->IsIndexOver(_nextIdx, &sub))
-		{
-			if (sub == 0)
+			if (_isLast)
+			{
+				return EBombTailType::END;
+			}
+			else if (MapWall->IsEdge(_nextIdx))
 			{
 				return EBombTailType::CONNECT;
 			}
 		}
+	}
+	else
+	{
+		*_isEnd = true;
 	}
 
 	return EBombTailType::NONE;

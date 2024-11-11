@@ -67,6 +67,10 @@ void ContentsCore::InitResources()
 	UImageManager& imgManager = UImageManager::GetInst();
 	imgManager.CuttingSprite("MainCharater_White.png", GlobalVar::BOMBERMAN_SIZE);
 
+	imgManager.CuttingSprite("Mushroom.png", GlobalVar::BOMBERMAN_SIZE);
+	imgManager.CuttingSprite("Balloon_long.png", GlobalVar::BOMBERMAN_SIZE);
+	imgManager.CuttingSprite("Cookie.png", GlobalVar::BOMBERMAN_SIZE);
+
 	imgManager.CuttingSprite("ExplodeCenter.png", GlobalVar::BOMB_SIZE);
 
 	imgManager.CuttingSprite("ExplodeUp.png", GlobalVar::BOMB_SIZE);
