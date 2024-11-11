@@ -146,7 +146,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ContentsStruct.h" />
-    <ClInclude Include="Matrix.h" />
     <ClInclude Include="TileMap.h" />
     <ClInclude Include="Bomb.h" />
     <ClInclude Include="ContentsCore.h">

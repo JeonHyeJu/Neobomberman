@@ -26,24 +26,16 @@ void ABomb::BeginPlay()
 	Super::BeginPlay();
 }
 
-void ABomb::Tick(float _DeltaTime)
+void ABomb::Tick(float _deltaTime)
 {
-	Super::Tick(_DeltaTime);
+	Super::Tick(_deltaTime);
 
-	if (State == BombState::Running)
-	{
-		AccumulatedSeconds += _DeltaTime;
-		if (AccumulatedSeconds >= EXPLODE_SECONDS)
-		{
-			AccumulatedSeconds = 0;
-			Explode();
-		}
-	}
+	Running(_deltaTime);
 }
 
+/* Initialize */
 void ABomb::InitSpriteAndAnim(const SBombTailTypes& _tailInfo)
 {
-	/* Initialize */
 	if (BombType == EBombType::PLAIN)
 	{
 		InitSpriteCenter(GlobalPath::BOMB_ORG, ANIM_RUNNING, IMG_EXPLOSION_CENTER);
@@ -90,6 +82,7 @@ void ABomb::InitSpriteCenter(std::string_view _spriteName, std::string_view _run
 	ExplodeSprite_Center->ChangeAnimation(_runnigAnimName);
 }
 
+// 4 directions
 void ABomb::_InitDefaultSprite4D(std::string_view _spriteName, std::string_view _animName, std::vector<USpriteRenderer*>& _vector, const FVector2D& _loc)
 {
 	USpriteRenderer* spriteRenderer = nullptr;
@@ -102,7 +95,10 @@ void ABomb::_InitDefaultSprite4D(std::string_view _spriteName, std::string_view 
 
 void ABomb::_InitDefaultSprite(USpriteRenderer** _spriteRenderer, std::string_view _spriteName, std::string_view _animName, const FVector2D& _animLoc)
 {
-	const int MAX_FRAME = 20;
+	static const int MAX_FRAME = 20;
+	static const int MID_SECONDS = 13;
+	static const float FIRST_ANIM_SECS = .15f;
+	static const float SECOND_ANIM_SECS = .1f;
 
 	FVector2D loc = _animLoc + Size.Half();
 
@@ -119,37 +115,49 @@ void ABomb::_InitDefaultSprite(USpriteRenderer** _spriteRenderer, std::string_vi
 	for (int i = 0; i < MAX_FRAME; ++i)
 	{
 		idxs.push_back(i);
-		if (i < 13)
+		if (i < MID_SECONDS)
 		{
-			secs.push_back(.15f);
+			secs.push_back(FIRST_ANIM_SECS);
 		}
 		else
 		{
-			secs.push_back(.1f);
+			secs.push_back(SECOND_ANIM_SECS);
 		}
 	}
 
 	(*_spriteRenderer)->CreateAnimation(_animName, _spriteName, idxs, secs, false);
 }
 
+/* Actions */
+void ABomb::Running(float _deltaTime)
+{
+	if (State != BombState::Running) return;
+
+	AccumulatedSeconds += _deltaTime;
+	if (AccumulatedSeconds >= EXPLODE_SECONDS)
+	{
+		AccumulatedSeconds = 0;
+		Explode();
+	}
+}
+
 void ABomb::Explode()
 {
-	if (State == BombState::Running)
-	{
-		SetState(BombState::StartExploding);
-
-		_RunAnimHelper(ExplodeSprite_Center, ANIM_EXPLODE_CENTER);
-		_RunAnimHelper(ExplodeSprites_Up, ANIM_EXPLODE_UP);
-		_RunAnimHelper(ExplodeSprites_Down, ANIM_EXPLODE_DOWN);
-		_RunAnimHelper(ExplodeSprites_Left, ANIM_EXPLODE_LEFT);
-		_RunAnimHelper(ExplodeSprites_Right, ANIM_EXPLODE_RIGHT);
-	}
+	if (State != BombState::Running) return;
+	SetState(BombState::StartExploding);
+	RunExplosionAnim();
 }
 
 void ABomb::ExplodeIntermediatly()
 {
-	SetState(BombState::FinishExploding);
+	if (State == BombState::Exploding) return;
+	SetState(BombState::Exploding);
+	RunExplosionAnim();
+}
 
+/* Helpers */
+void ABomb::RunExplosionAnim()
+{
 	_RunAnimHelper(ExplodeSprite_Center, ANIM_EXPLODE_CENTER);
 	_RunAnimHelper(ExplodeSprites_Up, ANIM_EXPLODE_UP);
 	_RunAnimHelper(ExplodeSprites_Down, ANIM_EXPLODE_DOWN);
@@ -157,19 +165,6 @@ void ABomb::ExplodeIntermediatly()
 	_RunAnimHelper(ExplodeSprites_Right, ANIM_EXPLODE_RIGHT);
 }
 
-bool ABomb::IsInExplosionRange(const std::vector<FIntPoint>& _explodeIdx)
-{
-	for (size_t i = 0, size = _explodeIdx.size(); i < size; ++i)
-	{
-		if (_explodeIdx[i] == MatrixIdx)
-		{
-			return true;
-		}
-	}
-	return false;
-}
-
-/* Helpers */
 void ABomb::_RunAnimHelper(USpriteRenderer* _centerSprite, std::string_view _animName, bool _isOn)
 {
 	_centerSprite->ChangeAnimation(_animName);
@@ -185,26 +180,23 @@ void ABomb::_RunAnimHelper(std::vector<USpriteRenderer*>& _vec, std::string_view
 	}
 }
 
-/** slots **/
+/** Animation slots **/
 void ABomb::OnExploding()
 {
-	if (State == BombState::StartExploding)
-	{
-		SetState(BombState::Exploding);
-	}
+	if (State != BombState::StartExploding) return;
+
+	SetState(BombState::Exploding);
 }
 
 void ABomb::OnEndAnimation()
 {
-	if (State == BombState::FinishExploding)
-	{
-		SetState(BombState::Over);
+	if (State != BombState::Exploding) return;
 
-		bool isOn = false;
-		_RunAnimHelper(ExplodeSprite_Center, ANIM_EXPLODE_CENTER, isOn);
-		_RunAnimHelper(ExplodeSprites_Up, ANIM_EXPLODE_UP, isOn);
-		_RunAnimHelper(ExplodeSprites_Down, ANIM_EXPLODE_DOWN, isOn);
-		_RunAnimHelper(ExplodeSprites_Left, ANIM_EXPLODE_LEFT, isOn);
-		_RunAnimHelper(ExplodeSprites_Right, ANIM_EXPLODE_RIGHT, isOn);
-	}
+	SetState(BombState::Over);
+
+	_RunAnimHelper(ExplodeSprite_Center, ANIM_EXPLODE_CENTER, false);
+	_RunAnimHelper(ExplodeSprites_Up, ANIM_EXPLODE_UP, false);
+	_RunAnimHelper(ExplodeSprites_Down, ANIM_EXPLODE_DOWN, false);
+	_RunAnimHelper(ExplodeSprites_Left, ANIM_EXPLODE_LEFT, false);
+	_RunAnimHelper(ExplodeSprites_Right, ANIM_EXPLODE_RIGHT, false);
 }

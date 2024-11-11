@@ -40,7 +40,6 @@ void APlayMap::BeginPlay()
 	Super::BeginPlay();
 
 	InitMap();
-	InitExplosionMatrix();
 	BombList.clear();
 }
 
@@ -52,14 +51,6 @@ void APlayMap::Tick(float _deltaTime)
 	HandleExplodedBomb();
 	HandleExplodedBox();
 	ClearExplosionInfo();
-}
-
-void APlayMap::InitExplosionMatrix()
-{
-	FIntPoint shape = GlobalVar::BATTLE_GROUND_COUNT;
-	FVector2D tileSize = GlobalVar::BOMB_SIZE;
-
-	ExplosionMatrix.Init(shape, tileSize);
 }
 
 void APlayMap::InitMap()
@@ -102,6 +93,8 @@ void APlayMap::InitMap()
 
 void APlayMap::SetBomb(const FVector2D& _loc, EBombType _bombType, int _power)
 {
+	if (BombList.size() >= GlobalVar::MAX_BOMB_CNT) return;
+
 	FIntPoint matIdx = MapGround->LocationToMatrixIdx(_loc);
 	FIntPoint realIdx = MapGround->LocationToIndex(_loc);
 	FVector2D orderedLoc = MapGround->IndexToLocation(realIdx);
@@ -168,6 +161,8 @@ EBombTailType APlayMap::GetBombTailType(const FIntPoint& _nextIdx, bool* isEnd)
 	bool hasWall = MapWall->IsBlocked(_nextIdx);
 	bool hasBox = MapBox->IsBlocked(_nextIdx);
 
+	OutputDebugString((std::to_string(_nextIdx.X) + ", " + std::to_string(_nextIdx.Y) + " .. " + (hasWall ? "Wall: O " : "Wall: X ") + "\n").c_str());
+
 	if (hasWall == false && *isEnd == false)
 	{
 		if (hasBox == true)
@@ -183,7 +178,17 @@ EBombTailType APlayMap::GetBombTailType(const FIntPoint& _nextIdx, bool* isEnd)
 	else
 	{
 		*isEnd = true;
+
+		int sub = -1;
+		if (MapWall->IsIndexOver(_nextIdx, &sub))
+		{
+			if (sub == 0)
+			{
+				return EBombTailType::CONNECT;
+			}
+		}
 	}
+
 	return EBombTailType::NONE;
 }
 
@@ -216,7 +221,6 @@ void APlayMap::CheckExplodedBomb()
 
 		if (pBomb->State == BombState::Exploding)
 		{
-			pBomb->SetState(BombState::FinishExploding);
 			AppendExplodeTiles(pBomb->ExplodeIdxs);
 		}
 	}
@@ -264,6 +268,7 @@ void APlayMap::HandleExplodedBomb()
 		{
 			pBomb->Destroy();
 			pBomb = nullptr;
+			*it = nullptr;
 		}
 	}
 	BombList.remove(nullptr);

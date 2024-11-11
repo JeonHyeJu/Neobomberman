@@ -93,6 +93,35 @@ bool ATileMap::IsIndexOver(FIntPoint _Index)
 	return false;
 }
 
+bool ATileMap::IsIndexOver(FIntPoint _Index, int* _refSub)
+{
+	if (0 > _Index.X)
+	{
+		*_refSub = std::abs(_Index.X);
+		return true;
+	}
+
+	if (0 > _Index.Y)
+	{
+		*_refSub = std::abs(_Index.Y);
+		return true;
+	}
+
+	if (TileCount.X - 1 < _Index.X)
+	{
+		*_refSub = _Index.X - (TileCount.X - 1);
+		return true;
+	}
+
+	if (TileCount.Y - 1 < _Index.Y)
+	{
+		*_refSub = _Index.Y - (TileCount.Y - 1);
+		return true;
+	}
+
+	return false;
+}
+
 Tile* ATileMap::GetTileRef(FVector2D _loc)
 {
 	FIntPoint idx = LocationToMatrixIdx(_loc);

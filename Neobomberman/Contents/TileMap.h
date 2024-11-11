@@ -98,6 +98,7 @@ public:
 	bool IsBlocked(const FIntPoint& _idx);
 
 	bool IsIndexOver(FIntPoint _Index);
+	bool IsIndexOver(FIntPoint _Index, int* _refSub);
 
 	void SetTilesAnimAfterLoad(std::string_view _animName, std::string_view _spriteName);
 	void LaunchTileAnimAfterLoad(const FIntPoint& _pt, std::string_view _animName);

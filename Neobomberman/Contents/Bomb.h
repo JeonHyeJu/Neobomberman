@@ -8,7 +8,6 @@ enum class BombState
 	Running,
 	StartExploding,
 	Exploding,
-	FinishExploding,
 	Over
 };
 
@@ -30,7 +29,6 @@ public:
 	void Tick(float _DeltaTime) override;
 
 	void InitSpriteAndAnim(const SBombTailTypes& _tailInfo);
-	void CreateTail(const char* _img, const char* _imgMid, const char* _animName, const FVector2D& loc, const std::vector<EBombTailType>& _tails, std::vector<USpriteRenderer*>* _pAnimVec);
 
 	inline EBombType GetBombType() const
 	{
@@ -45,21 +43,21 @@ public:
 		State = _state;
 	}
 
-	bool IsInExplosionRange(const std::vector<FIntPoint>& _explodeIdx);
-
 private:
+	void CreateTail(const char* _img, const char* _imgMid, const char* _animName, const FVector2D& loc, const std::vector<EBombTailType>& _tails, std::vector<USpriteRenderer*>* _pAnimVec);
 	void InitSpriteCenter(std::string_view _spriteName, std::string_view _animName, std::string_view _explodeSpriteName);
 	void _InitDefaultSprite4D(std::string_view _spriteName, std::string_view _animName, std::vector<USpriteRenderer*>& _vector, const FVector2D& _loc);
 	void _InitDefaultSprite(USpriteRenderer** _spriteRenderer, std::string_view _spriteName, std::string_view _animName, const FVector2D& _animLoc);
 
+	void Running(float _deltaTime);
 	void Explode();
 	void ExplodeIntermediatly();
-
-	void _RunAnimHelper(USpriteRenderer* _centerSprite, std::string_view _animName, bool _isOn=true);
-	void _RunAnimHelper(std::vector<USpriteRenderer*>& _vec, std::string_view _animName, bool _isOff=true);
-
 	void OnExploding();
 	void OnEndAnimation();
+
+	void RunExplosionAnim();
+	void _RunAnimHelper(USpriteRenderer* _centerSprite, std::string_view _animName, bool _isOn=true);
+	void _RunAnimHelper(std::vector<USpriteRenderer*>& _vec, std::string_view _animName, bool _isOff=true);
 
 	EBombType BombType = EBombType::PLAIN;
 	BombState State = BombState::None;

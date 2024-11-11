@@ -7,7 +7,7 @@ const FVector2D GlobalVar::WINDOW_SIZE = { 608, 448 };		// { 304, 224 }
 const FVector2D GlobalVar::BOMB_SIZE = { 32, 32 };			// { 16, 16 }
 const FIntPoint GlobalVar::BATTLE_GROUND_COUNT = { 13, 11 };
 const int GlobalVar::STAGE_H_MARGIN = 64;	// 32
-const int GlobalVar::MAX_BOMB_CNT = 5;
+const int GlobalVar::MAX_BOMB_CNT = 5;		// 5
 const int GlobalVar::ORG_BOMB_POWER = 1;
 const int GlobalVar::MAX_BOMB_POWER = 6;
 
