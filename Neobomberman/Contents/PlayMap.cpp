@@ -165,7 +165,7 @@ EBombTailType APlayMap::GetBombTailType(const FIntPoint& _nextIdx, bool* _isEnd,
 	bool hasWall = MapWall->IsBlocked(_nextIdx);
 	bool hasBox = MapBox->IsBlocked(_nextIdx);
 
-	OutputDebugString((std::to_string(_nextIdx.X) + ", " + std::to_string(_nextIdx.Y) + " .. " + (hasWall ? "Wall: O " : "Wall: X ") + "\n").c_str());
+	//OutputDebugString((std::to_string(_nextIdx.X) + ", " + std::to_string(_nextIdx.Y) + " .. " + (hasWall ? "Wall: O " : "Wall: X ") + "\n").c_str());
 
 	if (hasWall == false && *_isEnd == false)
 	{
@@ -238,16 +238,18 @@ void APlayMap::CheckExplodedBomb()
 			ABomb* pBomb = *it;
 			if (pBomb == nullptr) continue;
 
-			for (size_t i = 0, size = ExplodeTileIdxs.size(); i < size; ++i)
+			if (pBomb->State == BombState::Exploding)
 			{
-				bool isBombRunning = (pBomb->State == BombState::Running) || (pBomb->State == BombState::StartExploding);
-				if (isBombRunning && pBomb->MatrixIdx == ExplodeTileIdxs[i])
-				{
-					pBomb->ExplodeIntermediatly();
-					AppendExplodeTiles(pBomb->ExplodeIdxs);
-					isChanged = true;
-					break;
-				}
+				AppendExplodeTiles(pBomb->ExplodeIdxs);
+			}
+			bool isInSplash = pBomb->IsInSplash(ExplodeTileIdxs);
+			bool isBombRunning = (pBomb->State == BombState::Running) || (pBomb->State == BombState::StartExploding);
+			if (isInSplash && isBombRunning)
+			{
+				pBomb->ExplodeIntermediatly();
+				AppendExplodeTiles(pBomb->ExplodeIdxs);
+				isChanged = true;
+				break;
 			}
 		}
 
@@ -327,6 +329,14 @@ void APlayMap::AppendExplodeTiles(const std::vector<FIntPoint>& _appendIdxs)
 		if (_appendIdxs[i].X < 0 || _appendIdxs[i].Y < 0)
 		{
 			continue;
+		}
+
+		for (size_t j = 0, size = ExplodeTileIdxs.size(); j < size; ++j)
+		{
+			if (_appendIdxs[i] == ExplodeTileIdxs[j])
+			{
+				break;
+			}
 		}
 
 		ExplodeTileIdxs.push_back(_appendIdxs[i]);

@@ -58,7 +58,7 @@ void AMushroom::Init(std::string_view _spritePath)
 		}
 		
 	}
-	SpriteRenderer->CreateAnimation("Jump", _spritePath, indexes, times, 0.5f);
+	SpriteRenderer->CreateAnimation("Jump", _spritePath, indexes, times);
 
 	//SpriteRenderer->ChangeAnimation("Idle_Down");
 	SpriteRenderer->ChangeAnimation("Jump");
