@@ -28,14 +28,7 @@ void _ReorginizeExplosion(std::vector<EBombTailType>& _bombTrails)
 
 APlayMap::APlayMap()
 {
-	USpriteRenderer* OuterLineRenderer = CreateDefaultSubObject<USpriteRenderer>();
-	OuterLineRenderer->SetOrder(ERenderOrder::COLMAP);
-	OuterLineRenderer->SetSprite("Bg_1-Col.png");
-
-	FVector2D MapScale = OuterLineRenderer->SetSpriteScale(1.0f);
-	OuterLineRenderer->SetSpriteScale(1.0f);
-	OuterLineRenderer->SetComponentLocation(MapScale.Half());
-	OuterLineRenderer->SetActive(false);
+	
 }
 
 APlayMap::~APlayMap()
@@ -47,6 +40,7 @@ void APlayMap::BeginPlay()
 	Super::BeginPlay();
 
 	InitMap();
+	InitExplosionMatrix();
 	BombList.clear();
 }
 
@@ -55,24 +49,34 @@ void APlayMap::Tick(float _deltaTime)
 	Super::Tick(_deltaTime);
 
 	CheckExplodedBomb();
-	CheckExplodedBox();
+	HandleExplodedBomb();
+	HandleExplodedBox();
+	ClearExplosionInfo();
+}
+
+void APlayMap::InitExplosionMatrix()
+{
+	FIntPoint shape = GlobalVar::BATTLE_GROUND_COUNT;
+	FVector2D tileSize = GlobalVar::BOMB_SIZE;
+
+	ExplosionMatrix.Init(shape, tileSize);
 }
 
 void APlayMap::InitMap()
 {
-	FIntPoint tileIdxs = GlobalVar::BATTLE_GROUND_COUNT;
+	FIntPoint shape = GlobalVar::BATTLE_GROUND_COUNT;
 	FVector2D tileSize = GlobalVar::BOMB_SIZE;
 
 	FVector2D winSize = GlobalVar::WINDOW_SIZE;
-	FVector2D mapSize = { tileIdxs.X * tileSize.X, tileIdxs.Y * tileSize.Y };
+	FVector2D mapSize = { shape.X * tileSize.X, shape.Y * tileSize.Y };
 	FVector2D subSize = winSize - mapSize;
 	FIntPoint moveLoc{ static_cast<int>(subSize.X / 2), GlobalVar::STAGE_H_MARGIN };
 
 	MapGround = GetWorld()->SpawnActor<ATileMap>();
-	MapGround->Init(GlobalPath::TILE_STAGE_1, tileIdxs, tileSize, TileType::Ground);
-	for (int y = 0; y < tileIdxs.Y; y++)
+	MapGround->Init(GlobalPath::TILE_STAGE_1, shape, tileSize, TileType::Ground);
+	for (int y = 0; y < shape.Y; y++)
 	{
-		for (int x = 0; x < tileIdxs.X; x++)
+		for (int x = 0; x < shape.X; x++)
 		{
 			MapGround->SetTile({ x, y }, static_cast<int>(TileType::Ground), true);
 		}
@@ -80,11 +84,11 @@ void APlayMap::InitMap()
 	MapGround->SetActorLocation(moveLoc);
 
 	MapWall = GetWorld()->SpawnActor<ATileMap>();
-	MapWall->Init(GlobalPath::TILE_STAGE_1, tileIdxs, tileSize, TileType::Wall);
+	MapWall->Init(GlobalPath::TILE_STAGE_1, shape, tileSize, TileType::Wall);
 	MapWall->SetActorLocation(moveLoc);
 
 	MapBox = GetWorld()->SpawnActor<ATileMap>();
-	MapBox->Init(GlobalPath::TILE_STAGE_1, tileIdxs, tileSize, TileType::Box);
+	MapBox->Init(GlobalPath::TILE_STAGE_1, shape, tileSize, TileType::Box);
 	MapBox->SetActorLocation(moveLoc);
 
 	GlobalPath path;
@@ -99,7 +103,6 @@ void APlayMap::InitMap()
 void APlayMap::SetBomb(const FVector2D& _loc, EBombType _bombType, int _power)
 {
 	FIntPoint matIdx = MapGround->LocationToMatrixIdx(_loc);
-
 	FIntPoint realIdx = MapGround->LocationToIndex(_loc);
 	FVector2D orderedLoc = MapGround->IndexToLocation(realIdx);
 	SBombTailTypes bombTailTypes = GetBombTailTypes(matIdx, _bombType, _power);
@@ -214,28 +217,59 @@ void APlayMap::CheckExplodedBomb()
 		if (pBomb->State == BombState::Exploding)
 		{
 			pBomb->SetState(BombState::FinishExploding);
-
-			// Temp.. TODO!!
-			/*for (size_t i = 0, size = pBomb->ExplodeIdxs.size(); i < size; ++i)
-			{
-				if (pBomb->ExplodeIdxs[i] == pBomb->MatrixIdx)
-				{
-					pBomb->ExplodeIntermediatly();
-				}
-			}*/
 			AppendExplodeTiles(pBomb->ExplodeIdxs);
 		}
-		else if (pBomb->State == BombState::Over)
+	}
+
+	// TODO: optimization
+	while (true)
+	{
+		it = BombList.begin();
+		bool isChanged = false;
+
+		for (; it != itEnd; ++it)
+		{
+			ABomb* pBomb = *it;
+			if (pBomb == nullptr) continue;
+
+			for (size_t i = 0, size = ExplodeTileIdxs.size(); i < size; ++i)
+			{
+				bool isBombRunning = (pBomb->State == BombState::Running) || (pBomb->State == BombState::StartExploding);
+				if (isBombRunning && pBomb->MatrixIdx == ExplodeTileIdxs[i])
+				{
+					pBomb->ExplodeIntermediatly();
+					AppendExplodeTiles(pBomb->ExplodeIdxs);
+					isChanged = true;
+					break;
+				}
+			}
+		}
+
+		if (!isChanged)
+		{
+			break;
+		}
+	}
+}
+
+void APlayMap::HandleExplodedBomb()
+{
+	std::list<ABomb*>::iterator it = BombList.begin();
+	std::list<ABomb*>::iterator itEnd = BombList.end();
+
+	for (; it != itEnd; ++it)
+	{
+		ABomb* pBomb = *it;
+		if (pBomb != nullptr && pBomb->State == BombState::Over)
 		{
 			pBomb->Destroy();
 			pBomb = nullptr;
 		}
 	}
-
 	BombList.remove(nullptr);
 }
 
-void APlayMap::CheckExplodedBox()
+void APlayMap::HandleExplodedBox()
 {
 	bool hasExploded = ExplodeTileIdxs.size() > 0;
 	if (hasExploded)
@@ -245,8 +279,12 @@ void APlayMap::CheckExplodedBox()
 			FIntPoint boxIdx = ExplodeTileIdxs[i];
 			MapBox->LaunchTileAnimAfterLoad(boxIdx, GlobalPath::ANIM_CRUMBLING_BOX);
 		}
-		ExplodeTileIdxs.clear();
 	}
+}
+
+void APlayMap::ClearExplosionInfo()
+{
+	ExplodeTileIdxs.clear();
 }
 
 std::vector<FIntPoint> APlayMap::GetBombRange(const FIntPoint& _matIdx, const SBombTailTypes& _tailInfo)

@@ -45,6 +45,8 @@ public:
 		State = _state;
 	}
 
+	bool IsInExplosionRange(const std::vector<FIntPoint>& _explodeIdx);
+
 private:
 	void InitSpriteCenter(std::string_view _spriteName, std::string_view _animName, std::string_view _explodeSpriteName);
 	void _InitDefaultSprite4D(std::string_view _spriteName, std::string_view _animName, std::vector<USpriteRenderer*>& _vector, const FVector2D& _loc);

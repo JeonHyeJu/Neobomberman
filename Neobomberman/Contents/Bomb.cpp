@@ -157,6 +157,18 @@ void ABomb::ExplodeIntermediatly()
 	_RunAnimHelper(ExplodeSprites_Right, ANIM_EXPLODE_RIGHT);
 }
 
+bool ABomb::IsInExplosionRange(const std::vector<FIntPoint>& _explodeIdx)
+{
+	for (size_t i = 0, size = _explodeIdx.size(); i < size; ++i)
+	{
+		if (_explodeIdx[i] == MatrixIdx)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 /* Helpers */
 void ABomb::_RunAnimHelper(USpriteRenderer* _centerSprite, std::string_view _animName, bool _isOn)
 {

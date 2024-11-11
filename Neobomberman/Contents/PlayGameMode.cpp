@@ -18,7 +18,7 @@ void APlayGameMode::BeginPlay()
 	Super::BeginPlay();
 
 	APlayer* Player = GetWorld()->GetPawn<APlayer>();
-	Player->SetCollisionImage("Bg_1-Col.png");
+	//Player->SetCollisionImage("Bg_1-Col.png");
 
 	APlayMap* NewActor = GetWorld()->SpawnActor<APlayMap>();
 	Player->SetCurMap(NewActor);

@@ -18,3 +18,4 @@ struct SBombTailTypes
 		Right.reserve(GlobalVar::MAX_BOMB_POWER);
 	}
 };
+

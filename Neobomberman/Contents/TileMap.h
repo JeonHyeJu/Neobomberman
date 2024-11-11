@@ -12,6 +12,7 @@ enum class TileType
 	Ground = 0,
 	Wall,
 	Box,
+	ExplosionMatrix,
 };
 
 class Tile : public ISerializObject
