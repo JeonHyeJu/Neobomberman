@@ -1,9 +1,11 @@
 #pragma once
 #include "SceneComponent.h"
+#include <set>
 
 class U2DCollision : public USceneComponent
 {
 public:
+	friend class ULevel;
 	U2DCollision();
 	~U2DCollision();
 
@@ -39,10 +41,10 @@ public:
 	}
 
 	template<typename EnumType>
-	AActor* CollisionOnce(EnumType _OtherCollisionGroup)
+	AActor* CollisionOnce(EnumType _OtherCollisionGroup, FVector2D _NextPos = FVector2D::ZERO)
 	{
 		std::vector<AActor*> Result;
-		Collision(static_cast<int>(_OtherCollisionGroup), Result, 1);
+		Collision(static_cast<int>(_OtherCollisionGroup), Result, _NextPos, 1);
 
 		if (true == Result.empty())
 		{
@@ -61,18 +63,34 @@ public:
 		return Result;
 	}
 
-	bool Collision(int _OtherCollisionGroup, std::vector<AActor*>& _Result, unsigned int  _Limite);
+	bool Collision(int _OtherCollisionGroup, std::vector<AActor*>& _Result, FVector2D _NextDir, unsigned int  _Limite);
 
 	void SetCollisionType(ECollisionType _CollisionType)
 	{
 		CollisionType = _CollisionType;
 	}
 
+	ECollisionType GetCollisionType()
+	{
+		return CollisionType;
+	}
+
+	void SetCollisionEnter(std::function<void(AActor*)> _Function);
+	void SetCollisionStay(std::function<void(AActor*)> _Function);
+	void SetCollisionEnd(std::function<void(AActor*)> _Function);
+
 protected:
 
 private:
+	void CollisionEventCheck(class U2DCollision* _Other);
 
 	ECollisionType CollisionType = ECollisionType::CirCle;
 	int CollisionGroup = -1;
+
+	std::set<U2DCollision*> CollisionCheckSet;
+
+	std::function<void(AActor*)> Enter;
+	std::function<void(AActor*)> Stay;
+	std::function<void(AActor*)> End;
 };
 

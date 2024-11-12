@@ -25,6 +25,9 @@
     <Filter Include="GameMode">
       <UniqueIdentifier>{af77fa47-6d09-4e09-9acb-809429b85243}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Util">
+      <UniqueIdentifier>{642b6815-5cca-4168-bc47-40dd303f2683}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Actor.cpp">
@@ -63,6 +66,9 @@
     <ClCompile Include="GameMode.cpp">
       <Filter>GameMode</Filter>
     </ClCompile>
+    <ClCompile Include="PathFindAStar.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -100,6 +106,9 @@
     </ClInclude>
     <ClInclude Include="GameMode.h">
       <Filter>GameMode</Filter>
+    </ClInclude>
+    <ClInclude Include="PathFindAStar.h">
+      <Filter>Util</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

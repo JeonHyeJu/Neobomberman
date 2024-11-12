@@ -41,12 +41,12 @@ private:
 	SBombTailTypes GetBombTailTypes(const FIntPoint& _matIdx, EBombType _bombType, int _power);
 	EBombTailType GetBombTailType(const FIntPoint& _nextIdx, bool* _isEnd, bool _isLast);
 	std::vector<FIntPoint> GetBombRange(const FIntPoint& _matIdx, const SBombTailTypes& _tailInfo);
-	void AppendExplodeTiles(const std::vector<FIntPoint>& _appendIdxs);
+	void AppendSplash(const std::vector<FIntPoint>& _appendIdxs);
 
-	void CheckExplodedBomb();
-	void HandleExplodedBomb();
-	void HandleExplodedBox();
-	void ClearExplosionInfo();
+	void CheckLaunchedBomb();
+	void RemoveExplodedBomb();
+	void CheckExplodedBox();
+	void ClearSplashArray();
 
 	const int ENEMY_CNT_STAGE_1 = 4;
 
@@ -55,7 +55,7 @@ private:
 	ATileMap* MapBox = nullptr;
 
 	std::list<class ABomb*> BombList;
-	std::vector<FIntPoint> ExplodeTileIdxs;
+	std::vector<FIntPoint> SplashTileIdxs;
 
 	FIntPoint PortalIdx = { 6, 10 };	// Init with first stage loc.
 };

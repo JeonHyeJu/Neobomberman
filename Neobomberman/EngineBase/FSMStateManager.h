@@ -14,7 +14,7 @@ public:
 	UFSMStateManager& operator=(const UFSMStateManager& _Other) = delete;
 	UFSMStateManager& operator=(UFSMStateManager&& _Other) noexcept = delete;
 
-	class FSMState
+	class FSMFunction
 	{
 	public:
 		std::function<void()> StartFunction = nullptr;
@@ -40,15 +40,18 @@ public:
 		States[_Key].StartFunction = _Start;
 	}
 
-	void Update(float _DeltaTime)
+	void UpdateState(float _DeltaTime)
 	{
-		if (nullptr == CurState)
+		if (nullptr == CurStateFn)
 		{
 			MSGASSERT("상태가 지정되지 않은 스테이트머신 입니다.");
 			return;
 		}
 
-		CurState->UpdateFunction(_DeltaTime);
+		if (CurStateFn->UpdateFunction != nullptr)
+		{
+			CurStateFn->UpdateFunction(_DeltaTime);
+		}
 	}
 
 	template<typename EnumType>
@@ -65,19 +68,24 @@ public:
 			return;
 		}
 
-		CurState = &States[_Key];
-		if (nullptr != CurState->StartFunction)
+		CurStateFn = &States[_Key];
+		CurState = _Key;
+		if (nullptr != CurStateFn->StartFunction)
 		{
-			CurState->StartFunction();
+			CurStateFn->StartFunction();
 		}
 	}
 
+	inline int GetState() const
+	{
+		return CurState;
+	}
+
 protected:
-	// ChangeState("Idle")
-	// ChangeState(EPlayerState::Idle)
 
 private:
-	FSMState* CurState = nullptr;
-	std::map<int, FSMState> States;
+	int CurState = 0;
+	FSMFunction* CurStateFn = nullptr;
+	std::map<int, FSMFunction> States;
 };
 

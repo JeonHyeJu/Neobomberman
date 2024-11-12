@@ -1,14 +1,13 @@
 #pragma once
 #include <EngineCore/Actor.h>
+#include <EngineBase/FSMStateManager.h>
 #include "ContentsStruct.h"
 
-enum class BombState
+enum class EBombState
 {
-	None = 0,
 	Running,
-	StartExploding,
+	Launched,
 	Exploding,
-	Exploded,
 	Over
 };
 
@@ -30,19 +29,15 @@ public:
 	void Tick(float _DeltaTime) override;
 
 	void InitSpriteAndAnim(const SBombTailTypes& _tailInfo);
-	void ExplodeIntermediatly();
+	void ExplodeBySplash();
 
 	inline EBombType GetBombType() const
 	{
 		return BombType;
 	}
-	inline BombState GetState() const
+	inline EBombState GetState() const
 	{
-		return State;
-	}
-	inline void SetState(BombState _state)
-	{
-		State = _state;
+		return static_cast<EBombState>(FSM.GetState());
 	}
 
 	bool IsInSplash(const std::vector<FIntPoint>& _splashVec)
@@ -64,16 +59,17 @@ private:
 	void _InitDefaultSprite(USpriteRenderer** _spriteRenderer, std::string_view _spriteName, std::string_view _animName, const FVector2D& _animLoc);
 
 	void Running(float _deltaTime);
-	void Explode();
-	void OnExploding();
+	void OnLaunched();
+	void OnStartAnimation();
 	void OnEndAnimation();
 
 	void RunExplosionAnim(bool _isOn);
 	void _RunAnimHelper(USpriteRenderer* _centerSprite, std::string_view _animName, bool _isOn=true);
 	void _RunAnimHelper(std::vector<USpriteRenderer*>& _vec, std::string_view _animName, bool _isOff=true);
 
+	UFSMStateManager FSM;
+
 	EBombType BombType = EBombType::PLAIN;
-	BombState State = BombState::None;
 
 	const float EXPLODE_SECONDS = 2.f;
 	float AccumulatedSeconds = 0.f;

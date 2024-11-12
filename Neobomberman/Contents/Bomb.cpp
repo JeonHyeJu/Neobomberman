@@ -15,6 +15,11 @@ ABomb::ABomb()
 	ExplodeSprites_Down.reserve(GlobalVar::MAX_BOMB_POWER);
 	ExplodeSprites_Left.reserve(GlobalVar::MAX_BOMB_POWER);
 	ExplodeSprites_Right.reserve(GlobalVar::MAX_BOMB_POWER);
+
+	FSM.CreateState(EBombState::Running, std::bind(&ABomb::Running, this, std::placeholders::_1), nullptr);
+	FSM.CreateState(EBombState::Launched, nullptr, std::bind(&ABomb::OnLaunched, this));
+	FSM.CreateState(EBombState::Exploding, nullptr, nullptr);
+	FSM.CreateState(EBombState::Over, nullptr, nullptr);
 }
 
 ABomb::~ABomb()
@@ -25,14 +30,14 @@ void ABomb::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SetState(BombState::Running);
+	FSM.ChangeState(EBombState::Running);
 }
 
 void ABomb::Tick(float _deltaTime)
 {
 	Super::Tick(_deltaTime);
 
-	Running(_deltaTime);
+	FSM.UpdateState(_deltaTime);
 }
 
 /* Initialize */
@@ -77,7 +82,7 @@ void ABomb::InitSpriteCenter(std::string_view _spriteName, std::string_view _run
 	_InitDefaultSprite(&ExplodeSprite_Center, _explodeSpriteName, ANIM_EXPLODE_CENTER, { 0, 0 });
 	ExplodeSprite_Center->CreateAnimation(_runnigAnimName, _spriteName, 0, 3, .4f);
 
-	ExplodeSprite_Center->SetAnimationEvent(ANIM_EXPLODE_CENTER, 1, std::bind(&ABomb::OnExploding, this));
+	ExplodeSprite_Center->SetAnimationEvent(ANIM_EXPLODE_CENTER, 1, std::bind(&ABomb::OnStartAnimation, this));
 	ExplodeSprite_Center->SetAnimationEvent(ANIM_EXPLODE_CENTER, 19, std::bind(&ABomb::OnEndAnimation, this));
 	ExplodeSprite_Center->ChangeAnimation(_runnigAnimName);
 }
@@ -128,45 +133,39 @@ void ABomb::_InitDefaultSprite(USpriteRenderer** _spriteRenderer, std::string_vi
 	(*_spriteRenderer)->CreateAnimation(_animName, _spriteName, idxs, secs, false);
 }
 
-/* Actions */
+/* FSM actions */
+void ABomb::ExplodeBySplash()
+{
+	FSM.ChangeState(EBombState::Launched);
+}
+
 void ABomb::Running(float _deltaTime)
 {
-	if (State != BombState::Running) return;
+	if (GetState() != EBombState::Running) return;
 
 	AccumulatedSeconds += _deltaTime;
 	if (AccumulatedSeconds >= EXPLODE_SECONDS)
 	{
 		AccumulatedSeconds = 0;
-		Explode();
+		FSM.ChangeState(EBombState::Launched);
 	}
 }
 
-void ABomb::Explode()
+void ABomb::OnLaunched()
 {
-	SetState(BombState::StartExploding);
-	RunExplosionAnim(true);
-}
-
-void ABomb::ExplodeIntermediatly()
-{
-	SetState(BombState::Exploding);
 	RunExplosionAnim(true);
 }
 
 /** Animation slots **/
-void ABomb::OnExploding()
+void ABomb::OnStartAnimation()
 {
-	if (State != BombState::StartExploding) return;
-
-	SetState(BombState::Exploding);
+	FSM.ChangeState(EBombState::Exploding);
 }
 
 void ABomb::OnEndAnimation()
 {
-	if (State != BombState::Exploding) return;
-
-	SetState(BombState::Over);
 	RunExplosionAnim(false);
+	FSM.ChangeState(EBombState::Over);
 }
 
 /* Helpers */

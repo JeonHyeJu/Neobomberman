@@ -51,7 +51,7 @@ public:
 		IsDestroyValue = true;
 	}
 
-	virtual void ReleaseCheck(float _DeltaTime)
+	virtual void ReleaseTimeCheck(float _DeltaTime)
 	{
 		if (false == IsDeathTimeCheck)
 		{
@@ -66,6 +66,11 @@ public:
 		}
 	}
 
+	virtual void ReleaseCheck(float _DeltaTime)
+	{
+
+	}
+	
 	void SetActive(bool _IsActive)
 	{
 		IsActiveValue = _IsActive;

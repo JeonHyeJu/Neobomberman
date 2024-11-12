@@ -172,8 +172,63 @@ void ULevel::Render(float _DeltaTime)
 	DoubleBuffering();
 }
 
+void ULevel::Collision(float _DeltaTime)
+{
+	for (size_t i = 0; i < CollisionLink.size(); i++)
+	{
+		CollisionLinkData Data = CollisionLink[i];
+
+		int Left = Data.Left;
+		int Right = Data.Right;
+		
+		std::list<class U2DCollision*>& LeftList = CheckCollisions[Left];
+
+		std::list<class U2DCollision*>& RightList = Collisions[Right];
+
+		std::list<class U2DCollision*>::iterator StartLeftIter = LeftList.begin();
+		std::list<class U2DCollision*>::iterator EndLeftIter = LeftList.end();
+
+		std::list<class U2DCollision*>::iterator StartRightIter = RightList.begin();
+		std::list<class U2DCollision*>::iterator EndRightIter = RightList.end();
+
+		for (; StartLeftIter != EndLeftIter; ++StartLeftIter)
+		{
+		 	U2DCollision* LeftCollision = *StartLeftIter;
+
+			if (false == LeftCollision->IsActive())
+			{
+				continue;
+			}
+
+			for (; StartRightIter != EndRightIter; ++StartRightIter)
+			{
+				U2DCollision* RightCollision = *StartRightIter;
+				if (false == RightCollision->IsActive())
+				{
+					continue;
+				}
+
+				LeftCollision->CollisionEventCheck(RightCollision);
+			}
+		}
+	}
+}
+
+// 엔진 이벤트코드니까 이상한 곳에서 할필요가 없다.
+// 컨텐츠에서는 존재하는지도 몰라야 한다.
+
+
 void ULevel::Release(float _DeltaTime)
 {
+	std::list<AActor*>::iterator StartIter = AllActors.begin();
+	std::list<AActor*>::iterator EndIter = AllActors.end();
+
+	for (; StartIter != EndIter; ++StartIter)
+	{
+		AActor* CurActor = *StartIter;
+		CurActor->ReleaseTimeCheck(_DeltaTime);
+	}
+
 	{
 		std::map<int, std::list<class U2DCollision*>>::iterator StartOrderIter = Collisions.begin();
 		std::map<int, std::list<class U2DCollision*>>::iterator EndOrderIter = Collisions.end();
@@ -185,6 +240,30 @@ void ULevel::Release(float _DeltaTime)
 			std::list<class U2DCollision*>::iterator CollisionStartIter = CollisionList.begin();
 			std::list<class U2DCollision*>::iterator CollisionEndIter = CollisionList.end();
 			
+			for (; CollisionStartIter != CollisionEndIter; )
+			{
+				if (false == (*CollisionStartIter)->IsDestroy())
+				{
+					++CollisionStartIter;
+					continue;
+				}
+
+				CollisionStartIter = CollisionList.erase(CollisionStartIter);
+			}
+		}
+	}
+
+	{
+		std::map<int, std::list<class U2DCollision*>>::iterator StartOrderIter = CheckCollisions.begin();
+		std::map<int, std::list<class U2DCollision*>>::iterator EndOrderIter = CheckCollisions.end();
+
+		for (; StartOrderIter != EndOrderIter; ++StartOrderIter)
+		{
+			std::list<class U2DCollision*>& CollisionList = StartOrderIter->second;
+
+			std::list<class U2DCollision*>::iterator CollisionStartIter = CollisionList.begin();
+			std::list<class U2DCollision*>::iterator CollisionEndIter = CollisionList.end();
+
 			for (; CollisionStartIter != CollisionEndIter; )
 			{
 				if (false == (*CollisionStartIter)->IsDestroy())
@@ -278,6 +357,14 @@ void ULevel::PushCollision(U2DCollision* _Collision)
 {
 	int Order = _Collision->GetGroup();
 	Collisions[Order].push_back(_Collision);
+}
+
+std::vector<CollisionLinkData> ULevel::CollisionLink;
+
+void ULevel::PushCheckCollision(class U2DCollision* _Collision)
+{
+	int Order = _Collision->GetGroup();
+	CheckCollisions[Order].push_back(_Collision);
 }
 
 void ULevel::ChangeRenderOrder(class USpriteRenderer* _Renderer, int _PrevOrder)

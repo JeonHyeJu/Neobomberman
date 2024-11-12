@@ -19,7 +19,7 @@ public:
 
 	int RandomInt(int _Min, int _Max)
 	{
-		std::uniform_int_distribution<int> RandomCreate(_Min, _Max + 1);
+		std::uniform_int_distribution<int> RandomCreate(_Min, _Max);
 
 		return RandomCreate.operator()(MtGen);
 	}

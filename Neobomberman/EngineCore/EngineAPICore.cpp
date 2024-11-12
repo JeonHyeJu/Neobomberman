@@ -91,6 +91,8 @@ void UEngineAPICore::Tick()
 	CurLevel->Tick(DeltaTime);
 	CurLevel->Render(DeltaTime);
 	// After Tick, Render
+	
+	CurLevel->Collision(DeltaTime);		// Event type
 	CurLevel->Release(DeltaTime);
 }
 

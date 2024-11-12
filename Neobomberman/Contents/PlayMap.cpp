@@ -39,7 +39,7 @@ void APlayMap::BeginPlay()
 	Super::BeginPlay();
 
 	BombList.clear();
-	ExplodeTileIdxs.clear();
+	SplashTileIdxs.clear();
 
 	InitMap();
 }
@@ -48,10 +48,10 @@ void APlayMap::Tick(float _deltaTime)
 {
 	Super::Tick(_deltaTime);
 
-	CheckExplodedBomb();
-	HandleExplodedBomb();
-	HandleExplodedBox();
-	ClearExplosionInfo();
+	CheckLaunchedBomb();
+	RemoveExplodedBomb();
+	CheckExplodedBox();
+	ClearSplashArray();
 }
 
 void APlayMap::InitMap()
@@ -211,7 +211,7 @@ bool APlayMap::Deserialize(ATileMap* _tileMap, std::string_view _savePath, std::
 	return true;
 }
 
-void APlayMap::CheckExplodedBomb()
+void APlayMap::CheckLaunchedBomb()
 {
 	std::list<ABomb*>::iterator it = BombList.begin();
 	std::list<ABomb*>::iterator itEnd = BombList.end();
@@ -221,46 +221,30 @@ void APlayMap::CheckExplodedBomb()
 		ABomb* pBomb = *it;
 		if (pBomb == nullptr) continue;
 
-		if (pBomb->State == BombState::Exploding)
+		if (pBomb->GetState() == EBombState::Launched)
 		{
-			AppendExplodeTiles(pBomb->ExplodeIdxs);
+			AppendSplash(pBomb->ExplodeIdxs);
 		}
 	}
 
-	// TODO: optimization
-	while (true)
+	it = BombList.begin();
+	for (; it != itEnd; ++it)
 	{
-		it = BombList.begin();
-		bool isChanged = false;
+		ABomb* pBomb = *it;
+		if (pBomb == nullptr) continue;
 
-		for (; it != itEnd; ++it)
+		if (pBomb->GetState() == EBombState::Running)
 		{
-			ABomb* pBomb = *it;
-			if (pBomb == nullptr) continue;
-
-			if (pBomb->State == BombState::Exploding)
+			bool isInSplash = pBomb->IsInSplash(SplashTileIdxs);
+			if (isInSplash)
 			{
-				AppendExplodeTiles(pBomb->ExplodeIdxs);
+				pBomb->ExplodeBySplash();
 			}
-			bool isInSplash = pBomb->IsInSplash(ExplodeTileIdxs);
-			bool isBombRunning = (pBomb->State == BombState::Running) || (pBomb->State == BombState::StartExploding);
-			if (isInSplash && isBombRunning)
-			{
-				pBomb->ExplodeIntermediatly();
-				AppendExplodeTiles(pBomb->ExplodeIdxs);
-				isChanged = true;
-				break;
-			}
-		}
-
-		if (!isChanged)
-		{
-			break;
 		}
 	}
 }
 
-void APlayMap::HandleExplodedBomb()
+void APlayMap::RemoveExplodedBomb()
 {
 	std::list<ABomb*>::iterator it = BombList.begin();
 	std::list<ABomb*>::iterator itEnd = BombList.end();
@@ -268,7 +252,7 @@ void APlayMap::HandleExplodedBomb()
 	for (; it != itEnd; ++it)
 	{
 		ABomb* pBomb = *it;
-		if (pBomb != nullptr && pBomb->State == BombState::Over)
+		if (pBomb != nullptr && pBomb->GetState() == EBombState::Over)
 		{
 			pBomb->Destroy();
 			pBomb = nullptr;
@@ -278,22 +262,22 @@ void APlayMap::HandleExplodedBomb()
 	BombList.remove(nullptr);
 }
 
-void APlayMap::HandleExplodedBox()
+void APlayMap::CheckExplodedBox()
 {
-	bool hasExploded = ExplodeTileIdxs.size() > 0;
+	bool hasExploded = SplashTileIdxs.size() > 0;
 	if (hasExploded)
 	{
-		for (size_t i = 0; i < ExplodeTileIdxs.size(); ++i)
+		for (size_t i = 0; i < SplashTileIdxs.size(); ++i)
 		{
-			FIntPoint boxIdx = ExplodeTileIdxs[i];
+			FIntPoint boxIdx = SplashTileIdxs[i];
 			MapBox->LaunchTileAnimAfterLoad(boxIdx, GlobalPath::ANIM_CRUMBLING_BOX);
 		}
 	}
 }
 
-void APlayMap::ClearExplosionInfo()
+void APlayMap::ClearSplashArray()
 {
-	ExplodeTileIdxs.clear();
+	SplashTileIdxs.clear();
 }
 
 std::vector<FIntPoint> APlayMap::GetBombRange(const FIntPoint& _matIdx, const SBombTailTypes& _tailInfo)
@@ -322,7 +306,7 @@ std::vector<FIntPoint> APlayMap::GetBombRange(const FIntPoint& _matIdx, const SB
 	return explodeIdxs;
 }
 
-void APlayMap::AppendExplodeTiles(const std::vector<FIntPoint>& _appendIdxs)
+void APlayMap::AppendSplash(const std::vector<FIntPoint>& _appendIdxs)
 {
 	for (size_t i = 0; i < _appendIdxs.size(); ++i)
 	{
@@ -331,14 +315,14 @@ void APlayMap::AppendExplodeTiles(const std::vector<FIntPoint>& _appendIdxs)
 			continue;
 		}
 
-		for (size_t j = 0, size = ExplodeTileIdxs.size(); j < size; ++j)
+		for (size_t j = 0, size = SplashTileIdxs.size(); j < size; ++j)
 		{
-			if (_appendIdxs[i] == ExplodeTileIdxs[j])
+			if (_appendIdxs[i] == SplashTileIdxs[j])
 			{
 				break;
 			}
 		}
 
-		ExplodeTileIdxs.push_back(_appendIdxs[i]);
+		SplashTileIdxs.push_back(_appendIdxs[i]);
 	}
 }
