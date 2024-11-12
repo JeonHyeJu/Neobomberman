@@ -119,7 +119,7 @@ bool UEnginePath::MoveParentToDirectory(std::string_view _Path)
 
 bool UEnginePath::MoveRelative(std::string_view _path, char delimiter)
 {
-	if (_path.size() == 0) return false;
+	if (_path.empty()) return false;
 
 	std::vector<std::string> paths;			// relative paths
 	paths.reserve(128);						// Temp
@@ -139,7 +139,7 @@ bool UEnginePath::MoveRelative(std::string_view _path, char delimiter)
 		paths.push_back(findPath);
 	}
 
-	if (paths.size() == 0) return false;
+	if (paths.empty()) return false;
 
 	for (size_t i = 0; i < paths.size(); ++i)
 	{

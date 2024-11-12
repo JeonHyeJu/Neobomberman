@@ -150,6 +150,7 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="ContentsStruct.h" />
+    <ClInclude Include="DebugLog.h" />
     <ClInclude Include="Mushroom.h">
       <SubType>
       </SubType>

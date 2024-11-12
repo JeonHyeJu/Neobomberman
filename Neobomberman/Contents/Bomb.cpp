@@ -1,13 +1,34 @@
-
 #include "PreCompile.h"
 #include "Bomb.h"
+#include "TileMap.h"
+#include "PlayMap.h"
 #include "GlobalVar.h"
 #include "ContentsEnum.h"
+#include "DebugLog.h"	// TODO: delete
 
 #include <EngineCore/SpriteRenderer.h>
 #include <EngineBase/EngineDebug.h>
 #include <functional>
 #include <algorithm>
+
+std::list<ABomb*> ABomb::BombList;
+
+void _ReorginizeExplosion(std::vector<EBombTailType>& _bombTrails)
+{
+	for (size_t i = 0, size = _bombTrails.size(); i < size - 1; ++i)
+	{
+		if (i + 1 >= size) break;
+
+		if (_bombTrails[i] == EBombTailType::END && _bombTrails[i + 1] == EBombTailType::END)
+		{
+			_bombTrails[i] = EBombTailType::CONNECT;
+		}
+		else if (_bombTrails[i] == EBombTailType::END && _bombTrails[i + 1] == EBombTailType::CONNECT)
+		{
+			_bombTrails[i] = EBombTailType::CONNECT;
+		}
+	}
+}
 
 ABomb::ABomb()
 {
@@ -41,15 +62,48 @@ void ABomb::Tick(float _deltaTime)
 }
 
 /* Initialize */
+void ABomb::Init(const FVector2D& _loc, EBombType _bombType, int _power, APlayMap* _curMap)
+{
+	if (ABomb::BombList.size() >= GlobalVar::MAX_BOMB_CNT) return;
+
+	SetCurMap(_curMap);
+	ATileMap* pMap = CurMap->GetGroundMap();
+	FIntPoint matIdx = pMap->LocationToMatrixIdx(_loc);
+
+	if (!CanSetBombThisIdx(matIdx)) return;
+
+	FIntPoint realIdx = pMap->LocationToIndex(_loc);
+	FVector2D orderedLoc = pMap->IndexToLocation(realIdx);
+	SBombTailTypes bombTailTypes = GetBombTailTypes(matIdx, _bombType, _power);
+	std::vector<FIntPoint> explodeIdxs = GetBombRange(matIdx, bombTailTypes);
+
+	//DebugPrintEnumVector(bombTailTypes.Up, "bombTailTypes[UP]");
+	//DebugPrintEnumVector(bombTailTypes.Down, "bombTailTypes[Down]");
+	//DebugPrintEnumVector(bombTailTypes.Left, "bombTailTypes[Left]");
+	//DebugPrintEnumVector(bombTailTypes.Right, "bombTailTypes[Right]");
+	//DebugPrintFIntVector(explodeIdxs, "explodeIdxs");
+
+	Size = GlobalVar::BOMB_SIZE;
+	Power = _power;
+	BombType = _bombType;
+	MatrixIdx = matIdx;
+	ExplodeIdxs = explodeIdxs;
+
+	SetActorLocation(orderedLoc);
+	InitSpriteAndAnim(bombTailTypes);
+
+	ABomb::BombList.push_back(this);
+}
+
 void ABomb::InitSpriteAndAnim(const SBombTailTypes& _tailInfo)
 {
 	if (BombType == EBombType::PLAIN)
 	{
-		InitSpriteCenter(GlobalPath::BOMB_ORG, ANIM_RUNNING, IMG_EXPLOSION_CENTER);
+		InitSpriteCenter(GlobalPath::BOMB_ORG, ANIM_BOMB_RUNNING, IMG_EXPLOSION_CENTER);
 	}
 	else  // EBombType::RED
 	{
-		InitSpriteCenter(GlobalPath::BOMB_RED, ANIM_RUNNING, IMG_EXPLOSION_CENTER);
+		InitSpriteCenter(GlobalPath::BOMB_RED, ANIM_BOMB_RUNNING, IMG_EXPLOSION_CENTER);
 	}
 
 	/* Create explosion animations */
@@ -79,7 +133,10 @@ void ABomb::CreateTail(const char* _img, const char* _imgMid, const char* _animN
 
 void ABomb::InitSpriteCenter(std::string_view _spriteName, std::string_view _runnigAnimName, std::string_view _explodeSpriteName)
 {
+	// Creating a center explosion animation first
 	_InitDefaultSprite(&ExplodeSprite_Center, _explodeSpriteName, ANIM_EXPLODE_CENTER, { 0, 0 });
+	
+	// Craeteing running bomb animation
 	ExplodeSprite_Center->CreateAnimation(_runnigAnimName, _spriteName, 0, 3, .4f);
 
 	ExplodeSprite_Center->SetAnimationEvent(ANIM_EXPLODE_CENTER, 1, std::bind(&ABomb::OnStartAnimation, this));
@@ -133,9 +190,111 @@ void ABomb::_InitDefaultSprite(USpriteRenderer** _spriteRenderer, std::string_vi
 	(*_spriteRenderer)->CreateAnimation(_animName, _spriteName, idxs, secs, false);
 }
 
+SBombTailTypes ABomb::GetBombTailTypes(const FIntPoint& _matIdx, EBombType _bombType, int _power)
+{
+	SBombTailTypes bombTailTypes;
+
+	bool isUpEnd = false;
+	bool isDownEnd = false;
+	bool isLeftEnd = false;
+	bool isRightEnd = false;
+
+	ATileMap* pMapWall = CurMap->GetWallMap();
+	ATileMap* pBoxWall = CurMap->GetBoxMap();
+
+	for (int i = 1; i <= _power; i++)
+	{
+		bool isLast = (i == _power);
+		EBombTailType upType = GetBombTailType(pMapWall, pBoxWall, _matIdx + FIntPoint::UP * i, &isUpEnd, isLast);
+		EBombTailType downType = GetBombTailType(pMapWall, pBoxWall, _matIdx + FIntPoint::DOWN * i, &isDownEnd, isLast);
+		EBombTailType leftType = GetBombTailType(pMapWall, pBoxWall, _matIdx + FIntPoint::LEFT * i, &isLeftEnd, isLast);
+		EBombTailType rightType = GetBombTailType(pMapWall, pBoxWall, _matIdx + FIntPoint::RIGHT * i, &isRightEnd, isLast);
+
+		if (upType != EBombTailType::NONE) bombTailTypes.Up.push_back(upType);
+		if (downType != EBombTailType::NONE) bombTailTypes.Down.push_back(downType);
+		if (leftType != EBombTailType::NONE) bombTailTypes.Left.push_back(leftType);
+		if (rightType != EBombTailType::NONE) bombTailTypes.Right.push_back(rightType);
+	}
+
+	_ReorginizeExplosion(bombTailTypes.Up);
+	_ReorginizeExplosion(bombTailTypes.Down);
+	_ReorginizeExplosion(bombTailTypes.Left);
+	_ReorginizeExplosion(bombTailTypes.Right);
+
+	return bombTailTypes;
+}
+
+EBombTailType ABomb::GetBombTailType(ATileMap* _pWallMap, ATileMap* _pBoxMap, const FIntPoint& _nextIdx, bool* _isEnd, bool _isLast)
+{
+	if (CurMap == nullptr)
+	{
+		MSGASSERT("맵이 세팅되지 않은채 폭탄을 설치했습니다.");
+	}
+
+	bool hasWall = _pWallMap->IsBlocked(_nextIdx);
+	bool hasBox = _pBoxMap->IsBlocked(_nextIdx);
+
+	if (hasWall == false && *_isEnd == false)
+	{
+		if (hasBox == true)
+		{
+			*_isEnd = true;
+			return EBombTailType::CONNECT;
+		}
+		else
+		{
+			if (_isLast)
+			{
+				return EBombTailType::END;
+			}
+			else if (_pWallMap->IsEdge(_nextIdx))
+			{
+				return EBombTailType::CONNECT;
+			}
+			else
+			{
+				return EBombTailType::CONNECT;
+			}
+		}
+	}
+	else
+	{
+		*_isEnd = true;
+	}
+
+	return EBombTailType::NONE;
+}
+
+std::vector<FIntPoint> ABomb::GetBombRange(const FIntPoint& _matIdx, const SBombTailTypes& _tailInfo)
+{
+	std::vector<FIntPoint> explodeIdxs;
+	explodeIdxs.reserve(GlobalVar::MAX_BOMB_POWER * 4);
+	explodeIdxs.push_back(_matIdx);
+
+	for (size_t i = 0, size = _tailInfo.Up.size(); i < size; ++i)
+	{
+		explodeIdxs.push_back(_matIdx + FIntPoint::UP * (static_cast<int>(i) + 1));
+	}
+	for (size_t i = 0, size = _tailInfo.Down.size(); i < size; ++i)
+	{
+		explodeIdxs.push_back(_matIdx + FIntPoint::DOWN * (static_cast<int>(i) + 1));
+	}
+	for (size_t i = 0, size = _tailInfo.Left.size(); i < size; ++i)
+	{
+		explodeIdxs.push_back(_matIdx + FIntPoint::LEFT * (static_cast<int>(i) + 1));
+	}
+	for (size_t i = 0, size = _tailInfo.Right.size(); i < size; ++i)
+	{
+		explodeIdxs.push_back(_matIdx + FIntPoint::RIGHT * (static_cast<int>(i) + 1));
+	}
+
+	return explodeIdxs;
+}
+
 /* FSM actions */
 void ABomb::ExplodeBySplash()
 {
+	OutputDebugStringA("ABomb::ExplodeBySplash()\n");
 	FSM.ChangeState(EBombState::Launched);
 }
 

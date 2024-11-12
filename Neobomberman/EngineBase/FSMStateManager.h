@@ -67,6 +67,10 @@ public:
 			MSGASSERT("만든적이 없는 스테이트로 체인지 하려고 했습니다.");
 			return;
 		}
+		if (CurState == _Key)
+		{
+			return;
+		}
 
 		CurStateFn = &States[_Key];
 		CurState = _Key;
@@ -84,7 +88,7 @@ public:
 protected:
 
 private:
-	int CurState = 0;
+	int CurState = -1;
 	FSMFunction* CurStateFn = nullptr;
 	std::map<int, FSMFunction> States;
 };

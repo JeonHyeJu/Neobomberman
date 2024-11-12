@@ -72,6 +72,9 @@
     <ClInclude Include="Balloon.h">
       <Filter>Actor</Filter>
     </ClInclude>
+    <ClInclude Include="DebugLog.h">
+      <Filter>Util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Player.cpp">

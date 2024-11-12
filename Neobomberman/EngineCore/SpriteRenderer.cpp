@@ -229,6 +229,7 @@ void USpriteRenderer::ChangeAnimation(std::string_view _AnimationName, bool _For
 {
 	std::string UpperName = UEngineString::ToUpper(_AnimationName);
 
+	this;
 	if (false == FrameAnimations.contains(UpperName))
 	{
 		MSGASSERT("존재하지 않은 애니메이션으로 변경하려고 했습니다. = " + UpperName);

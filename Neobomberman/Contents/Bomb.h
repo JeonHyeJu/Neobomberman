@@ -7,10 +7,13 @@ enum class EBombState
 {
 	Running,
 	Launched,
+	WaitAnim,
 	Exploding,
 	Over
 };
 
+class ATileMap;
+class APlayMap;
 class USpriteRenderer;
 class ABomb : public AActor
 {
@@ -28,9 +31,13 @@ public:
 	void BeginPlay() override;
 	void Tick(float _DeltaTime) override;
 
+	void Init(const FVector2D& _loc, EBombType _bombType, int _power, APlayMap* _curMap);
 	void InitSpriteAndAnim(const SBombTailTypes& _tailInfo);
 	void ExplodeBySplash();
-
+	void SetCurMap(APlayMap* _map)
+	{
+		CurMap = _map;
+	}
 	inline EBombType GetBombType() const
 	{
 		return BombType;
@@ -39,7 +46,6 @@ public:
 	{
 		return static_cast<EBombState>(FSM.GetState());
 	}
-
 	bool IsInSplash(const std::vector<FIntPoint>& _splashVec)
 	{
 		for (size_t i = 0, size = _splashVec.size(); i < size; ++i)
@@ -52,11 +58,33 @@ public:
 		return false;
 	}
 
+	/* Static function */
+	static bool CanSetBombThisIdx(const FIntPoint& _idx)
+	{
+		std::list<ABomb*>::iterator it = ABomb::BombList.begin();
+		std::list<ABomb*>::iterator itEnd = ABomb::BombList.end();
+
+		for (; it != itEnd; ++it)
+		{
+			if (_idx == (*it)->MatrixIdx)
+			{
+				// If a bomb already exists, don't make it.
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 private:
 	void CreateTail(const char* _img, const char* _imgMid, const char* _animName, const FVector2D& loc, const std::vector<EBombTailType>& _tails, std::vector<USpriteRenderer*>* _pAnimVec);
 	void InitSpriteCenter(std::string_view _spriteName, std::string_view _animName, std::string_view _explodeSpriteName);
 	void _InitDefaultSprite4D(std::string_view _spriteName, std::string_view _animName, std::vector<USpriteRenderer*>& _vector, const FVector2D& _loc);
 	void _InitDefaultSprite(USpriteRenderer** _spriteRenderer, std::string_view _spriteName, std::string_view _animName, const FVector2D& _animLoc);
+
+	SBombTailTypes GetBombTailTypes(const FIntPoint& _matIdx, EBombType _bombType, int _power);
+	EBombTailType GetBombTailType(ATileMap* _pWallMap, ATileMap* _pBoxMap, const FIntPoint& _nextIdx, bool* _isEnd, bool _isLast);		// Temp. intergrate two tile map.
+	std::vector<FIntPoint> GetBombRange(const FIntPoint& _matIdx, const SBombTailTypes& _tailInfo);
 
 	void Running(float _deltaTime);
 	void OnLaunched();
@@ -67,7 +95,10 @@ private:
 	void _RunAnimHelper(USpriteRenderer* _centerSprite, std::string_view _animName, bool _isOn=true);
 	void _RunAnimHelper(std::vector<USpriteRenderer*>& _vec, std::string_view _animName, bool _isOff=true);
 
+	static std::list<ABomb*> BombList;
+
 	UFSMStateManager FSM;
+	APlayMap* CurMap = nullptr;
 
 	EBombType BombType = EBombType::PLAIN;
 
@@ -95,7 +126,7 @@ private:
 	const char* IMG_EXPLOSION_LEFTMID = "ExplodeLeftMid.png";
 	const char* IMG_EXPLOSION_RIGHTMID = "ExplodeRightMid.png";
 
-	const char* ANIM_RUNNING = "Bomb_Run";
+	const char* ANIM_BOMB_RUNNING = "Bomb_Run";
 	const char* ANIM_EXPLODE_CENTER = "ExplodeCenter";
 	const char* ANIM_EXPLODE_UP = "ExplodeUp";
 	const char* ANIM_EXPLODE_DOWN = "ExplodeDown";

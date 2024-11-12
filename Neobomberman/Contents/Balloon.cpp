@@ -1,4 +1,6 @@
 #include "PreCompile.h"
+#include "GlobalVar.h"
+#include "ContentsEnum.h"
 #include "Balloon.h"
 #include <EngineCore/SpriteRenderer.h>
 
@@ -14,18 +16,23 @@ ABalloon::~ABalloon()
 
 void ABalloon::BeginPlay()
 {
-	Super::BeginPlay();
+	AMonster::BeginPlay();
 }
 
 void ABalloon::Tick(float _deltaTime)
 {
-	Super::Tick(_deltaTime);
+	AMonster::Tick(_deltaTime);
 }
 
-void ABalloon::Init(std::string_view _spritePath)
+void ABalloon::Init()
 {
-	AMonster::Init(_spritePath);
+	SpriteRenderer = CreateDefaultSubObject<USpriteRenderer>();
+	SpriteRenderer->SetSprite(SPRITE_NAME);
+	SpriteRenderer->SetComponentLocation({ 0, 0 });
+	SpriteRenderer->SetComponentScale(GlobalVar::BOMBERMAN_SIZE);
+	SpriteRenderer->SetPivotType(PivotType::Bot);
+	SpriteRenderer->SetOrder(ERenderOrder::PLAYER);
 
-	SpriteRenderer->CreateAnimation("Run", _spritePath, 0, 8, 0.5f);
+	SpriteRenderer->CreateAnimation("Run", SPRITE_NAME, 0, 8, 0.5f);
 	SpriteRenderer->ChangeAnimation("Run");
 }

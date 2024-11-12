@@ -3,6 +3,7 @@
 #include "TileMap.h"
 #include "PlayMap.h"
 #include "Player.h"
+#include "Bomb.h"
 
 #include <EngineCore/EngineAPICore.h>
 #include <EngineCore/SpriteRenderer.h>
@@ -169,7 +170,7 @@ void APlayer::Tick(float _DeltaTime)
 		default:
 			break;
 	}
-	FVector2D nextPos = GetActorLocation() + (directionPos * _DeltaTime * Speed) + additionalPos;
+	FVector2D nextPos = GetActorLocation() + (directionPos * _DeltaTime * Ability.Speed) + additionalPos;
 
 	// Temp
 	const int POS_X_MIN = 96;	// 48
@@ -209,12 +210,23 @@ void APlayer::Tick(float _DeltaTime)
 
 	if (isMove)
 	{
-		AddActorLocation(directionPos * _DeltaTime * Speed);
+		AddActorLocation(directionPos * _DeltaTime * Ability.Speed);
 	}
 	
 	if (isDownSpace)
 	{
-		CurMap->SetBomb(GetActorLocation(), Ability.BombType, Ability.Power);
+		SetBomb();
+	}
+}
+
+void APlayer::SetBomb()
+{
+	FVector2D loc = GetActorLocation();
+	FIntPoint idx = CurMap->GetGroundMap()->LocationToMatrixIdx(loc);
+	if (ABomb::CanSetBombThisIdx(idx))
+	{
+		ABomb* pBomb = GetWorld()->SpawnActor<ABomb>();
+		pBomb->Init(loc, Ability.BombType, Ability.Power, CurMap);
 	}
 }
 
@@ -235,9 +247,4 @@ void APlayer::LevelChangeEnd()
 void APlayer::SetCollisionImage(std::string_view _ColImageName)
 {
 	CollisionImage = UImageManager::GetInst().FindImage(_ColImageName);
-}
-
-void APlayer::SetCurMap(APlayMap* _map)
-{
-	CurMap = _map;
 }

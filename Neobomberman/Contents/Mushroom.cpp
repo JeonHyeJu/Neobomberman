@@ -14,27 +14,56 @@ AMushroom::~AMushroom()
 
 void AMushroom::BeginPlay()
 {
-	Super::BeginPlay();
+	AMonster::BeginPlay();
 }
 
 void AMushroom::Tick(float _deltaTime)
 {
-	Super::Tick(_deltaTime);
+	AMonster::Tick(_deltaTime);
+
+	// TODO: change to FSM
+	if (State == EMushroomState::INIT_BLINK)
+	{
+		AccumulatedSecs += _deltaTime;
+		if (AccumulatedSecs >= BLINK_SECONDS)
+		{
+			SpriteRenderer->SetActive(true);
+			State = EMushroomState::WALKING;
+			return;
+		}
+
+		SpriteRenderer->SetActiveSwitch();
+	}
+	else if (State == EMushroomState::WALKING)
+	{
+		// Nothing..
+	}
+	else if (State == EMushroomState::JUMPING)
+	{
+
+	}
 }
 
-void AMushroom::Init(std::string_view _spritePath)
+void AMushroom::Init()
 {
-	AMonster::Init(_spritePath);
+	FVector2D size = GlobalVar::BOMBERMAN_SIZE;
 
-	SpriteRenderer->CreateAnimation("Idle_Up", _spritePath, 0, 0, 0.1f);
-	SpriteRenderer->CreateAnimation("Idle_Down", _spritePath, 22, 22, 0.1f);
-	SpriteRenderer->CreateAnimation("Idle_Left", _spritePath, 33, 33, 0.1f);
-	SpriteRenderer->CreateAnimation("Idle_Right", _spritePath, 11, 11, 0.1f);
+	SpriteRenderer = CreateDefaultSubObject<USpriteRenderer>();
+	SpriteRenderer->SetSprite(SPRITE_NAME);
+	SpriteRenderer->SetComponentLocation({ size.X * .25f, size.Y * .5f });
+	SpriteRenderer->SetComponentScale(size);
+	SpriteRenderer->SetPivotType(PivotType::Bot);
+	SpriteRenderer->SetOrder(ERenderOrder::PLAYER);
 
-	SpriteRenderer->CreateAnimation("Run_Up", _spritePath, 1, 6, 0.1f);
-	SpriteRenderer->CreateAnimation("Run_Down", _spritePath, 23, 28, 0.1f);
-	SpriteRenderer->CreateAnimation("Run_Left", _spritePath, 34, 39, 0.1f);
-	SpriteRenderer->CreateAnimation("Run_Right", _spritePath, 12, 17, 0.1f);
+	SpriteRenderer->CreateAnimation("Idle_Up", SPRITE_NAME, 0, 0, 0.1f);
+	SpriteRenderer->CreateAnimation("Idle_Down", SPRITE_NAME, 22, 22, 0.1f);
+	SpriteRenderer->CreateAnimation("Idle_Left", SPRITE_NAME, 33, 33, 0.1f);
+	SpriteRenderer->CreateAnimation("Idle_Right", SPRITE_NAME, 11, 11, 0.1f);
+
+	SpriteRenderer->CreateAnimation("Run_Up", SPRITE_NAME, 1, 6, 0.1f);
+	SpriteRenderer->CreateAnimation("Run_Down", SPRITE_NAME, 23, 28, 0.1f);
+	SpriteRenderer->CreateAnimation("Run_Left", SPRITE_NAME, 34, 39, 0.1f);
+	SpriteRenderer->CreateAnimation("Run_Right", SPRITE_NAME, 12, 17, 0.1f);
 
 	std::vector<int> indexes;
 	std::vector<float> times;
@@ -42,9 +71,9 @@ void AMushroom::Init(std::string_view _spritePath)
 	// temp. TODO
 	int startIdx = 44;
 	int endIdx = 54;
-	int size = endIdx - startIdx;
-	indexes.reserve(size);
-	times.reserve(size);
+	int subIdx = endIdx - startIdx;
+	indexes.reserve(subIdx);
+	times.reserve(subIdx);
 	for (int i = startIdx; i < endIdx; i++)
 	{
 		indexes.push_back(i);
@@ -58,8 +87,10 @@ void AMushroom::Init(std::string_view _spritePath)
 		}
 		
 	}
-	SpriteRenderer->CreateAnimation("Jump", _spritePath, indexes, times);
+	SpriteRenderer->CreateAnimation("Jump", SPRITE_NAME, indexes, times);
 
 	//SpriteRenderer->ChangeAnimation("Idle_Down");
 	SpriteRenderer->ChangeAnimation("Jump");
+
+	State = EMushroomState::INIT_BLINK;
 }

@@ -9,23 +9,6 @@
 #include <EngineCore/SpriteRenderer.h>
 #include <EngineCore/ImageManager.h>
 
-void _ReorginizeExplosion(std::vector<EBombTailType>& _bombTrails)
-{
-	for (size_t i = 0, size = _bombTrails.size(); i < size - 1; ++i)
-	{
-		if (i + 1 >= size) break;
-
-		if (_bombTrails[i] == EBombTailType::END && _bombTrails[i + 1] == EBombTailType::END)
-		{
-			_bombTrails[i] = EBombTailType::CONNECT;
-		}
-		else if (_bombTrails[i] == EBombTailType::END && _bombTrails[i + 1] == EBombTailType::CONNECT)
-		{
-			_bombTrails[i] = EBombTailType::CONNECT;
-		}
-	}
-}
-
 APlayMap::APlayMap()
 {
 }
@@ -38,10 +21,8 @@ void APlayMap::BeginPlay()
 {
 	Super::BeginPlay();
 
-	BombList.clear();
+	ABomb::BombList.clear();
 	SplashTileIdxs.clear();
-
-	InitMap();
 }
 
 void APlayMap::Tick(float _deltaTime)
@@ -94,106 +75,6 @@ void APlayMap::InitMap()
 	MapGround->SetPortal(PortalIdx, { 0, 0 }, GlobalVar::BOMB_SIZE, "ClosedPortal.png");	// Temp
 }
 
-void APlayMap::SetBomb(const FVector2D& _loc, EBombType _bombType, int _power)
-{
-	if (BombList.size() >= GlobalVar::MAX_BOMB_CNT) return;
-
-	FIntPoint matIdx = MapGround->LocationToMatrixIdx(_loc);
-	FIntPoint realIdx = MapGround->LocationToIndex(_loc);
-	FVector2D orderedLoc = MapGround->IndexToLocation(realIdx);
-	SBombTailTypes bombTailTypes = GetBombTailTypes(matIdx, _bombType, _power);
-
-	std::list<ABomb*>::iterator it = BombList.begin();
-	std::list<ABomb*>::iterator itEnd = BombList.end();
-
-	for (; it != itEnd; ++it)
-	{
-		if (matIdx == (*it)->MatrixIdx)
-		{
-			// If a bomb already exists, don't make it.
-			return;
-		}
-	}
-
-	std::vector<FIntPoint> explodeIdxs = GetBombRange(matIdx, bombTailTypes);
-
-	ABomb* pBomb = GetWorld()->SpawnActor<ABomb>();
-	pBomb->SetActorLocation(orderedLoc);
-	pBomb->Size = GlobalVar::BOMB_SIZE;
-	pBomb->Power = _power;
-	pBomb->BombType = _bombType;
-	pBomb->MatrixIdx = matIdx;
-	pBomb->ExplodeIdxs = explodeIdxs;
-	pBomb->InitSpriteAndAnim(bombTailTypes);
-
-	BombList.push_back(pBomb);
-}
-
-SBombTailTypes APlayMap::GetBombTailTypes(const FIntPoint& _matIdx, EBombType _bombType, int _power)
-{
-	SBombTailTypes bombTailTypes;
-
-	bool isUpEnd = false;
-	bool isDownEnd = false;
-	bool isLeftEnd = false;
-	bool isRightEnd = false;
-
-	for (int i = 1; i <= _power; i++)
-	{
-		bool isLast = (i == _power);
-		EBombTailType upType = GetBombTailType(_matIdx + FIntPoint::UP * i, &isUpEnd, isLast);
-		EBombTailType downType = GetBombTailType(_matIdx + FIntPoint::DOWN * i, &isDownEnd, isLast);
-		EBombTailType leftType = GetBombTailType(_matIdx + FIntPoint::LEFT * i, &isLeftEnd, isLast);
-		EBombTailType rightType = GetBombTailType(_matIdx + FIntPoint::RIGHT * i, &isRightEnd, isLast);
-
-		if (upType != EBombTailType::NONE) bombTailTypes.Up.push_back(upType);
-		if (downType != EBombTailType::NONE) bombTailTypes.Down.push_back(downType);
-		if (leftType != EBombTailType::NONE) bombTailTypes.Left.push_back(leftType);
-		if (rightType != EBombTailType::NONE) bombTailTypes.Right.push_back(rightType);
-	}
-
-	_ReorginizeExplosion(bombTailTypes.Up);
-	_ReorginizeExplosion(bombTailTypes.Down);
-	_ReorginizeExplosion(bombTailTypes.Left);
-	_ReorginizeExplosion(bombTailTypes.Right);
-
-	return bombTailTypes;
-}
-
-EBombTailType APlayMap::GetBombTailType(const FIntPoint& _nextIdx, bool* _isEnd, bool _isLast)
-{
-	bool hasWall = MapWall->IsBlocked(_nextIdx);
-	bool hasBox = MapBox->IsBlocked(_nextIdx);
-
-	//OutputDebugString((std::to_string(_nextIdx.X) + ", " + std::to_string(_nextIdx.Y) + " .. " + (hasWall ? "Wall: O " : "Wall: X ") + "\n").c_str());
-
-	if (hasWall == false && *_isEnd == false)
-	{
-		if (hasBox == true)
-		{
-			*_isEnd = true;
-			return EBombTailType::CONNECT;
-		}
-		else
-		{
-			if (_isLast)
-			{
-				return EBombTailType::END;
-			}
-			else if (MapWall->IsEdge(_nextIdx))
-			{
-				return EBombTailType::CONNECT;
-			}
-		}
-	}
-	else
-	{
-		*_isEnd = true;
-	}
-
-	return EBombTailType::NONE;
-}
-
 bool APlayMap::Deserialize(ATileMap* _tileMap, std::string_view _savePath, std::string_view _saveName)
 {
 	if (_tileMap == nullptr) return false;
@@ -213,8 +94,8 @@ bool APlayMap::Deserialize(ATileMap* _tileMap, std::string_view _savePath, std::
 
 void APlayMap::CheckLaunchedBomb()
 {
-	std::list<ABomb*>::iterator it = BombList.begin();
-	std::list<ABomb*>::iterator itEnd = BombList.end();
+	std::list<ABomb*>::iterator it = ABomb::BombList.begin();
+	std::list<ABomb*>::iterator itEnd = ABomb::BombList.end();
 
 	for (; it != itEnd; ++it)
 	{
@@ -227,7 +108,7 @@ void APlayMap::CheckLaunchedBomb()
 		}
 	}
 
-	it = BombList.begin();
+	it = ABomb::BombList.begin();
 	for (; it != itEnd; ++it)
 	{
 		ABomb* pBomb = *it;
@@ -246,8 +127,8 @@ void APlayMap::CheckLaunchedBomb()
 
 void APlayMap::RemoveExplodedBomb()
 {
-	std::list<ABomb*>::iterator it = BombList.begin();
-	std::list<ABomb*>::iterator itEnd = BombList.end();
+	std::list<ABomb*>::iterator it = ABomb::BombList.begin();
+	std::list<ABomb*>::iterator itEnd = ABomb::BombList.end();
 
 	for (; it != itEnd; ++it)
 	{
@@ -259,7 +140,7 @@ void APlayMap::RemoveExplodedBomb()
 			*it = nullptr;
 		}
 	}
-	BombList.remove(nullptr);
+	ABomb::BombList.remove(nullptr);
 }
 
 void APlayMap::CheckExplodedBox()
@@ -278,32 +159,6 @@ void APlayMap::CheckExplodedBox()
 void APlayMap::ClearSplashArray()
 {
 	SplashTileIdxs.clear();
-}
-
-std::vector<FIntPoint> APlayMap::GetBombRange(const FIntPoint& _matIdx, const SBombTailTypes& _tailInfo)
-{
-	std::vector<FIntPoint> explodeIdxs;
-	explodeIdxs.reserve(GlobalVar::MAX_BOMB_POWER * 4);
-	explodeIdxs.push_back(_matIdx);
-
-	for (size_t i = 0, size = _tailInfo.Up.size(); i < size; ++i)
-	{
-		explodeIdxs.push_back(_matIdx + FIntPoint::UP * (static_cast<int>(i) + 1));
-	}
-	for (size_t i = 0, size = _tailInfo.Down.size(); i < size; ++i)
-	{
-		explodeIdxs.push_back(_matIdx + FIntPoint::DOWN * (static_cast<int>(i) + 1));
-	}
-	for (size_t i = 0, size = _tailInfo.Left.size(); i < size; ++i)
-	{
-		explodeIdxs.push_back(_matIdx + FIntPoint::LEFT * (static_cast<int>(i) + 1));
-	}
-	for (size_t i = 0, size = _tailInfo.Right.size(); i < size; ++i)
-	{
-		explodeIdxs.push_back(_matIdx + FIntPoint::RIGHT * (static_cast<int>(i) + 1));
-	}
-
-	return explodeIdxs;
 }
 
 void APlayMap::AppendSplash(const std::vector<FIntPoint>& _appendIdxs)
@@ -325,4 +180,15 @@ void APlayMap::AppendSplash(const std::vector<FIntPoint>& _appendIdxs)
 
 		SplashTileIdxs.push_back(_appendIdxs[i]);
 	}
+}
+
+FVector2D APlayMap::GetPortalLoc() const
+{
+	if (MapGround == nullptr)
+	{
+		return FVector2D::ZERO;
+	}
+
+	FVector2D realLoc = MapGround->GetActorLocation() + MapGround->IndexToLocation(PortalIdx);	// include margin
+	return realLoc;
 }

@@ -12,8 +12,16 @@ public:
 	AMonster& operator=(const AMonster& _other) = delete;
 	AMonster& operator=(AMonster&& _other) noexcept = delete;
 
-	virtual void Init(std::string_view _spritePath);
+	virtual void BeginPlay();
+	virtual void Tick(float _deltaTime);
+	virtual void Init() {};
+
+	void SetCurMap(class APlayMap* _map)
+	{
+		CurMap = _map;
+	}
 
 protected:
 	class USpriteRenderer* SpriteRenderer = nullptr;
+	class APlayMap* CurMap = nullptr;
 };

@@ -33,7 +33,7 @@ void ATileMapGameMode::Tick(float _DeltaTime)
 	Super::Tick(_DeltaTime);
 
 	/** checking **/
-	if (TilePtrs.size() == 0) return;
+	if (TilePtrs.empty()) return;
 
 	ATileMap* curMapPtr = TilePtrs[CurTilePtrIdx];
 	if (curMapPtr == nullptr) return;

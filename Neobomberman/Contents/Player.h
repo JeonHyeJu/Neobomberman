@@ -9,7 +9,7 @@ public:
 	struct PlayerAbility
 	{
 		int Power = 2;
-		int Speed = 1;
+		float Speed = 100.f;
 		int BombCount = 1;
 		bool HasGlove = false;
 		bool HasShoes = false;
@@ -35,13 +35,17 @@ public:
 	void LevelChangeEnd();
 
 	void SetCollisionImage(std::string_view _ColImageName);
-	void SetCurMap(class APlayMap* _map);
+	inline void SetCurMap(class APlayMap* _map)
+	{
+		CurMap = _map;
+	}
 
 protected:
 
 private:
+	void SetBomb();
+
 	int CurIndex = 0;
-	float Speed = 100.0f;
 	const char* PLAYER_SPRITE_PATH = "MainCharater_White.png";	// 1024 x 640 (32x64)
 
 	class USpriteRenderer* SpriteRendererHead = nullptr;
