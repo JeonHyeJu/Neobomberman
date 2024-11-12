@@ -1,5 +1,6 @@
 #pragma once
-#include "EngineCore/Actor.h"
+#include <EngineCore/Actor.h>
+#include <EngineCore/PathFindAStar.h>
 
 class AMonster : public AActor
 {
@@ -16,12 +17,14 @@ public:
 	virtual void Tick(float _deltaTime);
 	virtual void Init() {};
 
-	void SetCurMap(class APlayMap* _map)
-	{
-		CurMap = _map;
-	}
+	void SetCurMap(class APlayMap* _map);
 
 protected:
 	class USpriteRenderer* SpriteRenderer = nullptr;
 	class APlayMap* CurMap = nullptr;
+
+	float Speed = 1.f;
+	UPathFindAStar PathFinder;
+	std::list<FIntPoint> Route;
+	FIntPoint Destination = { -1, -1 };
 };

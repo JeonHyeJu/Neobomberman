@@ -26,4 +26,8 @@ void AMonster::Tick(float _deltaTime)
 	Super::Tick(_deltaTime);
 }
 
-
+void AMonster::SetCurMap(APlayMap* _map)
+{
+	CurMap = _map;
+	PathFinder.SetData(CurMap);
+}

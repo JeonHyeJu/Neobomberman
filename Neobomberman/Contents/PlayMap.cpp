@@ -198,8 +198,11 @@ bool APlayMap::IsMove(const FIntPoint& _Point)
 	bool hasWall = MapWall->IsBlocked(_Point);
 	bool hasBox = MapBox->IsBlocked(_Point);
 
+	/*bool hasWall = MapWall->GetIsMovable(_Point);
+	bool hasBox = MapBox->GetIsMovable(_Point);*/
+
 	// TODO!!: hasBomb
 
-	bool isBlocked = hasWall && hasBox;
+	bool isBlocked = hasWall || hasBox;
 	return !isBlocked;
 }

@@ -26,7 +26,7 @@ protected:
 	void Tick(float _deltaTime) override;
 
 private:
-	void Walk();
+	void Walk(float _deltaTime);
 	void FindPath();
 
 	EMushroomState State = EMushroomState::INIT_BLINK;

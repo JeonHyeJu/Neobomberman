@@ -23,6 +23,7 @@ public:
 	int X = 0;
 	int Y = 0;
 
+	static const FIntPoint ZERO;
 	static const FIntPoint LEFT;
 	static const FIntPoint RIGHT;
 	static const FIntPoint UP;
