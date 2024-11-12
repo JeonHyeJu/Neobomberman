@@ -6,18 +6,14 @@ UPathFindAStar::UPathFindAStar()
 {
 	NodePool.resize(1000);
 
-	// 4방향
-	// WayDir = { {0, 1}, {0, -1}, {1, 0}, {-1, 0} };
-
-	WayDir = { {0, 1}, {0, -1}, {1, 0}, {-1, 0},  {-1, 1}, {-1, -1}, {1, 1}, {1, -1} };
-
+	WayDir = { {0, 1}, {0, -1}, {1, 0}, {-1, 0} };
 }
 
 UPathFindAStar::~UPathFindAStar()
 {
 }
 
-bool Comp(UPathFindNode* first, UPathFindNode* second)
+bool Compare(UPathFindNode* first, UPathFindNode* second)
 {
 	if (first->F < second->F)
 	{
@@ -28,8 +24,6 @@ bool Comp(UPathFindNode* first, UPathFindNode* second)
 		return false;
 	}
 }
-
-
 
 std::list<FIntPoint> UPathFindAStar::PathFind(const FIntPoint& _Start, const FIntPoint& _End)
 {
@@ -47,13 +41,10 @@ std::list<FIntPoint> UPathFindAStar::PathFind(const FIntPoint& _Start, const FIn
 			// 도달 못함.
 			break;
 		}
-		
 
 		// 정렬기준을 정해주는 함수를 넣어주면 
 		// 혹은 내부에 존재하는 녀석이 operator<가능한 값형이면 자동정렬을 해준다.
-		OpenList.sort(Comp);
-
-
+		OpenList.sort(Compare);
 
 		UPathFindNode* CurNode = OpenList.front();
 		// 가장 앞의 노드를 삭제하는 함수.
@@ -98,8 +89,6 @@ std::list<FIntPoint> UPathFindAStar::PathFind(const FIntPoint& _Start, const FIn
 			ResultNode = CurNode;
 			break;
 		}
-
-
 	}
 
 	std::list<FIntPoint> Result;
@@ -114,14 +103,9 @@ std::list<FIntPoint> UPathFindAStar::PathFind(const FIntPoint& _Start, const FIn
 			ResultNode = ResultNode->ParentNode;
 		}
 	}
-	
-
 
 	return Result;
-
 }
-
-
 
 bool UPathFindAStar::FindOpenNode(FIntPoint _Point)
 {
@@ -153,5 +137,4 @@ bool UPathFindAStar::FindCloseNode(FIntPoint _Point)
 	}
 
 	return false;
-
 }

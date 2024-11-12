@@ -2,7 +2,9 @@
 #include "Mushroom.h"
 #include "ContentsEnum.h"
 #include "GlobalVar.h"
+#include "PlayMap.h"
 #include <EngineCore/SpriteRenderer.h>
+#include <EngineCore/PathFindAStar.h>
 
 AMushroom::AMushroom()
 {
@@ -21,12 +23,19 @@ void AMushroom::Tick(float _deltaTime)
 {
 	AMonster::Tick(_deltaTime);
 
+	bool isOverSecond = false;
+	AccumulatedSecs += _deltaTime;
+	if (AccumulatedSecs >= BLINK_SECONDS)
+	{
+		isOverSecond = true;
+	}
+
 	// TODO: change to FSM
 	if (State == EMushroomState::INIT_BLINK)
 	{
-		AccumulatedSecs += _deltaTime;
-		if (AccumulatedSecs >= BLINK_SECONDS)
+		if (isOverSecond)
 		{
+			AccumulatedSecs = 0.f;
 			SpriteRenderer->SetActive(true);
 			State = EMushroomState::WALKING;
 			return;
@@ -36,11 +45,17 @@ void AMushroom::Tick(float _deltaTime)
 	}
 	else if (State == EMushroomState::WALKING)
 	{
-		// Nothing..
+		Walk();
+
+		if (isOverSecond)
+		{
+			AccumulatedSecs = 0.f;
+			FindPath();
+		}
 	}
 	else if (State == EMushroomState::JUMPING)
 	{
-
+		SpriteRenderer->ChangeAnimation("Jump");
 	}
 }
 
@@ -89,8 +104,17 @@ void AMushroom::Init()
 	}
 	SpriteRenderer->CreateAnimation("Jump", SPRITE_NAME, indexes, times);
 
-	//SpriteRenderer->ChangeAnimation("Idle_Down");
-	SpriteRenderer->ChangeAnimation("Jump");
-
 	State = EMushroomState::INIT_BLINK;
+}
+
+void AMushroom::Walk()
+{
+
+}
+
+void AMushroom::FindPath()
+{
+	UPathFindAStar pathFinder;
+	pathFinder.SetData(CurMap);
+	//pathFinder.PathFind();
 }

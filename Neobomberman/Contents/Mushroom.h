@@ -26,6 +26,9 @@ protected:
 	void Tick(float _deltaTime) override;
 
 private:
+	void Walk();
+	void FindPath();
+
 	EMushroomState State = EMushroomState::INIT_BLINK;
 
 	float AccumulatedSecs = 0.f;

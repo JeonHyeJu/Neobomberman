@@ -1,9 +1,10 @@
 #pragma once
 #include <EngineCore/Actor.h>
+#include <EngineCore/PathFindAStar.h>
 #include "ContentsStruct.h"
 
 class ATileMap;
-class APlayMap : public AActor
+class APlayMap : public AActor, public IPathFindData
 {
 public:
 	APlayMap();
@@ -15,6 +16,8 @@ public:
 	APlayMap& operator=(APlayMap&& _Other) noexcept = delete;
 
 	void InitMap();
+	FVector2D GetPortalLoc() const;
+	bool IsMove(const FIntPoint& _Point) override;
 
 	inline ATileMap* GetGroundMap() const
 	{
@@ -32,7 +35,6 @@ public:
 	{
 		PortalIdx = _idx;
 	}
-	FVector2D GetPortalLoc() const;
 
 protected:
 	 void BeginPlay() override;

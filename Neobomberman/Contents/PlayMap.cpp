@@ -192,3 +192,14 @@ FVector2D APlayMap::GetPortalLoc() const
 	FVector2D realLoc = MapGround->GetActorLocation() + MapGround->IndexToLocation(PortalIdx);	// include margin
 	return realLoc;
 }
+
+bool APlayMap::IsMove(const FIntPoint& _Point)
+{
+	bool hasWall = MapWall->IsBlocked(_Point);
+	bool hasBox = MapBox->IsBlocked(_Point);
+
+	// TODO!!: hasBomb
+
+	bool isBlocked = hasWall && hasBox;
+	return !isBlocked;
+}
