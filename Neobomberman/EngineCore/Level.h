@@ -134,6 +134,7 @@ protected:
 private:
 	void ScreenClear();
 	void DoubleBuffering();
+	void BeginPlayCheck();
 
 	void PushRenderer(class USpriteRenderer* _Renderer);
 	void ChangeRenderOrder(class USpriteRenderer* _Renderer, int _PrevOrder);

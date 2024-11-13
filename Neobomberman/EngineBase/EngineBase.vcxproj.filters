@@ -40,6 +40,9 @@
     <ClInclude Include="FSMStateManager.h">
       <Filter>StateMachine</Filter>
     </ClInclude>
+    <ClInclude Include="TimeEvent.h">
+      <Filter>Timer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EngineDebug.cpp">
@@ -80,6 +83,9 @@
     </ClCompile>
     <ClCompile Include="FSMStateManager.cpp">
       <Filter>StateMachine</Filter>
+    </ClCompile>
+    <ClCompile Include="TimeEvent.cpp">
+      <Filter>Timer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

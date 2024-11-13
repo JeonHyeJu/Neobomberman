@@ -55,10 +55,10 @@ public:
 	}
 
 	template<typename EnumType>
-	std::vector<AActor*> CollisionAll(EnumType _OtherCollisionGroup)
+	std::vector<AActor*> CollisionAll(EnumType _OtherCollisionGroup, FVector2D _NextDir)
 	{
 		std::vector<AActor*> Result;
-		Collision(static_cast<int>(_OtherCollisionGroup), Result, -1);
+		Collision(static_cast<int>(_OtherCollisionGroup), Result, _NextDir, -1);
 
 		return Result;
 	}

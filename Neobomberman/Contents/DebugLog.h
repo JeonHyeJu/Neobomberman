@@ -25,3 +25,16 @@ void DebugPrintFIntVector(const std::vector<FIntPoint>& _vec, std::string_view n
 	temp += "\n";
 	OutputDebugString(temp.c_str());
 }
+
+void DebugPrintFIntVector(std::list<FIntPoint>& _vec, std::string_view name = "")
+{
+	std::list<FIntPoint>::iterator it = _vec.begin();
+	std::list<FIntPoint>::iterator itEnd = _vec.end();
+	std::string temp = name.data() + std::string(" : ");
+	for (it; it != itEnd; ++it)
+	{
+		temp += "(" + std::to_string((*it).Y) + "," + std::to_string((*it).X) + "), ";
+	}
+	temp += "\n";
+	OutputDebugString(temp.c_str());
+}

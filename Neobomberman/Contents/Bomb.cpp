@@ -4,7 +4,7 @@
 #include "PlayMap.h"
 #include "GlobalVar.h"
 #include "ContentsEnum.h"
-#include "DebugLog.h"	// TODO: delete
+//#include "DebugLog.h"	// TODO: delete
 
 #include <EngineCore/SpriteRenderer.h>
 #include <EngineBase/EngineDebug.h>

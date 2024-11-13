@@ -47,61 +47,7 @@ ULevel::~ULevel()
 	}
 }
 
-void ULevel::LevelChangeStart()
-{
-	{
-		{
-			std::list<AActor*>::iterator StartIter = AllActors.begin();
-			std::list<AActor*>::iterator EndIter = AllActors.end();
-
-			for (; StartIter != EndIter; ++StartIter)
-			{
-				AActor* CurActor = *StartIter;
-				CurActor->LevelChangeStart();
-			}
-		}
-
-		{
-			std::list<AActor*>::iterator StartIter = BeginPlayList.begin();
-			std::list<AActor*>::iterator EndIter = BeginPlayList.end();
-
-			for (; StartIter != EndIter; ++StartIter)
-			{
-				AActor* CurActor = *StartIter;
-				CurActor->LevelChangeStart();
-			}
-		}
-	}
-}
-
-void ULevel::LevelChangeEnd()
-{
-	{
-		{
-			std::list<AActor*>::iterator StartIter = AllActors.begin();
-			std::list<AActor*>::iterator EndIter = AllActors.end();
-
-			for (; StartIter != EndIter; ++StartIter)
-			{
-				AActor* CurActor = *StartIter;
-				CurActor->LevelChangeEnd();
-			}
-		}
-
-		{
-			std::list<AActor*>::iterator StartIter = BeginPlayList.begin();
-			std::list<AActor*>::iterator EndIter = BeginPlayList.end();
-
-			for (; StartIter != EndIter; ++StartIter)
-			{
-				AActor* CurActor = *StartIter;
-				CurActor->LevelChangeEnd();
-			}
-		}
-	}
-}
-
-void ULevel::Tick(float _DeltaTime)
+void ULevel::BeginPlayCheck()
 {
 	{
 		std::list<AActor*>::iterator StartIter = BeginPlayList.begin();
@@ -117,6 +63,75 @@ void ULevel::Tick(float _DeltaTime)
 		BeginPlayList.clear();
 		AActor::ComponentBeginPlay();
 	}
+
+
+}
+
+void ULevel::LevelChangeStart()
+{
+	BeginPlayCheck();
+
+	{
+		{
+			std::list<AActor*>::iterator StartIter = AllActors.begin();
+			std::list<AActor*>::iterator EndIter = AllActors.end();
+
+			for (; StartIter != EndIter; ++StartIter)
+			{
+				AActor* CurActor = *StartIter;
+
+				CurActor->LevelChangeStart();
+			}
+		}
+
+		{
+			std::list<AActor*>::iterator StartIter = BeginPlayList.begin();
+			std::list<AActor*>::iterator EndIter = BeginPlayList.end();
+
+			for (; StartIter != EndIter; ++StartIter)
+			{
+				AActor* CurActor = *StartIter;
+
+				CurActor->LevelChangeStart();
+			}
+		}
+	}
+
+}
+
+void ULevel::LevelChangeEnd()
+{
+	{
+		{
+			std::list<AActor*>::iterator StartIter = AllActors.begin();
+			std::list<AActor*>::iterator EndIter = AllActors.end();
+
+			for (; StartIter != EndIter; ++StartIter)
+			{
+				AActor* CurActor = *StartIter;
+
+				CurActor->LevelChangeEnd();
+			}
+		}
+
+		{
+			std::list<AActor*>::iterator StartIter = BeginPlayList.begin();
+			std::list<AActor*>::iterator EndIter = BeginPlayList.end();
+
+			for (; StartIter != EndIter; ++StartIter)
+			{
+				AActor* CurActor = *StartIter;
+
+				CurActor->LevelChangeEnd();
+			}
+		}
+	}
+
+}
+
+void ULevel::Tick(float _DeltaTime)
+{
+	BeginPlayCheck();
 
 	{
 		std::list<AActor*>::iterator StartIter = AllActors.begin();

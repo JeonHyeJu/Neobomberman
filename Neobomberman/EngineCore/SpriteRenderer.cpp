@@ -17,6 +17,7 @@ void USpriteRenderer::Render(float _DeltaTime)
 {
 	if (nullptr != CurAnimation)
 	{
+		CurAnimation->IsEnd = false; 
 		std::vector<int>& Indexs = CurAnimation->FrameIndex;
 		std::vector<float>& Times = CurAnimation->FrameTime;
 
@@ -33,9 +34,14 @@ void USpriteRenderer::Render(float _DeltaTime)
 			CurAnimation->CurTime -= CurFrameTime;
 			++CurAnimation->CurIndex;
 
-			if (CurAnimation->Events.contains(CurAnimation->CurIndex))
+			if (CurAnimation->Events.contains(CurIndex))
 			{
-				CurAnimation->Events[CurAnimation->CurIndex]();
+				CurAnimation->Events[CurIndex]();
+			}
+
+			if (CurAnimation->CurIndex >= Indexs.size())
+			{
+				CurAnimation->IsEnd = true;
 			}
 
 			if (CurAnimation->CurIndex >= Indexs.size())
@@ -44,13 +50,14 @@ void USpriteRenderer::Render(float _DeltaTime)
 				{
 					CurAnimation->CurIndex = 0;
 
-					if (CurAnimation->Events.contains(CurAnimation->CurIndex))
+					if (CurAnimation->Events.contains(CurIndex))
 					{
-						CurAnimation->Events[CurAnimation->CurIndex]();
+						CurAnimation->Events[CurIndex]();
 					}
 				}
 				else
 				{
+					CurAnimation->IsEnd = true;
 					--CurAnimation->CurIndex;
 				}
 			}
@@ -80,7 +87,15 @@ void USpriteRenderer::Render(float _DeltaTime)
 	}
 
 	Trans.Location += Pivot;
-	CurData.Image->CopyToTrans(BackBufferImage, Trans, CurData.Transform);
+
+	if (Alpha == 255)
+	{
+		CurData.Image->CopyToTrans(BackBufferImage, Trans, CurData.Transform);
+	}
+	else 
+	{
+		CurData.Image->CopyToAlpha(BackBufferImage, Trans, CurData.Transform, Alpha);
+	}
 }
 
 void USpriteRenderer::BeginPlay()
@@ -229,7 +244,6 @@ void USpriteRenderer::ChangeAnimation(std::string_view _AnimationName, bool _For
 {
 	std::string UpperName = UEngineString::ToUpper(_AnimationName);
 
-	this;
 	if (false == FrameAnimations.contains(UpperName))
 	{
 		MSGASSERT("존재하지 않은 애니메이션으로 변경하려고 했습니다. = " + UpperName);

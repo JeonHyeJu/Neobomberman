@@ -6,6 +6,7 @@
 #include "TileMap.h"
 #include <EngineCore/SpriteRenderer.h>
 #include <EngineCore/PathFindAStar.h>
+#include "DebugLog.h"	// TODO: delete
 
 AMushroom::AMushroom()
 {
@@ -57,7 +58,7 @@ void AMushroom::Tick(float _deltaTime)
 			if (Destination.X == -1 && Destination.Y == -1)
 			{
 				Destination = Route.front();
-				Route.remove(Destination);
+				Route.pop_front();
 			}
 
 			Walk(_deltaTime);
@@ -122,13 +123,29 @@ void AMushroom::Walk(float _deltaTime)
 {
 	static FIntPoint none = FIntPoint{ -1, -1 };
 
-	FVector2D monsterLoc = GetActorLocation();
-	FIntPoint monsterIdx = CurMap->GetGroundMap()->LocationToMatrixIdx(monsterLoc);
+	FVector2D monsterRealLoc = GetActorLocation();
+	FIntPoint monsterRealLocInt = FIntPoint{ static_cast<int>(monsterRealLoc.X), static_cast<int>(monsterRealLoc.Y) };
+	FIntPoint monsterMatrixIdx = CurMap->GetGroundMap()->LocationToMatrixIdx(monsterRealLoc);
 
-	if (monsterIdx == Destination)
+	FVector2D destRealLoc = CurMap->GetGroundMap()->MatrixIdxToLocation(Destination);
+	FIntPoint destRealLocInt = FIntPoint{ static_cast<int>(destRealLoc.X), static_cast<int>(destRealLoc.Y) };
+	FIntPoint destMatrixIdx = Destination;
+
+	//OutputDebugString(("monsterRealLoc: " + std::to_string(monsterRealLoc.X) + ", " + std::to_string(monsterRealLoc.Y) + " ... " + ("destRealLoc: " + std::to_string(destRealLoc.X) + ", " + std::to_string(destRealLoc.Y) + "\n")).c_str());
+	//OutputDebugString(("monsterMatrixIdx: " + std::to_string(monsterMatrixIdx.X) + ", " + std::to_string(monsterMatrixIdx.Y) + " ... " + ("destMatrixIdx: " + std::to_string(destMatrixIdx.X) + ", " + std::to_string(destMatrixIdx.Y) + "\n")).c_str());
+
+	FVector2D direction;
+	bool isGotLast = monsterRealLocInt.X == destRealLocInt.X && monsterRealLocInt.Y <= destRealLocInt.Y;
+
+	if (monsterMatrixIdx == destMatrixIdx)
 	{
-		Destination = none;
-		return;
+		//OutputDebugString("monsterIdx == Destination\n");
+		if (isGotLast)
+		{
+			//OutputDebugString("isGotLast\n");
+			Destination = none;
+			return;
+		}
 	}
 
 	if (Destination == none)
@@ -136,23 +153,48 @@ void AMushroom::Walk(float _deltaTime)
 		return;
 	}
 
-	FVector2D direction = Destination - monsterIdx;
+	// Temp
+	direction = destRealLocInt - monsterRealLocInt;
+	//OutputDebugString(("monsterLoc: " + std::to_string(monsterLoc.X) + ", " + std::to_string(monsterLoc.Y) + " ... " + ("destLoc: " + std::to_string(destLoc.X) + ", " + std::to_string(destLoc.Y) + "\n")).c_str());
+
+	if (direction.X < 0)
+	{
+		direction = FVector2D::LEFT;
+	}
+	else if (direction.X > 0)
+	{
+		direction = FVector2D::RIGHT;
+	}
+	else if (direction.Y < 0)
+	{
+		direction = FVector2D::UP;
+	}
+	else if (direction.Y > 0)
+	{
+		direction = FVector2D::DOWN;
+	}
+
 	if (direction == FVector2D::UP)
 	{
+		//OutputDebugString("UP\n");
 		SpriteRenderer->ChangeAnimation("Run_Up");
 	}
 	else if (direction == FVector2D::DOWN)
 	{
+		//OutputDebugString("DOWN\n");
 		SpriteRenderer->ChangeAnimation("Run_Down");
 	}
 	else if (direction == FVector2D::LEFT)
 	{
+		//OutputDebugString("LEFT\n");
 		SpriteRenderer->ChangeAnimation("Run_Left");
 	}
 	else if (direction == FVector2D::RIGHT)
 	{
+		//OutputDebugString("RIGHT\n");
 		SpriteRenderer->ChangeAnimation("Run_Right");
 	}
+
 	AddActorLocation(direction * _deltaTime * Speed);
 }
 
@@ -164,4 +206,10 @@ void AMushroom::FindPath()
 	FIntPoint monsterIdx = CurMap->GetGroundMap()->LocationToMatrixIdx(monsterLoc);
 
 	Route = PathFinder.PathFind(monsterIdx, playerIdx);
+	if (Route.empty())
+	{
+		Route = PathFinder.PathFindAnotherEdge(monsterIdx);
+	}
+
+	DebugPrintFIntVector(Route, "Route");
 }

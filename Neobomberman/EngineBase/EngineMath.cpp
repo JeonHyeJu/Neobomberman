@@ -33,6 +33,10 @@ public:
 
 		FTransform::AllCollisionFunction[static_cast<int>(ECollisionType::CirCle)][static_cast<int>(ECollisionType::CirCle)] = FTransform::CirCleToCirCle;
 
+		FTransform::AllCollisionFunction[static_cast<int>(ECollisionType::Rect)][static_cast<int>(ECollisionType::CirCle)] = FTransform::RectToCirCle;
+
+		FTransform::AllCollisionFunction[static_cast<int>(ECollisionType::CirCle)][static_cast<int>(ECollisionType::Rect)] = FTransform::CirCleToRect;
+
 	}
 };
 
@@ -43,6 +47,19 @@ bool FTransform::Collision(ECollisionType _LeftType, const FTransform& _Left, EC
 	return FTransform::AllCollisionFunction[static_cast<int>(_LeftType)][static_cast<int>(_RightType)](_Left, _Right);
 }
 
+bool FTransform::PointToCirCle(const FTransform& _Left, const FTransform& _Right)
+{
+	FTransform LeftTrans = _Left;
+	LeftTrans.Scale = FVector2D::ZERO;
+	return CirCleToCirCle(LeftTrans, _Right);
+}
+
+bool FTransform::PointToRect(const FTransform& _Left, const FTransform& _Right)
+{
+	FTransform LeftTrans = _Left;
+	LeftTrans.Scale = FVector2D::ZERO;
+	return RectToRect(LeftTrans, _Right);
+}
 
 bool FTransform::CirCleToCirCle(const FTransform& _Left, const FTransform& _Right)
 {
@@ -80,4 +97,43 @@ bool FTransform::RectToRect(const FTransform& _Left, const FTransform& _Right)
 	}
 
 	return true;
+}
+
+bool FTransform::RectToCirCle(const FTransform& _Left, const FTransform& _Right)
+{
+	return CirCleToRect(_Right, _Left);
+}
+
+bool FTransform::CirCleToRect(const FTransform& _Left, const FTransform& _Right)
+{
+	FTransform WTransform = _Right;
+	WTransform.Scale.X += _Left.Scale.X;
+
+	FTransform HTransform = _Right;
+	HTransform.Scale.Y += _Left.Scale.X;
+
+	if (true == PointToRect(_Left, WTransform) || true == PointToRect(_Left, HTransform))
+	{
+		return true;
+	}
+
+	FVector2D ArrPoint[4];
+
+	ArrPoint[0] = _Right.CenterLeftTop();
+	ArrPoint[1] = _Right.CenterLeftBottom();
+	ArrPoint[2] = _Right.CenterRightTop();
+	ArrPoint[3] = _Right.CenterRightBottom();
+
+	FTransform PointCirCle;
+	PointCirCle.Scale = _Left.Scale;
+	for (size_t i = 0; i < 4; i++)
+	{
+		PointCirCle.Location = ArrPoint[i];
+		if (true == PointToCirCle(_Left, PointCirCle))
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
