@@ -31,16 +31,22 @@ void APlayGameMode::BeginPlay()
 	FVector2D monsterStartingLoc = pStage1->GetPortalLoc();
 
 	AMushroom* monsterMushroom1 = pLevel->SpawnActor<AMushroom>();
-	//AMushroom* monsterMushroom2 = pLevel->SpawnActor<AMushroom>();
+	AMushroom* monsterMushroom2 = pLevel->SpawnActor<AMushroom>();
+
 	//ABalloon* monsterBalloon1 = pLevel->SpawnActor<ABalloon>();
 	//ABalloon* monsterBalloon2 = pLevel->SpawnActor<ABalloon>();
 
 	monsterMushroom1->SetCurMap(pStage1);
-	//monsterMushroom2->SetCurMap(pStage1);
+	monsterMushroom2->SetCurMap(pStage1);
+
 	//monsterBalloon1->SetCurMap(pStage1);
 	//monsterBalloon2->SetCurMap(pStage1);
 
+	monsterMushroom1->SetFirstIndex({ 5, 10 });
+	monsterMushroom2->SetFirstIndex({ 6, 9 });
+
 	monsterMushroom1->SetActorLocation(monsterStartingLoc);
+	monsterMushroom2->SetActorLocation(monsterStartingLoc);
 
 	//pStage2->SetPortalIdx(FIntPoint(6, 10));	// temp
 }

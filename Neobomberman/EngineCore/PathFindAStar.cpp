@@ -1,6 +1,5 @@
 #include "PreCompile.h"
 #include "PathFindAStar.h"
-#include <EngineBase/EngineRandom.h>
 #include <string>	// temp
 
 bool Compare(UPathFindNode* first, UPathFindNode* second)
@@ -19,6 +18,7 @@ UPathFindAStar::UPathFindAStar()
 : WayDir({ {0, 1}, {0, -1}, {1, 0}, {-1, 0} })
 {
 	NodePool.resize(1000);
+	Random.SetSeed(time(nullptr));
 }
 
 UPathFindAStar::~UPathFindAStar()
@@ -124,13 +124,14 @@ std::list<FIntPoint> UPathFindAStar::PathFind(const FIntPoint& _Start, const FIn
 
 	std::list<FIntPoint> Result;
 
-	if (nullptr != ResultNode)
+	if (ResultNode != nullptr)
 	{
-		while (nullptr != ResultNode)
-		{
-			Result.push_front(ResultNode->Point);
-			ResultNode = ResultNode->ParentNode;
-		}
+		Result.push_back(EndPoint);
+	}
+	while (ResultNode != nullptr)
+	{
+		Result.push_front(ResultNode->Point);
+		ResultNode = ResultNode->ParentNode;
 	}
 
 	return Result;
@@ -193,15 +194,14 @@ std::list<FIntPoint> UPathFindAStar::PathFindAnotherEdge(const FIntPoint& _start
 		edges.push_back(RightBottom);
 	}
 
+	// TODO: remove log
 	if (edges.empty())
 	{
 		OutputDebugString(("edges.empty()!!!!!!!!" + std::string("\n")).c_str());
 		return Result;
 	}
 
-	UEngineRandom rd;
-	rd.SetSeed(time(nullptr));
-	int val = rd.RandomInt(0, static_cast<int>(edges.size()-1));
+	int val = Random.RandomInt(0, static_cast<int>(edges.size())-1);
 	FIntPoint endPoint = edges[val];
 
 	std::string vectorStr = "";

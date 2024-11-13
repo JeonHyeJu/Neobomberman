@@ -1,5 +1,6 @@
 #pragma once
 #include <EngineBase/EngineMath.h>
+#include <EngineBase/EngineRandom.h>
 #include <list>
 #include <vector>
 
@@ -55,6 +56,8 @@ private:
 	std::vector<UPathFindNode> NodePool;
 	FIntPoint EndPoint;
 	int PoolCount = 0;
+
+	UEngineRandom Random;
 
 	std::list<UPathFindNode*> OpenList;
 	std::list<UPathFindNode*> CloseList;

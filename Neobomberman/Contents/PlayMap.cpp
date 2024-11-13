@@ -195,6 +195,8 @@ FVector2D APlayMap::GetPortalLoc() const
 
 bool APlayMap::IsMove(const FIntPoint& _Point)
 {
+	// Temp
+	bool isPortal = _Point == FIntPoint({ 6, 10 });
 	bool hasWall = MapWall->IsBlocked(_Point);
 	bool hasBox = MapBox->IsBlocked(_Point);
 
@@ -203,6 +205,6 @@ bool APlayMap::IsMove(const FIntPoint& _Point)
 
 	// TODO!!: hasBomb
 
-	bool isBlocked = hasWall || hasBox;
+	bool isBlocked = hasWall || hasBox || isPortal;
 	return !isBlocked;
 }

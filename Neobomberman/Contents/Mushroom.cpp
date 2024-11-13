@@ -11,6 +11,7 @@
 AMushroom::AMushroom()
 {
 	Speed = 20.f;
+	Random.SetSeed(time(nullptr));
 }
 
 AMushroom::~AMushroom()
@@ -40,17 +41,30 @@ void AMushroom::Tick(float _deltaTime)
 		if (isOverSecond)
 		{
 			SpriteRenderer->SetActive(true);
-			State = EMushroomState::WALKING;
+			State = EMushroomState::INIT_WALKING;
 			return;
 		}
 
 		SpriteRenderer->SetActiveSwitch();
+	}
+	else if (State == EMushroomState::INIT_WALKING)
+	{
+		WalkForFirstLoc(_deltaTime);
 	}
 	else if (State == EMushroomState::WALKING)
 	{
 		// Temp
 		if (Route.empty())
 		{
+			bool isJump = (Random.RandomInt(0, 4) == 0);	// 25%
+			if (isJump && State != EMushroomState::JUMPING)
+			{
+				State = EMushroomState::JUMPING;
+			}
+
+			// TODO: 몬스터별 번갈아서 하도록!
+			// TODO: 정리
+			// TODO: collision
 			FindPath();
 		}
 		else
@@ -66,8 +80,13 @@ void AMushroom::Tick(float _deltaTime)
 	}
 	else if (State == EMushroomState::JUMPING)
 	{
-		SpriteRenderer->ChangeAnimation("Jump");
+		Jump();
 	}
+}
+
+void AMushroom::SetFirstIndex(const FIntPoint& _idx)
+{
+	FirstIdx = _idx;
 }
 
 void AMushroom::Init()
@@ -115,8 +134,36 @@ void AMushroom::Init()
 		
 	}
 	SpriteRenderer->CreateAnimation("Jump", SPRITE_NAME, indexes, times);
+	SpriteRenderer->SetAnimationEvent("Jump", endIdx-1, std::bind(&AMushroom::OnEndJump, this));
 
 	State = EMushroomState::INIT_BLINK;
+}
+
+void AMushroom::WalkForFirstLoc(float _deltaTime)
+{
+	FVector2D firstLoc = CurMap->GetGroundMap()->MatrixIdxToLocation(FirstIdx);
+	FVector2D monsterRealLoc = GetActorLocation();
+
+	// Temp
+	FIntPoint firstLocInt{ static_cast<int>(firstLoc.X), static_cast<int>(firstLoc.Y) };
+	FIntPoint monsterRealLocInt{ static_cast<int>(monsterRealLoc.X), static_cast<int>(monsterRealLoc.Y) };
+
+	if (monsterRealLocInt.X > firstLocInt.X)
+	{
+		Move(FVector2D::LEFT, _deltaTime);
+	}
+	else if (monsterRealLocInt.Y > firstLocInt.Y)
+	{
+		Move(FVector2D::UP, _deltaTime);
+	}
+	else if (monsterRealLocInt.X < firstLocInt.X)
+	{
+		Move(FVector2D::RIGHT, _deltaTime);
+	}
+	else
+	{
+		State = EMushroomState::WALKING;
+	}
 }
 
 void AMushroom::Walk(float _deltaTime)
@@ -174,6 +221,27 @@ void AMushroom::Walk(float _deltaTime)
 		direction = FVector2D::DOWN;
 	}
 
+	Move(direction, _deltaTime);
+}
+
+void AMushroom::FindPath()
+{
+	FVector2D playerLoc = GetWorld()->GetPawn()->GetActorLocation();
+	FIntPoint playerIdx = CurMap->GetGroundMap()->LocationToMatrixIdx(playerLoc);
+	FVector2D monsterLoc = GetActorLocation();
+	FIntPoint monsterIdx = CurMap->GetGroundMap()->LocationToMatrixIdx(monsterLoc);
+
+	Route = PathFinder.PathFind(monsterIdx, playerIdx);
+	if (Route.empty())
+	{
+		Route = PathFinder.PathFindAnotherEdge(monsterIdx);
+	}
+
+	DebugPrintFIntVector(Route, "Route");
+}
+
+void AMushroom::Move(const FVector2D& direction, float _deltaTime)
+{
 	if (direction == FVector2D::UP)
 	{
 		//OutputDebugString("UP\n");
@@ -198,18 +266,12 @@ void AMushroom::Walk(float _deltaTime)
 	AddActorLocation(direction * _deltaTime * Speed);
 }
 
-void AMushroom::FindPath()
+void AMushroom::Jump()
 {
-	FVector2D playerLoc = GetWorld()->GetPawn()->GetActorLocation();
-	FIntPoint playerIdx = CurMap->GetGroundMap()->LocationToMatrixIdx(playerLoc);
-	FVector2D monsterLoc = GetActorLocation();
-	FIntPoint monsterIdx = CurMap->GetGroundMap()->LocationToMatrixIdx(monsterLoc);
+	SpriteRenderer->ChangeAnimation("Jump");
+}
 
-	Route = PathFinder.PathFind(monsterIdx, playerIdx);
-	if (Route.empty())
-	{
-		Route = PathFinder.PathFindAnotherEdge(monsterIdx);
-	}
-
-	DebugPrintFIntVector(Route, "Route");
+void AMushroom::OnEndJump()
+{
+	State = EMushroomState::WALKING;
 }
