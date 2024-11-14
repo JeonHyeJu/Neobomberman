@@ -150,6 +150,7 @@ void AMonster::FindPath()
 void AMonster::Blinking(float _deltaTime)
 {
 	static float accumulatedSecs = 0.f;
+	static float blinkElapsedSecs = 0.f;
 
 	accumulatedSecs += _deltaTime;
 	if (accumulatedSecs >= BLINK_SECONDS)
@@ -160,7 +161,12 @@ void AMonster::Blinking(float _deltaTime)
 		return;
 	}
 
-	SpriteRenderer->SetActiveSwitch();
+	blinkElapsedSecs += _deltaTime;
+	if (blinkElapsedSecs > 0.1f)
+	{
+		blinkElapsedSecs = 0.f;
+		SpriteRenderer->SetActiveSwitch();
+	}
 }
 
 void AMonster::WalkingForStart(float _deltaTime)

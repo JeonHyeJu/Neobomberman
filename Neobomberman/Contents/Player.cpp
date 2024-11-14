@@ -89,8 +89,8 @@ APlayer::APlayer()
 		//DebugOn();
 	}
 
-	DyingAnimInfo.AnimSeconds = 1.f;
-	DyingAnimInfo.WaitSeconds = 3.f;
+	DyingAnimInfo.AnimSeconds = 1.5f;
+	DyingAnimInfo.WaitSeconds = 3.0f;
 
 	SpriteRendererHead->SetOrder(ERenderOrder::PLAYER);
 	SpriteRendererBody->SetOrder(ERenderOrder::PLAYER);
@@ -120,7 +120,6 @@ void APlayer::Tick(float _deltaTime)
 	//UEngineDebug::CoreOutPutString("PlayerPos : " + GetActorLocation().ToString());
 
 	FsmH.Update(_deltaTime);
-
 	return;
 
 	EPlayerState nowState = static_cast<EPlayerState>(FsmH.GetState());
@@ -237,8 +236,14 @@ void APlayer::OnEnterCollision(AActor* _actor)
 /* FSM start functions */
 void APlayer::OnReborn()
 {
-	//SpriteRendererHead->SetActive(true);
-	//SpriteRendererBody->SetActive(true);
+	SpriteRendererHead->SetActive(true);
+	SpriteRendererBody->SetActive(true);
+
+	Direction = FVector2D::ZERO;
+
+	// Temp
+	SpriteRendererHead->ChangeAnimation("Idle_Down");
+	SpriteRendererBody->ChangeAnimation("Idle_Down");
 }
 
 void APlayer::OnIdle()
@@ -266,7 +271,27 @@ void APlayer::OnDead()
 /* FSM update functions */
 void APlayer::Reborning(float _deltaTime)
 {
+	static float allElapsedSecs = 0.f;		// Temp
+	static float elapsedSecs = 0.f;		// TODO: change to local
 
+	allElapsedSecs += _deltaTime;
+	elapsedSecs += _deltaTime;
+
+	if (allElapsedSecs >= 1.f)
+	{
+		SpriteRendererHead->SetActive(true);
+		SpriteRendererBody->SetActive(true);
+
+		FsmH.ChangeState(EPlayerState::IDLE);
+		return;
+	}
+
+	if (elapsedSecs >= 0.1f)
+	{
+		elapsedSecs = 0.f;
+		SpriteRendererHead->SetActiveSwitch();
+		SpriteRendererBody->SetActiveSwitch();
+	}
 }
 
 void APlayer::Idling(float _deltaTime)
@@ -355,14 +380,15 @@ void APlayer::Moving(float _deltaTime)
 void APlayer::Dying(float _deltaTime)
 {
 	static bool isOff = false;
-	static float elapsedSecs = 0.f;
+	static float elapsedSecs = 0.f;		// TODO: change to local
 
 	if (SpriteRendererHead->IsCurAnimationEnd())
 	{
 		DyingAnimInfo.Seconds += _deltaTime;
 
-		/*if (DyingAnimInfo.Seconds >= DyingAnimInfo.AnimSeconds)
+		if (DyingAnimInfo.Seconds >= DyingAnimInfo.AnimSeconds)
 		{
+			// only once
 			if (!isOff)
 			{
 				isOff = true;
@@ -379,17 +405,16 @@ void APlayer::Dying(float _deltaTime)
 				FsmH.ChangeState(EPlayerState::REBORN);
 				return;
 			}
-		}*/
-
-		elapsedSecs += _deltaTime;
-		if (elapsedSecs >= 0.03f)	// Temp
+		}
+		else
 		{
-			unsigned int addr = reinterpret_cast<unsigned int>(this);
-
-			OutputDebugString(("[ " + std::to_string(addr )+" ]BLINK!!, elapsedSecs: " + std::to_string(elapsedSecs) + "\n").c_str());
-			elapsedSecs = 0.f;
-			SpriteRendererHead->SetActiveSwitch();
-			SpriteRendererBody->SetActiveSwitch();
+			elapsedSecs += _deltaTime;
+			if (elapsedSecs >= 0.1f)
+			{
+				elapsedSecs = 0.f;
+				SpriteRendererHead->SetActiveSwitch();
+				SpriteRendererBody->SetActiveSwitch();
+			}
 		}
 	}
 }
