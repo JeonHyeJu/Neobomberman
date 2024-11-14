@@ -119,6 +119,10 @@ void APlayer::Tick(float _deltaTime)
 	UEngineDebug::CoreOutPutString("FPS : " + std::to_string(1.0f / _deltaTime));
 	//UEngineDebug::CoreOutPutString("PlayerPos : " + GetActorLocation().ToString());
 
+	FsmH.Update(_deltaTime);
+
+	return;
+
 	EPlayerState nowState = static_cast<EPlayerState>(FsmH.GetState());
 	if (nowState != EPlayerState::DEAD)
 	{
@@ -149,8 +153,6 @@ void APlayer::Tick(float _deltaTime)
 	//std::string nowPosStr = (std::to_string(nowPos.X) + ", " + std::to_string(nowPos.Y));
 	//std::string additionalPosStr = (std::to_string(additionalPos.X) + ", " + std::to_string(additionalPos.Y) + "\n");
 	//OutputDebugString((nowPosStr + " -> " + additionalPosStr).c_str());
-
-	FsmH.Update(_deltaTime);
 }
 
 bool APlayer::IsDownAnyKeyWithSetDir()
@@ -177,7 +179,8 @@ bool APlayer::IsDownAnyKeyWithSetDir()
 		Direction = FVector2D::UP;
 	}
 
-	return isDownD || isDownA || isDownS || isDownW;
+	bool ret = isDownD || isDownA || isDownS || isDownW;
+	return ret;
 }
 
 bool APlayer::IsPressedAnyKey()
@@ -187,7 +190,8 @@ bool APlayer::IsPressedAnyKey()
 	bool isPressedS = UEngineInput::GetInst().IsPress('S');
 	bool isPressedW = UEngineInput::GetInst().IsPress('W');
 
-	return isPressedD || isPressedA || isPressedS || isPressedW;
+	bool ret = isPressedD || isPressedA || isPressedS || isPressedW;
+	return ret;
 }
 
 std::string APlayer::GetDirectionStr()
