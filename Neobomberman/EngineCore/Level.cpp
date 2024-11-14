@@ -203,7 +203,6 @@ void ULevel::Collision(float _DeltaTime)
 		std::list<class U2DCollision*>::iterator StartLeftIter = LeftList.begin();
 		std::list<class U2DCollision*>::iterator EndLeftIter = LeftList.end();
 
-		std::list<class U2DCollision*>::iterator StartRightIter = RightList.begin();
 		std::list<class U2DCollision*>::iterator EndRightIter = RightList.end();
 
 		for (; StartLeftIter != EndLeftIter; ++StartLeftIter)
@@ -214,6 +213,8 @@ void ULevel::Collision(float _DeltaTime)
 			{
 				continue;
 			}
+
+			std::list<class U2DCollision*>::iterator StartRightIter = RightList.begin();
 
 			for (; StartRightIter != EndRightIter; ++StartRightIter)
 			{

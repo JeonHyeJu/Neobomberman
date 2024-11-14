@@ -3,6 +3,7 @@
 #include <Windows.h>
 #include <EnginePlatform/EngineWindow.h>
 #include <EngineBase/EngineTimer.h>
+#include <EngineBase/EngineString.h>
 #include "Level.h"
 
 #pragma comment (lib, "EngineBase.lib")
@@ -46,14 +47,65 @@ public:
 	template<typename GameModeType, typename MainPawnType>
 	ULevel* CreateLevel(std::string_view _LevelName)
 	{
+		std::string UpperName = UEngineString::ToUpper(_LevelName);
+
+		if (false != Levels.contains(UpperName))
+		{
+			MSGASSERT("존재하는 이름의 레벨을 또 만들수 없습니다" + UpperName);
+			return nullptr;
+		}
+
+
 		ULevel* NewLevel = new ULevel();
 
 		NewLevel->CreateGameMode<GameModeType, MainPawnType>();
+		NewLevel->SetName(UpperName);
 
-		Levels.insert({ _LevelName.data() , NewLevel});
+		Levels.insert({ UpperName, NewLevel });
 
 		return NewLevel;
 	}
+
+
+	template<typename GameModeType, typename MainPawnType>
+	void ResetLevel(std::string_view _LevelName)
+	{
+		std::string UpperName = UEngineString::ToUpper(_LevelName);
+
+		if (CurLevel->GetName() != UpperName)
+		{
+			DestroyLevel(_LevelName);
+			CreateLevel<GameModeType, MainPawnType>(UpperName);
+			return;
+		}
+
+		std::map<std::string, class ULevel*>::iterator FindIter = Levels.find(UpperName);
+		Levels.erase(FindIter);
+		NextLevel = CreateLevel<GameModeType, MainPawnType>(UpperName);
+		IsCurLevelReset = true;
+	}
+
+	void DestroyLevel(std::string_view _LevelName)
+	{
+		std::string UpperName = UEngineString::ToUpper(_LevelName);
+
+		if (false == Levels.contains(UpperName))
+		{
+			// MSGASSERT("존재하지 않는 레벨을 리셋할수 없습니다." + UpperName);
+			return;
+		}
+
+		std::map<std::string, class ULevel*>::iterator FindIter = Levels.find(UpperName);
+
+		if (nullptr != FindIter->second)
+		{
+			delete FindIter->second;
+			FindIter->second = nullptr;
+		}
+
+		Levels.erase(FindIter);
+	}
+
 
 	void OpenLevel(std::string_view _LevelName);
 
@@ -68,6 +120,7 @@ private:
 	static UContentsCore* UserCore;
 	class ULevel* CurLevel = nullptr;
 	class ULevel* NextLevel = nullptr;
+	bool IsCurLevelReset = false;
 
 	UEngineTimer DeltaTimer = UEngineTimer();
 	UEngineWindow EngineMainWindow = UEngineWindow();

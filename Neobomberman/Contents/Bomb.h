@@ -44,7 +44,7 @@ public:
 	}
 	inline EBombState GetState() const
 	{
-		return static_cast<EBombState>(FSM.GetState());
+		return static_cast<EBombState>(Fsm.GetState());
 	}
 	bool IsInSplash(const std::vector<FIntPoint>& _splashVec)
 	{
@@ -97,7 +97,7 @@ private:
 
 	static std::list<ABomb*> BombList;
 
-	UFSMStateManager FSM;
+	UFSMStateManager Fsm;
 	APlayMap* CurMap = nullptr;
 
 	EBombType BombType = EBombType::PLAIN;

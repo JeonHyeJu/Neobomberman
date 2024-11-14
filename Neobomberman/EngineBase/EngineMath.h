@@ -63,7 +63,7 @@ public:
 
 	}
 
-	FIntPoint operator+(FIntPoint _Other) const
+	FIntPoint operator+(const FIntPoint& _Other) const
 	{
 		FIntPoint Result;
 		Result.X = X + _Other.X;
@@ -71,7 +71,7 @@ public:
 		return Result;
 	}
 	
-	FIntPoint operator-(FIntPoint _Other) const
+	FIntPoint operator-(const FIntPoint& _Other) const
 	{
 		FIntPoint Result;
 		Result.X = X - _Other.X;
@@ -95,12 +95,12 @@ public:
 		return Result;
 	}
 
-	bool operator==(FIntPoint _Other) const
+	bool operator==(const FIntPoint& _Other) const
 	{
 		return X == _Other.X && Y == _Other.Y;
 	}
 
-	FIntPoint& operator+=(FIntPoint _Other)
+	FIntPoint& operator+=(const FIntPoint& _Other)
 	{
 		X += _Other.X;
 		Y += _Other.Y;
@@ -213,7 +213,7 @@ public:
 		return Result;
 	}
 
-	FVector2D operator+(FVector2D _Other) const
+	FVector2D operator+(const FVector2D& _Other) const
 	{
 		FVector2D Result;
 		Result.X = X + _Other.X;
@@ -221,7 +221,7 @@ public:
 		return Result;
 	}
 
-	FVector2D& operator-=(FVector2D _Other) 
+	FVector2D& operator-=(const FVector2D& _Other)
 	{
 		X -= _Other.X;
 		Y -= _Other.Y;
@@ -229,7 +229,7 @@ public:
 	}
 
 
-	FVector2D operator-(FVector2D _Other) const
+	FVector2D operator-(const FVector2D& _Other) const
 	{
 		FVector2D Result;
 		Result.X = X - _Other.X;
@@ -261,7 +261,7 @@ public:
 		return Result;
 	}
 
-	bool operator==(FVector2D _Other) const
+	bool operator==(const FVector2D& _Other) const
 	{
 		return X == _Other.X && Y == _Other.Y;
 	}
@@ -271,17 +271,24 @@ public:
 		return iX() == _Other.iX() && iY() == _Other.iY();
 	}
 
-	FVector2D& operator+=(FVector2D _Other)
+	FVector2D& operator+=(const FVector2D& _Other)
 	{
 		X += _Other.X;
 		Y += _Other.Y;
 		return *this;
 	}
 
-	FVector2D& operator*=(float _val)
+	FVector2D& operator*=(const FVector2D& _Other)
 	{
-		X *= _val;
-		Y *= _val;
+		X *= _Other.X;
+		Y *= _Other.Y;
+		return *this;
+	}
+
+	FVector2D& operator*=(float _Other)
+	{
+		X *= _Other;
+		Y *= _Other;
 		return *this;
 	}
 

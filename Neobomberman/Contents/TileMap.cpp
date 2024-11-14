@@ -254,7 +254,7 @@ void ATileMap::SetTilesAnimAfterLoad(std::string_view _animName, std::string_vie
 			}
 
 			// Temp
-			AllTiles[y][x].SpriteRenderer->CreateAnimation(_animName, _spriteName, 0, 10, 0.25f, false);
+			AllTiles[y][x].SpriteRenderer->CreateAnimation(_animName, _spriteName, 0, 10, 0.15f, false);
 			AllTiles[y][x].SpriteRenderer->SetAnimationEvent(_animName, 10, [=]() { DestroySpriteAfterLoad(FIntPoint({ static_cast<int>(x), static_cast<int>(y) })); });
 			AllTiles[y][x].SpriteRenderer->SetOrder(ERenderOrder::CRUMBLING_BOX);
 		}

@@ -6,7 +6,7 @@
 
 ABalloon::ABalloon()
 {
-
+	Speed = 20.f;
 }
 
 ABalloon::~ABalloon()
@@ -26,13 +26,18 @@ void ABalloon::Tick(float _deltaTime)
 
 void ABalloon::Init()
 {
+	FVector2D size = GlobalVar::BOMBERMAN_SIZE;
+
 	SpriteRenderer = CreateDefaultSubObject<USpriteRenderer>();
 	SpriteRenderer->SetSprite(SPRITE_NAME);
-	SpriteRenderer->SetComponentLocation({ 0, 0 });
-	SpriteRenderer->SetComponentScale(GlobalVar::BOMBERMAN_SIZE);
+	SpriteRenderer->SetComponentLocation({ size.X * .25f, size.Y * .5f });
+	SpriteRenderer->SetComponentScale(size);
 	SpriteRenderer->SetPivotType(PivotType::Bot);
-	SpriteRenderer->SetOrder(ERenderOrder::PLAYER);
+	SpriteRenderer->SetOrder(ERenderOrder::MONSTER);
 
-	SpriteRenderer->CreateAnimation("Run", SPRITE_NAME, 0, 8, 0.5f);
-	SpriteRenderer->ChangeAnimation("Run");
+	// For interface.. TODO
+	SpriteRenderer->CreateAnimation("Run_Up", SPRITE_NAME, 0, 8, 0.5f);
+	SpriteRenderer->CreateAnimation("Run_Down", SPRITE_NAME, 0, 8, 0.5f);
+	SpriteRenderer->CreateAnimation("Run_Left", SPRITE_NAME, 0, 8, 0.5f);
+	SpriteRenderer->CreateAnimation("Run_Right", SPRITE_NAME, 0, 8, 0.5f);
 }

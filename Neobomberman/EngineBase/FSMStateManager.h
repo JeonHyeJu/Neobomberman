@@ -40,7 +40,7 @@ public:
 		States[_Key].StartFunction = _Start;
 	}
 
-	void UpdateState(float _DeltaTime)
+	void Update(float _DeltaTime)
 	{
 		if (nullptr == CurStateFn)
 		{

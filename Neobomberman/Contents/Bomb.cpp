@@ -37,10 +37,10 @@ ABomb::ABomb()
 	ExplodeSprites_Left.reserve(GlobalVar::MAX_BOMB_POWER);
 	ExplodeSprites_Right.reserve(GlobalVar::MAX_BOMB_POWER);
 
-	FSM.CreateState(EBombState::Running, std::bind(&ABomb::Running, this, std::placeholders::_1), nullptr);
-	FSM.CreateState(EBombState::Launched, nullptr, std::bind(&ABomb::OnLaunched, this));
-	FSM.CreateState(EBombState::Exploding, nullptr, nullptr);
-	FSM.CreateState(EBombState::Over, nullptr, nullptr);
+	Fsm.CreateState(EBombState::Running, std::bind(&ABomb::Running, this, std::placeholders::_1), nullptr);
+	Fsm.CreateState(EBombState::Launched, nullptr, std::bind(&ABomb::OnLaunched, this));
+	Fsm.CreateState(EBombState::Exploding, nullptr, nullptr);
+	Fsm.CreateState(EBombState::Over, nullptr, nullptr);
 }
 
 ABomb::~ABomb()
@@ -51,14 +51,14 @@ void ABomb::BeginPlay()
 {
 	Super::BeginPlay();
 
-	FSM.ChangeState(EBombState::Running);
+	Fsm.ChangeState(EBombState::Running);
 }
 
 void ABomb::Tick(float _deltaTime)
 {
 	Super::Tick(_deltaTime);
 
-	FSM.UpdateState(_deltaTime);
+	Fsm.Update(_deltaTime);
 }
 
 /* Initialize */
@@ -136,8 +136,8 @@ void ABomb::InitSpriteCenter(std::string_view _spriteName, std::string_view _run
 	// Creating a center explosion animation first
 	_InitDefaultSprite(&ExplodeSprite_Center, _explodeSpriteName, ANIM_EXPLODE_CENTER, { 0, 0 });
 	
-	// Craeteing running bomb animation
-	ExplodeSprite_Center->CreateAnimation(_runnigAnimName, _spriteName, 0, 3, .4f);
+	// Creaeting running bomb animation
+	ExplodeSprite_Center->CreateAnimation(_runnigAnimName, _spriteName, 0, 3, .2f);
 
 	ExplodeSprite_Center->SetAnimationEvent(ANIM_EXPLODE_CENTER, 1, std::bind(&ABomb::OnStartAnimation, this));
 	ExplodeSprite_Center->SetAnimationEvent(ANIM_EXPLODE_CENTER, 19, std::bind(&ABomb::OnEndAnimation, this));
@@ -159,8 +159,8 @@ void ABomb::_InitDefaultSprite(USpriteRenderer** _spriteRenderer, std::string_vi
 {
 	static const int MAX_FRAME = 20;
 	static const int MID_SECONDS = 13;
-	static const float FIRST_ANIM_SECS = .15f;
-	static const float SECOND_ANIM_SECS = .1f;
+	static const float FIRST_ANIM_SECS = .09f;
+	static const float SECOND_ANIM_SECS = .04f;
 
 	FVector2D loc = _animLoc + Size.Half();
 
@@ -294,8 +294,7 @@ std::vector<FIntPoint> ABomb::GetBombRange(const FIntPoint& _matIdx, const SBomb
 /* FSM actions */
 void ABomb::ExplodeBySplash()
 {
-	OutputDebugStringA("ABomb::ExplodeBySplash()\n");
-	FSM.ChangeState(EBombState::Launched);
+	Fsm.ChangeState(EBombState::Launched);
 }
 
 void ABomb::Running(float _deltaTime)
@@ -306,7 +305,7 @@ void ABomb::Running(float _deltaTime)
 	if (AccumulatedSeconds >= EXPLODE_SECONDS)
 	{
 		AccumulatedSeconds = 0;
-		FSM.ChangeState(EBombState::Launched);
+		Fsm.ChangeState(EBombState::Launched);
 	}
 }
 
@@ -318,13 +317,13 @@ void ABomb::OnLaunched()
 /** Animation slots **/
 void ABomb::OnStartAnimation()
 {
-	FSM.ChangeState(EBombState::Exploding);
+	Fsm.ChangeState(EBombState::Exploding);
 }
 
 void ABomb::OnEndAnimation()
 {
 	RunExplosionAnim(false);
-	FSM.ChangeState(EBombState::Over);
+	Fsm.ChangeState(EBombState::Over);
 }
 
 /* Helpers */

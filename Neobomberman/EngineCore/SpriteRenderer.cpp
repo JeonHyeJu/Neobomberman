@@ -15,6 +15,51 @@ USpriteRenderer::~USpriteRenderer()
 
 void USpriteRenderer::Render(float _DeltaTime)
 {
+	if (nullptr == Sprite)
+	{
+		MSGASSERT("스프라이트가 세팅되지 않은 액터를 랜더링을 할수 없습니다.");
+		return;
+	}
+	UEngineWindow& MainWindow = UEngineAPICore::GetCore()->GetMainWindow();
+	UEngineWinImage* BackBufferImage = MainWindow.GetBackBuffer();
+	UEngineSprite::USpriteData CurData = Sprite->GetSpriteData(CurIndex);
+
+	FTransform Trans = GetActorTransform();
+
+	ULevel* Level = GetActor()->GetWorld();
+
+	if (true == IsCameraEffect)
+	{
+		Trans.Location = Trans.Location - (Level->CameraPos * CameraEffectScale);
+	}
+
+	Trans.Location += Pivot;
+
+
+	if (Alpha == 255)
+	{
+		CurData.Image->CopyToTrans(BackBufferImage, Trans, CurData.Transform);
+	}
+	else
+	{
+		CurData.Image->CopyToAlpha(BackBufferImage, Trans, CurData.Transform, Alpha);
+	}
+}
+
+void USpriteRenderer::BeginPlay()
+{
+	Super::BeginPlay();
+
+	AActor* Actor = GetActor();
+	ULevel* Level = Actor->GetWorld();
+
+	Level->PushRenderer(this);
+}
+
+void USpriteRenderer::ComponentTick(float _DeltaTime)
+{
+	Super::ComponentTick(_DeltaTime);
+
 	if (nullptr != CurAnimation)
 	{
 		CurAnimation->IsEnd = false; 
@@ -68,49 +113,6 @@ void USpriteRenderer::Render(float _DeltaTime)
 		// ++CurAnimation->CurIndex;
 	}
 
-	if (nullptr == Sprite)
-	{
-		MSGASSERT("스프라이트가 세팅되지 않은 액터를 랜더링을 할수 없습니다.");
-		return;
-	}
-
-	UEngineWindow& MainWindow = UEngineAPICore::GetCore()->GetMainWindow();
-	UEngineWinImage* BackBufferImage = MainWindow.GetBackBuffer();
-	UEngineSprite::USpriteData CurData = Sprite->GetSpriteData(CurIndex);
-
-	FTransform Trans = GetActorTransform();
-	ULevel* Level = GetActor()->GetWorld();
-
-	if (true == IsCameraEffect)
-	{
-		Trans.Location = Trans.Location - (Level->CameraPos * CameraEffectScale);
-	}
-
-	Trans.Location += Pivot;
-
-	if (Alpha == 255)
-	{
-		CurData.Image->CopyToTrans(BackBufferImage, Trans, CurData.Transform);
-	}
-	else 
-	{
-		CurData.Image->CopyToAlpha(BackBufferImage, Trans, CurData.Transform, Alpha);
-	}
-}
-
-void USpriteRenderer::BeginPlay()
-{
-	Super::BeginPlay();
-
-	AActor* Actor = GetActor();
-	ULevel* Level = Actor->GetWorld();
-
-	Level->PushRenderer(this);
-}
-
-void USpriteRenderer::ComponentTick(float _DeltaTime)
-{
-	Super::ComponentTick(_DeltaTime);
 }
 
 void USpriteRenderer::SetSprite(std::string_view _Name, int _CurIndex /*= 0*/)
@@ -132,6 +134,13 @@ void USpriteRenderer::SetOrder(int _Order)
 
 	Order = _Order;
 
+	if (PrevOrder == Order)
+	{
+		return;
+	}
+
+	// 동적으로 해야할때는 레벨이 세팅되어 있을 것이므로
+	// 레벨이 세팅되어 있다면 즉각 바꿔준다.
 	ULevel* Level = GetActor()->GetWorld();
 
 	if (nullptr != Level)
@@ -159,12 +168,6 @@ FVector2D USpriteRenderer::SetSpriteScale(float _Ratio /*= 1.0f*/, int _CurIndex
 
 void USpriteRenderer::CreateAnimation(std::string_view _AnimationName, std::string_view _SpriteName, int _Start, int _End, float Time /*= 0.1f*/, bool _Loop /*= true*/)
 {
-	if (_Start > _End)
-	{
-		MSGASSERT("애니메이션에서 Start가 End보다 클수는 없습니다. " + std::string(_AnimationName));
-		return;
-	}
-
 	int Inter = 0;
 
 	std::vector<int> Indexs;
@@ -180,7 +183,8 @@ void USpriteRenderer::CreateAnimation(std::string_view _AnimationName, std::stri
 			++_Start;
 		}
 
-	} else 
+	}
+	else
 	{
 		Inter = (_Start - _End) + 1;
 		for (size_t i = 0; i < Inter; i++)
@@ -259,6 +263,7 @@ void USpriteRenderer::ChangeAnimation(std::string_view _AnimationName, bool _For
 
 	CurAnimation = &FrameAnimations[UpperName];
 	CurAnimation->Reset();
+	CurIndex = CurAnimation->FrameIndex[CurAnimation->CurIndex];
 
 	if (CurAnimation->Events.contains(CurAnimation->CurIndex))
 	{

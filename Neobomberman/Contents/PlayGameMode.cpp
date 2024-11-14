@@ -30,24 +30,44 @@ void APlayGameMode::BeginPlay()
 
 	FVector2D monsterStartingLoc = pStage1->GetPortalLoc();
 
-	AMushroom* monsterMushroom1 = pLevel->SpawnActor<AMushroom>();
-	AMushroom* monsterMushroom2 = pLevel->SpawnActor<AMushroom>();
+	// Temp. to test collision
+	AMushroom* monsterMushroom = pLevel->SpawnActor<AMushroom>();
+	monsterMushroom->SetCurMap(pStage1);
+	monsterMushroom->SetFirstDestination({ 0, 0 });
+	monsterMushroom->SetActorLocation(Player->GetActorLocation() + FVector2D({ 64, 0 }) - FVector2D({ 16, 16 }));
+	
+	// TODO: spawn delay
+	/*{
+		AMushroom* monsterMushroom = pLevel->SpawnActor<AMushroom>();
+		monsterMushroom->SetCurMap(pStage1);
+		monsterMushroom->SetFirstDestination({ 5, 10 });
+		monsterMushroom->SetActorLocation(monsterStartingLoc);
+	}
 
-	//ABalloon* monsterBalloon1 = pLevel->SpawnActor<ABalloon>();
-	//ABalloon* monsterBalloon2 = pLevel->SpawnActor<ABalloon>();
+	{
+		AMushroom* monsterMushroom = pLevel->SpawnActor<AMushroom>();
+		monsterMushroom->SetCurMap(pStage1);
+		monsterMushroom->SetFirstDestination({ 6, 9 });
+		monsterMushroom->SetActorLocation(monsterStartingLoc);
+		monsterMushroom->SetStartDelay(1.f);
+	}
 
-	monsterMushroom1->SetCurMap(pStage1);
-	monsterMushroom2->SetCurMap(pStage1);
+	{
+		ABalloon* monsterBalloon = pLevel->SpawnActor<ABalloon>();
+		monsterBalloon->SetCurMap(pStage1);
+		monsterBalloon->SetFirstDestination({ 6, 9 });
+		monsterBalloon->SetActorLocation(monsterStartingLoc);
+		monsterBalloon->SetStartDelay(2.f);
+	}
 
-	//monsterBalloon1->SetCurMap(pStage1);
-	//monsterBalloon2->SetCurMap(pStage1);
-
-	monsterMushroom1->SetFirstIndex({ 5, 10 });
-	monsterMushroom2->SetFirstIndex({ 6, 9 });
-
-	monsterMushroom1->SetActorLocation(monsterStartingLoc);
-	monsterMushroom2->SetActorLocation(monsterStartingLoc);
-
+	{
+		ABalloon* monsterBalloon = pLevel->SpawnActor<ABalloon>();
+		monsterBalloon->SetCurMap(pStage1);
+		monsterBalloon->SetFirstDestination({ 7, 10 });
+		monsterBalloon->SetActorLocation(monsterStartingLoc);
+		monsterBalloon->SetStartDelay(3.f);
+	}*/
+	
 	//pStage2->SetPortalIdx(FIntPoint(6, 10));	// temp
 }
 
