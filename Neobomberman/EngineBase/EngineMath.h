@@ -51,6 +51,7 @@ public:
 	static const FIntPoint RIGHT;
 	static const FIntPoint UP;
 	static const FIntPoint DOWN;
+	static const FIntPoint NEGATIVE_ONE;
 
 	FIntPoint()
 	{

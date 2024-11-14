@@ -1,6 +1,5 @@
 #include "PreCompile.h"
 #include "PathFindAStar.h"
-#include <string>	// temp
 
 bool Compare(UPathFindNode* first, UPathFindNode* second)
 {
@@ -31,7 +30,6 @@ void UPathFindAStar::NodeClear()
 	CloseList.clear();
 	PoolCount = 0;
 
-	// Temp
 	LeftTop = InitLeftTop;
 	RightTop = InitRightTop;
 	LeftBottom = InitLeftBottom;
@@ -64,9 +62,7 @@ UPathFindNode* UPathFindAStar::GetNewNode(FIntPoint _Point, UPathFindNode* _Pare
 
 std::list<FIntPoint> UPathFindAStar::PathFind(const FIntPoint& _Start, const FIntPoint& _End)
 {
-	OutputDebugString("UPathFindAStar::PathFind()\n");
 	NodeClear();
-
 	EndPoint = _End;
 	GetNewNode(_Start, nullptr);
 
@@ -139,7 +135,6 @@ std::list<FIntPoint> UPathFindAStar::PathFind(const FIntPoint& _Start, const FIn
 
 std::list<FIntPoint> UPathFindAStar::PathFindAnotherEdge(const FIntPoint& _start)
 {
-	OutputDebugString("UPathFindAStar::PathFindAnotherEdge()\n");
 	std::list<FIntPoint> Result;
 
 	if (CloseList.empty())
@@ -153,7 +148,6 @@ std::list<FIntPoint> UPathFindAStar::PathFindAnotherEdge(const FIntPoint& _start
 	for (; it != itEnd; ++it)
 	{
 		const FIntPoint& pt = (*it)->Point;
-		//OutputDebugString(("- Org: " + std::to_string(pt.X) + ", " + std::to_string(pt.Y) + "\n").c_str());
 
 		if (pt.X <= LeftTop.X && pt.Y <= LeftTop.Y)
 		{
@@ -176,7 +170,6 @@ std::list<FIntPoint> UPathFindAStar::PathFindAnotherEdge(const FIntPoint& _start
 	std::vector<FIntPoint> edges;
 	edges.reserve(4);
 
-	// Temp
 	if (LeftTop != InitLeftTop)
 	{
 		edges.push_back(LeftTop);
@@ -194,10 +187,8 @@ std::list<FIntPoint> UPathFindAStar::PathFindAnotherEdge(const FIntPoint& _start
 		edges.push_back(RightBottom);
 	}
 
-	// TODO: remove log
 	if (edges.empty())
 	{
-		OutputDebugString(("edges.empty()!!!!!!!!" + std::string("\n")).c_str());
 		return Result;
 	}
 
@@ -212,10 +203,6 @@ std::list<FIntPoint> UPathFindAStar::PathFindAnotherEdge(const FIntPoint& _start
 	vectorStr += "\n";
 
 	Result = PathFind(_start, endPoint);
-	std::string startStr = std::to_string(_start.Y) + ", " + std::to_string(_start.X);
-	std::string endStr = std::to_string(endPoint.Y) + ", " + std::to_string(endPoint.X);
-	OutputDebugString(("EdgeVector[" + std::to_string(val)+ "]: " + vectorStr).c_str());
-	OutputDebugString(("PathFindAnotherEdge 2.. (" + startStr + ") ~ (" + endStr + ") ... " + std::to_string(Result.size()) + "\n").c_str());
 	return Result;
 }
 

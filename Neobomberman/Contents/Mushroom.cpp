@@ -6,12 +6,17 @@
 #include "TileMap.h"
 #include <EngineCore/SpriteRenderer.h>
 #include <EngineCore/PathFindAStar.h>
-#include "DebugLog.h"	// TODO: delete
+//#include "DebugLog.h"	// TODO: delete
 
 AMushroom::AMushroom()
 {
 	Speed = 20.f;
-	Random.SetSeed(time(nullptr));
+
+	FSM.CreateState(EMushroomState::INIT_BLINK, std::bind(&AMushroom::Blinking, this, std::placeholders::_1));
+	FSM.CreateState(EMushroomState::INIT_WALKING, std::bind(&AMushroom::WalkingForStart, this, std::placeholders::_1));
+	FSM.CreateState(EMushroomState::THINKING, std::bind(&AMushroom::Thinking, this, std::placeholders::_1));
+	FSM.CreateState(EMushroomState::WALKING, std::bind(&AMushroom::Walking, this, std::placeholders::_1));
+	FSM.CreateState(EMushroomState::JUMPING, std::bind(&AMushroom::Jumping, this, std::placeholders::_1));
 }
 
 AMushroom::~AMushroom()
@@ -27,66 +32,13 @@ void AMushroom::Tick(float _deltaTime)
 {
 	AMonster::Tick(_deltaTime);
 
-	bool isOverSecond = false;
-	AccumulatedSecs += _deltaTime;
-	if (AccumulatedSecs >= BLINK_SECONDS)
-	{
-		AccumulatedSecs = 0.f;
-		isOverSecond = true;
-	}
-
-	// TODO: change to FSM
-	if (State == EMushroomState::INIT_BLINK)
-	{
-		if (isOverSecond)
-		{
-			SpriteRenderer->SetActive(true);
-			State = EMushroomState::INIT_WALKING;
-			return;
-		}
-
-		SpriteRenderer->SetActiveSwitch();
-	}
-	else if (State == EMushroomState::INIT_WALKING)
-	{
-		WalkForFirstLoc(_deltaTime);
-	}
-	else if (State == EMushroomState::WALKING)
-	{
-		// Temp
-		if (Route.empty())
-		{
-			bool isJump = (Random.RandomInt(0, 4) == 0);	// 25%
-			if (isJump && State != EMushroomState::JUMPING)
-			{
-				State = EMushroomState::JUMPING;
-			}
-
-			// TODO: 몬스터별 번갈아서 하도록!
-			// TODO: 정리
-			// TODO: collision
-			FindPath();
-		}
-		else
-		{
-			if (Destination.X == -1 && Destination.Y == -1)
-			{
-				Destination = Route.front();
-				Route.pop_front();
-			}
-
-			Walk(_deltaTime);
-		}
-	}
-	else if (State == EMushroomState::JUMPING)
-	{
-		Jump();
-	}
+	FSM.UpdateState(_deltaTime);
 }
 
 void AMushroom::SetFirstIndex(const FIntPoint& _idx)
 {
 	FirstIdx = _idx;
+	Random.SetSeed(FirstIdx.X);
 }
 
 void AMushroom::Init()
@@ -114,16 +66,16 @@ void AMushroom::Init()
 	std::vector<int> indexes;
 	std::vector<float> times;
 
-	// temp. TODO
-	int startIdx = 44;
-	int endIdx = 54;
-	int subIdx = endIdx - startIdx;
-	indexes.reserve(subIdx);
-	times.reserve(subIdx);
-	for (int i = startIdx; i < endIdx; i++)
+	int jumpAnimSize = IDX_ANIM_END - IDX_ANIM_START;
+	indexes.reserve(jumpAnimSize);
+	times.reserve(jumpAnimSize);
+
+	const int IDX_LONG_START = IDX_ANIM_START + 3;
+	const int IDX_LONG_END = IDX_ANIM_END - 3;
+	for (int i = IDX_ANIM_START; i < IDX_ANIM_END; i++)
 	{
 		indexes.push_back(i);
-		if (i >= startIdx+3 && i < endIdx-3)
+		if (i >= IDX_LONG_START && i < IDX_LONG_END)
 		{
 			times.push_back(1.f);
 		}
@@ -133,95 +85,9 @@ void AMushroom::Init()
 		}
 		
 	}
-	SpriteRenderer->CreateAnimation("Jump", SPRITE_NAME, indexes, times);
-	SpriteRenderer->SetAnimationEvent("Jump", endIdx-1, std::bind(&AMushroom::OnEndJump, this));
+	SpriteRenderer->CreateAnimation("Jump", SPRITE_NAME, indexes, times, false);
 
-	State = EMushroomState::INIT_BLINK;
-}
-
-void AMushroom::WalkForFirstLoc(float _deltaTime)
-{
-	FVector2D firstLoc = CurMap->GetGroundMap()->MatrixIdxToLocation(FirstIdx);
-	FVector2D monsterRealLoc = GetActorLocation();
-
-	// Temp
-	FIntPoint firstLocInt{ static_cast<int>(firstLoc.X), static_cast<int>(firstLoc.Y) };
-	FIntPoint monsterRealLocInt{ static_cast<int>(monsterRealLoc.X), static_cast<int>(monsterRealLoc.Y) };
-
-	if (monsterRealLocInt.X > firstLocInt.X)
-	{
-		Move(FVector2D::LEFT, _deltaTime);
-	}
-	else if (monsterRealLocInt.Y > firstLocInt.Y)
-	{
-		Move(FVector2D::UP, _deltaTime);
-	}
-	else if (monsterRealLocInt.X < firstLocInt.X)
-	{
-		Move(FVector2D::RIGHT, _deltaTime);
-	}
-	else
-	{
-		State = EMushroomState::WALKING;
-	}
-}
-
-void AMushroom::Walk(float _deltaTime)
-{
-	static FIntPoint none = FIntPoint{ -1, -1 };
-
-	FVector2D monsterRealLoc = GetActorLocation();
-	FIntPoint monsterRealLocInt = FIntPoint{ static_cast<int>(monsterRealLoc.X), static_cast<int>(monsterRealLoc.Y) };
-	FIntPoint monsterMatrixIdx = CurMap->GetGroundMap()->LocationToMatrixIdx(monsterRealLoc);
-
-	FVector2D destRealLoc = CurMap->GetGroundMap()->MatrixIdxToLocation(Destination);
-	FIntPoint destRealLocInt = FIntPoint{ static_cast<int>(destRealLoc.X), static_cast<int>(destRealLoc.Y) };
-	FIntPoint destMatrixIdx = Destination;
-
-	//OutputDebugString(("monsterRealLoc: " + std::to_string(monsterRealLoc.X) + ", " + std::to_string(monsterRealLoc.Y) + " ... " + ("destRealLoc: " + std::to_string(destRealLoc.X) + ", " + std::to_string(destRealLoc.Y) + "\n")).c_str());
-	//OutputDebugString(("monsterMatrixIdx: " + std::to_string(monsterMatrixIdx.X) + ", " + std::to_string(monsterMatrixIdx.Y) + " ... " + ("destMatrixIdx: " + std::to_string(destMatrixIdx.X) + ", " + std::to_string(destMatrixIdx.Y) + "\n")).c_str());
-
-	FVector2D direction;
-	bool isGotLast = monsterRealLocInt.X == destRealLocInt.X && monsterRealLocInt.Y <= destRealLocInt.Y;
-
-	if (monsterMatrixIdx == destMatrixIdx)
-	{
-		//OutputDebugString("monsterIdx == Destination\n");
-		if (isGotLast)
-		{
-			//OutputDebugString("isGotLast\n");
-			Destination = none;
-			return;
-		}
-	}
-
-	if (Destination == none)
-	{
-		return;
-	}
-
-	// Temp
-	direction = destRealLocInt - monsterRealLocInt;
-	//OutputDebugString(("monsterLoc: " + std::to_string(monsterLoc.X) + ", " + std::to_string(monsterLoc.Y) + " ... " + ("destLoc: " + std::to_string(destLoc.X) + ", " + std::to_string(destLoc.Y) + "\n")).c_str());
-
-	if (direction.X < 0)
-	{
-		direction = FVector2D::LEFT;
-	}
-	else if (direction.X > 0)
-	{
-		direction = FVector2D::RIGHT;
-	}
-	else if (direction.Y < 0)
-	{
-		direction = FVector2D::UP;
-	}
-	else if (direction.Y > 0)
-	{
-		direction = FVector2D::DOWN;
-	}
-
-	Move(direction, _deltaTime);
+	FSM.ChangeState(EMushroomState::INIT_BLINK);
 }
 
 void AMushroom::FindPath()
@@ -237,41 +103,182 @@ void AMushroom::FindPath()
 		Route = PathFinder.PathFindAnotherEdge(monsterIdx);
 	}
 
-	DebugPrintFIntVector(Route, "Route");
+	//DebugPrintFIntVector(Route, "Route");
+}
+
+FVector2D AMushroom::GetDirection(const FIntPoint& _vec)
+{
+	FVector2D direction = _vec;
+
+	if (_vec.X < 0)
+	{
+		direction = FVector2D::LEFT;
+	}
+	else if (_vec.X > 0)
+	{
+		direction = FVector2D::RIGHT;
+	}
+	else if (_vec.Y < 0)
+	{
+		direction = FVector2D::UP;
+	}
+	else if (_vec.Y > 0)
+	{
+		direction = FVector2D::DOWN;
+	}
+
+	return direction;
 }
 
 void AMushroom::Move(const FVector2D& direction, float _deltaTime)
 {
 	if (direction == FVector2D::UP)
 	{
-		//OutputDebugString("UP\n");
 		SpriteRenderer->ChangeAnimation("Run_Up");
 	}
 	else if (direction == FVector2D::DOWN)
 	{
-		//OutputDebugString("DOWN\n");
 		SpriteRenderer->ChangeAnimation("Run_Down");
 	}
 	else if (direction == FVector2D::LEFT)
 	{
-		//OutputDebugString("LEFT\n");
 		SpriteRenderer->ChangeAnimation("Run_Left");
 	}
 	else if (direction == FVector2D::RIGHT)
 	{
-		//OutputDebugString("RIGHT\n");
 		SpriteRenderer->ChangeAnimation("Run_Right");
 	}
 
 	AddActorLocation(direction * _deltaTime * Speed);
 }
 
-void AMushroom::Jump()
+bool AMushroom::IsJump()
 {
-	SpriteRenderer->ChangeAnimation("Jump");
+	bool isJump = Random.RandomInt(0, 4) == 0;
+	EMushroomState nowState = static_cast<EMushroomState>(FSM.GetState());
+
+	if (isJump && nowState != EMushroomState::JUMPING)
+	{
+		return true;
+	}
+
+	return false;
 }
 
-void AMushroom::OnEndJump()
+bool AMushroom::IsArrivedAtOneBlock()
 {
-	State = EMushroomState::WALKING;
+	return Destination.X == -1 && Destination.Y == -1;
+}
+
+void AMushroom::Blinking(float _deltaTime)
+{
+	static float accumulatedSecs = 0.f;
+
+	accumulatedSecs += _deltaTime;
+	if (accumulatedSecs >= BLINK_SECONDS)
+	{
+		accumulatedSecs = 0.f;
+		SpriteRenderer->SetActive(true);
+		FSM.ChangeState(EMushroomState::INIT_WALKING);
+		return;
+	}
+
+	SpriteRenderer->SetActiveSwitch();
+}
+
+void AMushroom::WalkingForStart(float _deltaTime)
+{
+	FVector2D firstLoc = CurMap->GetGroundMap()->MatrixIdxToLocation(FirstIdx);
+	FVector2D monsterRealLoc = GetActorLocation();
+
+	FIntPoint firstLocInt = firstLoc.ConvertToPoint();
+	FIntPoint monsterRealLocInt = monsterRealLoc.ConvertToPoint();
+
+	if (monsterRealLocInt.X > firstLocInt.X)
+	{
+		Move(FVector2D::LEFT, _deltaTime);
+	}
+	else if (monsterRealLocInt.Y > firstLocInt.Y)
+	{
+		Move(FVector2D::UP, _deltaTime);
+	}
+	else if (monsterRealLocInt.X < firstLocInt.X)
+	{
+		Move(FVector2D::RIGHT, _deltaTime);
+	}
+	else
+	{
+		FSM.ChangeState(EMushroomState::THINKING);
+	}
+}
+
+void AMushroom::Thinking(float _deltaTime)
+{
+	if (Route.empty())
+	{
+		// TODO: 몬스터별 번갈아서 하도록!
+		// TODO: collision
+		FindPath();
+
+		if (IsJump())
+		{
+			FSM.ChangeState(EMushroomState::JUMPING);
+		}
+	}
+	else
+	{
+		FSM.ChangeState(EMushroomState::WALKING);
+	}
+}
+
+void AMushroom::Walking(float _deltaTime)
+{
+	if (Route.empty())
+	{
+		FSM.ChangeState(EMushroomState::THINKING);
+		return;
+	}
+
+	if (IsArrivedAtOneBlock())
+	{
+		Destination = Route.front();
+		Route.pop_front();
+	}
+
+	FVector2D monsterRealLoc = GetActorLocation();
+	FIntPoint monsterRealLocInt = monsterRealLoc.ConvertToPoint();
+	FIntPoint monsterMatrixIdx = CurMap->GetGroundMap()->LocationToMatrixIdx(monsterRealLoc);
+
+	FVector2D destRealLoc = CurMap->GetGroundMap()->MatrixIdxToLocation(Destination);
+	FIntPoint destRealLocInt = destRealLoc.ConvertToPoint();
+	FIntPoint destMatrixIdx = Destination;
+
+	//OutputDebugString(("monsterRealLoc: " + std::to_string(monsterRealLoc.X) + ", " + std::to_string(monsterRealLoc.Y) + " ... " + ("destRealLoc: " + std::to_string(destRealLoc.X) + ", " + std::to_string(destRealLoc.Y) + "\n")).c_str());
+	//OutputDebugString(("monsterMatrixIdx: " + std::to_string(monsterMatrixIdx.X) + ", " + std::to_string(monsterMatrixIdx.Y) + " ... " + ("destMatrixIdx: " + std::to_string(destMatrixIdx.X) + ", " + std::to_string(destMatrixIdx.Y) + "\n")).c_str());
+
+	if (monsterMatrixIdx == destMatrixIdx)
+	{
+		//OutputDebugString("monsterIdx == Destination\n");
+		bool isGotLast = (monsterRealLocInt.X == destRealLocInt.X) && (monsterRealLocInt.Y <= destRealLocInt.Y);
+		if (isGotLast)
+		{
+			//OutputDebugString("isGotLast\n");
+			Destination = FIntPoint::NEGATIVE_ONE;
+			return;
+		}
+	}
+
+	FVector2D direction = GetDirection(destRealLocInt - monsterRealLocInt);
+
+	Move(direction, _deltaTime);
+}
+
+void AMushroom::Jumping(float _deltaTime)
+{
+	SpriteRenderer->ChangeAnimation("Jump");
+
+	if (SpriteRenderer->IsCurAnimationEnd())
+	{
+		FSM.ChangeState(EMushroomState::THINKING);
+	}
 }
