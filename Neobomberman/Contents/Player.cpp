@@ -127,7 +127,14 @@ void APlayer::Tick(float _deltaTime)
 		bool isDownSpace = UEngineInput::GetInst().IsDown(VK_SPACE);
 		if (isDownSpace)
 		{
-			SPDropBomb = UEngineSound::Play("CreateBomb.mp3");
+			// Temp
+			//std::map<std::string, USoundPlayer>::iterator iterSfx = Sounds.find("DropBomb");
+			//if (iterSfx != Sounds.end())
+			//{
+			//	iterSfx->second.On();
+			//}
+			USoundPlayer splayer = UEngineSound::Play("CreateBomb.mp3");
+
 			DropBomb();
 		}
 
@@ -152,6 +159,13 @@ void APlayer::Tick(float _deltaTime)
 	//std::string nowPosStr = (std::to_string(nowPos.X) + ", " + std::to_string(nowPos.Y));
 	//std::string additionalPosStr = (std::to_string(additionalPos.X) + ", " + std::to_string(additionalPos.Y) + "\n");
 	//OutputDebugString((nowPosStr + " -> " + additionalPosStr).c_str());
+}
+
+void APlayer::InitSounds()
+{
+	// TODO: Do I need to change string to enum?
+	//USoundPlayer splayer = UEngineSound::Play("CreateBomb.mp3");
+	//Sounds.insert({"DropBomb", splayer});
 }
 
 bool APlayer::IsDownAnyKeyWithSetDir()

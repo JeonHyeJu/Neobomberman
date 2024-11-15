@@ -4,8 +4,7 @@
 #include <EngineBase/EngineDebug.h>
 
 std::map<std::string, UEngineSound*> UEngineSound::Sounds;
-
-FMOD::System* SoundSystem = nullptr;
+FMOD::System* gSoundSystem = nullptr;
 
 #ifdef _DEBUG
 #pragma comment(lib, "fmodL_vc.lib")
@@ -13,36 +12,38 @@ FMOD::System* SoundSystem = nullptr;
 #pragma comment(lib, "fmod_vc.lib")
 #endif
 
-class SoundInit
+UEngineSound::UEngineSound()
 {
-public:
-	SoundInit()
+}
+
+UEngineSound::~UEngineSound()
+{
+}
+
+// static function
+void UEngineSound::InitFMOD()
+{
+	if (FMOD::System_Create(&gSoundSystem) != FMOD_RESULT::FMOD_OK)
 	{
-		if (FMOD_RESULT::FMOD_OK != FMOD::System_Create(&SoundSystem))
-		{
-			MSGASSERT("FMOD 시스템 이닛에 실패했습니다.");
-			return;
-		}
-
-		if (FMOD_RESULT::FMOD_OK != SoundSystem->init(32, FMOD_DEFAULT, nullptr))
-		{
-			MSGASSERT("FMOD 시스템 이닛에 실패했습니다.");
-			return;
-		}
+		MSGASSERT("FMOD 시스템 초기화에 실패했습니다.");
+		return;
 	}
-};
 
-SoundInit SoundInitObject;
-
+	if (gSoundSystem->init(32, FMOD_DEFAULT, nullptr) != FMOD_RESULT::FMOD_OK)
+	{
+		MSGASSERT("FMOD 시스템 초기화에 실패했습니다.");
+		return;
+	}
+}
 
 void UEngineSound::Update()
 {
-	if (nullptr == SoundSystem)
+	if (nullptr == gSoundSystem)
 	{
 		return;
 	}
 
-	if (FMOD_RESULT::FMOD_OK != SoundSystem->update())
+	if (FMOD_RESULT::FMOD_OK != gSoundSystem->update())
 	{
 		MSGASSERT("FMOD 시스템 업데이트에 이상이 감지되었습니다.");
 	}
@@ -64,19 +65,11 @@ void UEngineSound::Release()
 
 	Sounds.clear();
 
-	if (nullptr != SoundSystem)
+	if (nullptr != gSoundSystem)
 	{
-		SoundSystem->release();
-		SoundSystem = nullptr;
+		gSoundSystem->release();
+		gSoundSystem = nullptr;
 	}
-}
-
-UEngineSound::UEngineSound()
-{
-}
-
-UEngineSound::~UEngineSound()
-{
 }
 
 void UEngineSound::Load(std::string_view _Path)
@@ -90,17 +83,13 @@ void UEngineSound::Load(std::string_view _Path)
 void UEngineSound::Load(std::string_view _Name, std::string_view _Path)
 {
 	std::string UpperString = UEngineString::ToUpper(_Name);
+	UEngineSound* NewSound = new UEngineSound;
 
-	UEngineSound* NewSound = new UEngineSound();
-
-
-	if (false == NewSound->ResLoad(_Path))
+	if (NewSound->LoadResource(_Path) == false)
 	{
 		delete NewSound;
 		MSGASSERT("사운드 로드에 실패했습니다" + UpperString);
-		return;
 	}
-	;
 
 	UEngineSound::Sounds.insert({ UpperString, NewSound });
 }
@@ -108,8 +97,7 @@ void UEngineSound::Load(std::string_view _Name, std::string_view _Path)
 UEngineSound* UEngineSound::Find(std::string_view _Name)
 {
 	std::string UpperString = UEngineString::ToUpper(_Name);
-
-	if (false == Sounds.contains(UpperString))
+	if (Sounds.contains(UpperString) == false)
 	{
 		return nullptr;
 	}
@@ -120,34 +108,28 @@ UEngineSound* UEngineSound::Find(std::string_view _Name)
 USoundPlayer UEngineSound::Play(std::string_view _Name)
 {
 	std::string UpperString = UEngineString::ToUpper(_Name);
-
 	UEngineSound* FindSound = Find(_Name);
 
-	if (nullptr == FindSound)
+	if (FindSound == nullptr)
 	{
 		MSGASSERT("로드하지 않은 사운드를 재생하려고 했습니다" + UpperString);
 	}
 
-	FMOD::Channel* Ch = nullptr;
-
-	SoundSystem->playSound(FindSound->SoundHandle, nullptr, false, &Ch);
-
-	Ch->setLoopCount(0);
-
-	Ch->setVolume(1.0f);
-
+	FMOD::Channel* pChannel = nullptr;
+	gSoundSystem->playSound(FindSound->SoundHandle, nullptr, true, &pChannel);
+	pChannel->setLoopCount(0);
+	pChannel->setVolume(1.0f);
 
 	USoundPlayer NewPlayer;
-	NewPlayer.Control = Ch;
+	NewPlayer.Control = pChannel;
 	return NewPlayer;
 }
 
-
-bool UEngineSound::ResLoad(std::string_view _Path)
+bool UEngineSound::LoadResource(std::string_view _Path)
 {
-	SoundSystem->createSound(_Path.data(), FMOD_LOOP_NORMAL, nullptr, &SoundHandle);
+	gSoundSystem->createSound(_Path.data(), FMOD_LOOP_NORMAL, nullptr, &SoundHandle);
 
-	if (nullptr == SoundHandle)
+	if (SoundHandle == nullptr)
 	{
 		MSGASSERT("사운드 로딩에 실패했습니다" + std::string(_Path));
 		return false;

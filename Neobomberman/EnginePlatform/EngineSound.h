@@ -34,7 +34,6 @@ public:
 		}
 	}
 
-
 	void Loop(int Count = -1)
 	{
 		Control->setLoopCount(Count);
@@ -55,21 +54,22 @@ public:
 	UEngineSound& operator=(const UEngineSound& _Other) = delete;
 	UEngineSound& operator=(UEngineSound&& _Other) noexcept = delete;
 
+	static void InitFMOD();
+
+	static USoundPlayer Play(std::string_view _Name);
+
 	static void Load(std::string_view _Path);
 	static void Load(std::string_view _Name, std::string_view _Path);
-	static USoundPlayer Play(std::string_view _Name);
 	static UEngineSound* Find(std::string_view _Name);
 	static void Release();
-
 	static void Update();
 
 protected:
 
 private:
+	bool LoadResource(std::string_view _Path);
+
 	static std::map<std::string, UEngineSound*> Sounds;
-
-	FMOD::Sound* SoundHandle;
-
-	bool ResLoad(std::string_view _Path);
+	FMOD::Sound* SoundHandle = nullptr;
 };
 

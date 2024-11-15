@@ -55,6 +55,8 @@ public:
 protected:
 
 private:
+	void InitSounds();
+
 	std::string GetDirectionStr();
 	void DropBomb();
 
@@ -92,5 +94,5 @@ private:
 	SAnimKeepInfo BlinkEyeAnimInfo;
 	SAnimKeepInfo DyingAnimInfo;
 
-	USoundPlayer SPDropBomb;
+	std::map<std::string, USoundPlayer> Sounds;
 };

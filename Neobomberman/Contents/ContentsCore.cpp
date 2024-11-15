@@ -67,6 +67,7 @@ void ContentsCore::InitResources()
 	LoadImageFolders(path.GetAppendedRootPath(GlobalPath::ANIM_CRUMBLING_BOX));
 
 	/* Load sounds */
+	UEngineSound::InitFMOD();
 	LoadSounds("Resources\\Sounds");
 
 	/** Cutting **/
