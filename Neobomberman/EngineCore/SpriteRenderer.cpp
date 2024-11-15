@@ -53,7 +53,7 @@ void USpriteRenderer::BeginPlay()
 	AActor* Actor = GetActor();
 	ULevel* Level = Actor->GetWorld();
 
-	Level->PushRenderer(this);
+	Level->ChangeRenderOrder(this, this->GetOrder());
 }
 
 void USpriteRenderer::ComponentTick(float _DeltaTime)
@@ -68,7 +68,7 @@ void USpriteRenderer::ComponentTick(float _DeltaTime)
 		Sprite = CurAnimation->Sprite;
 
 
-		CurAnimation->CurTime += _DeltaTime;
+		CurAnimation->CurTime += _DeltaTime * CurAnimationSpeed;
 
 		float CurFrameTime = Times[CurAnimation->CurIndex];
 

@@ -154,6 +154,7 @@
     <ClInclude Include="EngineMath.h" />
     <ClInclude Include="EnginePath.h" />
     <ClInclude Include="EngineRandom.h" />
+    <ClInclude Include="EngineResources.h" />
     <ClInclude Include="EngineSerializer.h" />
     <ClInclude Include="EngineString.h" />
     <ClInclude Include="EngineTimer.h" />
@@ -170,6 +171,7 @@
     <ClCompile Include="EngineMath.cpp" />
     <ClCompile Include="EnginePath.cpp" />
     <ClCompile Include="EngineRandom.cpp" />
+    <ClCompile Include="EngineResources.cpp" />
     <ClCompile Include="EngineSerializer.cpp" />
     <ClCompile Include="EngineString.cpp" />
     <ClCompile Include="EngineTimer.cpp" />

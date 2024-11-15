@@ -1,6 +1,7 @@
 #pragma once
 #include <EngineCore/Actor.h>
 #include <EngineBase/FSMStateManager.h>
+#include <EnginePlatform/EngineSound.h>
 #include <vector>
 #include "ContentsEnum.h"
 
@@ -90,4 +91,6 @@ private:
 	FVector2D Direction;
 	SAnimKeepInfo BlinkEyeAnimInfo;
 	SAnimKeepInfo DyingAnimInfo;
+
+	USoundPlayer SPDropBomb;
 };

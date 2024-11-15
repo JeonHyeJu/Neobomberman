@@ -10,11 +10,23 @@
     <Filter Include="Input">
       <UniqueIdentifier>{4ba1104f-b5ef-4051-ae2b-678a1e6ce4dd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Image">
-      <UniqueIdentifier>{41439a39-0dc7-484c-8873-c220a4a4b73b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Debug">
       <UniqueIdentifier>{1b11d295-0063-4ee5-97f9-5ea72c75a838}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ThirdParty">
+      <UniqueIdentifier>{e33cca90-1adf-42d6-b255-6aa9601cd69c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ThirdParty\FMOD">
+      <UniqueIdentifier>{a6aa445d-78d4-48fb-bd03-f233d9ef52a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ThirdParty\FMOD\include">
+      <UniqueIdentifier>{97789008-3da8-40a3-b64e-645ab9be336f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ThirdParty\FMOD\lib">
+      <UniqueIdentifier>{dda5ceef-dc39-470a-8c6a-bed41cbbfc20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource">
+      <UniqueIdentifier>{f216bacd-d502-4b46-b66d-37f72a912903}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -27,11 +39,14 @@
     <ClCompile Include="EngineInput.cpp">
       <Filter>Input</Filter>
     </ClCompile>
-    <ClCompile Include="EngineWinImage.cpp">
-      <Filter>Image</Filter>
-    </ClCompile>
     <ClCompile Include="EngineWinDebug.cpp">
       <Filter>Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineSound.cpp">
+      <Filter>Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineWinImage.cpp">
+      <Filter>Resource</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -44,11 +59,52 @@
     <ClInclude Include="EngineInput.h">
       <Filter>Input</Filter>
     </ClInclude>
-    <ClInclude Include="EngineWinImage.h">
-      <Filter>Image</Filter>
-    </ClInclude>
     <ClInclude Include="EngineWinDebug.h">
       <Filter>Debug</Filter>
     </ClInclude>
+    <ClInclude Include="..\ThirdParty\FMOD\inc\fmod.h">
+      <Filter>ThirdParty\FMOD\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\FMOD\inc\fmod.hpp">
+      <Filter>ThirdParty\FMOD\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\FMOD\inc\fmod_codec.h">
+      <Filter>ThirdParty\FMOD\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\FMOD\inc\fmod_common.h">
+      <Filter>ThirdParty\FMOD\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\FMOD\inc\fmod_dsp.h">
+      <Filter>ThirdParty\FMOD\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\FMOD\inc\fmod_dsp_effects.h">
+      <Filter>ThirdParty\FMOD\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\FMOD\inc\fmod_errors.h">
+      <Filter>ThirdParty\FMOD\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\FMOD\inc\fmod_output.h">
+      <Filter>ThirdParty\FMOD\include</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineSound.h">
+      <Filter>Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineWinImage.h">
+      <Filter>Resource</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="..\ThirdParty\FMOD\lib\x64\fmodL_vc.lib">
+      <Filter>ThirdParty\FMOD\lib</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="..\ThirdParty\FMOD\lib\x64\fmod.dll">
+      <Filter>ThirdParty\FMOD\lib</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="..\ThirdParty\FMOD\lib\x64\fmod_vc.lib">
+      <Filter>ThirdParty\FMOD\lib</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="..\ThirdParty\FMOD\lib\x64\fmodL.dll">
+      <Filter>ThirdParty\FMOD\lib</Filter>
+    </CopyFileToFolders>
   </ItemGroup>
 </Project>

@@ -43,6 +43,9 @@
     <ClInclude Include="TimeEvent.h">
       <Filter>Timer</Filter>
     </ClInclude>
+    <ClInclude Include="EngineResources.h">
+      <Filter>Resource</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EngineDebug.cpp">
@@ -87,6 +90,9 @@
     <ClCompile Include="TimeEvent.cpp">
       <Filter>Timer</Filter>
     </ClCompile>
+    <ClCompile Include="EngineResources.cpp">
+      <Filter>Resource</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Debug">
@@ -112,6 +118,9 @@
     </Filter>
     <Filter Include="StateMachine">
       <UniqueIdentifier>{01a1d411-4525-4a85-89ec-31ca988fcbfd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource">
+      <UniqueIdentifier>{d58dbb9d-e4af-445d-83d8-ba2403c85efa}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

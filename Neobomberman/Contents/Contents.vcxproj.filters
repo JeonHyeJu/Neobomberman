@@ -19,6 +19,9 @@
     <Filter Include="Map">
       <UniqueIdentifier>{4a1ddc86-217d-4734-9565-42d9536d9925}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Actor\NotGame">
+      <UniqueIdentifier>{a9b5dbbc-ae7e-4502-a88d-15cd70f5f4fe}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Player.h">
@@ -48,9 +51,6 @@
     <ClInclude Include="TitleGameMode.h">
       <Filter>GameMode</Filter>
     </ClInclude>
-    <ClInclude Include="Title.h">
-      <Filter>Actor</Filter>
-    </ClInclude>
     <ClInclude Include="ContentsEnum.h">
       <Filter>Util</Filter>
     </ClInclude>
@@ -74,6 +74,12 @@
     </ClInclude>
     <ClInclude Include="DebugLog.h">
       <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Title.h">
+      <Filter>Actor\NotGame</Filter>
+    </ClInclude>
+    <ClInclude Include="Ending.h">
+      <Filter>Actor\NotGame</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -101,9 +107,6 @@
     <ClCompile Include="TitleGameMode.cpp">
       <Filter>GameMode</Filter>
     </ClCompile>
-    <ClCompile Include="Title.cpp">
-      <Filter>Actor</Filter>
-    </ClCompile>
     <ClCompile Include="Bomb.cpp">
       <Filter>Actor</Filter>
     </ClCompile>
@@ -118,6 +121,12 @@
     </ClCompile>
     <ClCompile Include="Balloon.cpp">
       <Filter>Actor</Filter>
+    </ClCompile>
+    <ClCompile Include="Title.cpp">
+      <Filter>Actor\NotGame</Filter>
+    </ClCompile>
+    <ClCompile Include="Ending.cpp">
+      <Filter>Actor\NotGame</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

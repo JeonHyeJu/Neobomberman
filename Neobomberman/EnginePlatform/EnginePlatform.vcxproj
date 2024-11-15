@@ -147,7 +147,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\ThirdParty\FMOD\inc\fmod.h" />
+    <ClInclude Include="..\ThirdParty\FMOD\inc\fmod.hpp" />
+    <ClInclude Include="..\ThirdParty\FMOD\inc\fmod_codec.h" />
+    <ClInclude Include="..\ThirdParty\FMOD\inc\fmod_common.h" />
+    <ClInclude Include="..\ThirdParty\FMOD\inc\fmod_dsp.h" />
+    <ClInclude Include="..\ThirdParty\FMOD\inc\fmod_dsp_effects.h" />
+    <ClInclude Include="..\ThirdParty\FMOD\inc\fmod_errors.h" />
+    <ClInclude Include="..\ThirdParty\FMOD\inc\fmod_output.h" />
     <ClInclude Include="EngineInput.h" />
+    <ClInclude Include="EngineSound.h" />
     <ClInclude Include="EngineWinDebug.h" />
     <ClInclude Include="EngineWindow.h" />
     <ClInclude Include="EngineWinImage.h" />
@@ -155,6 +164,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EngineInput.cpp" />
+    <ClCompile Include="EngineSound.cpp" />
     <ClCompile Include="EngineWinDebug.cpp" />
     <ClCompile Include="EngineWindow.cpp" />
     <ClCompile Include="EngineWinImage.cpp" />
@@ -162,6 +172,22 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="..\ThirdParty\FMOD\lib\x64\fmodL_vc.lib">
+      <FileType>Document</FileType>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="..\ThirdParty\FMOD\lib\x64\fmod_vc.lib">
+      <FileType>Document</FileType>
+    </CopyFileToFolders>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="..\ThirdParty\FMOD\lib\x64\fmod.dll">
+      <FileType>Document</FileType>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="..\ThirdParty\FMOD\lib\x64\fmodL.dll">
+      <FileType>Document</FileType>
+    </CopyFileToFolders>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

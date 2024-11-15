@@ -120,11 +120,17 @@ void APlayer::Tick(float _deltaTime)
 	//UEngineDebug::CoreOutPutString("PlayerPos : " + GetActorLocation().ToString());
 
 	FsmH.Update(_deltaTime);
-	return;
 
 	EPlayerState nowState = static_cast<EPlayerState>(FsmH.GetState());
 	if (nowState != EPlayerState::DEAD)
 	{
+		bool isDownSpace = UEngineInput::GetInst().IsDown(VK_SPACE);
+		if (isDownSpace)
+		{
+			SPDropBomb = UEngineSound::Play("CreateBomb.mp3");
+			DropBomb();
+		}
+
 		if (IsDownAnyKeyWithSetDir())
 		{
 			// Start to move
@@ -139,12 +145,6 @@ void APlayer::Tick(float _deltaTime)
 		{
 			FsmH.ChangeState(EPlayerState::IDLE);
 			return;
-		}
-
-		bool isDownSpace = UEngineInput::GetInst().IsDown(VK_SPACE);
-		if (isDownSpace)
-		{
-			DropBomb();
 		}
 	}
 

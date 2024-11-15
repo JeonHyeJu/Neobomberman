@@ -1,9 +1,12 @@
 #include "PreCompile.h"
+
 #include <EngineCore/EngineAPICore.h>
 #include <EngineBase/EngineDirectory.h>
 #include <EngineBase/EngineDebug.h>
 #include <EngineBase/EngineFile.h>
 #include <EngineCore/ImageManager.h>
+#include <EnginePlatform/EngineSound.h>
+
 #include "ContentsCore.h"
 #include "TitleGameMode.h"
 #include "TileMapGameMode.h"
@@ -48,20 +51,23 @@ void ContentsCore::InitResources()
 {
 	GlobalPath path;
 
-	/** Load resources **/
-	LoadResource(GlobalPath::ROOT);
-	LoadResource(path.GetAppendedRootPath(GlobalPath::BACKGROUND));
-	LoadResource(path.GetAppendedRootPath(GlobalPath::CHARACTER));
-	LoadResource(path.GetAppendedRootPath(GlobalPath::RIDING));
-	LoadResource(path.GetAppendedRootPath(GlobalPath::ENEMY));
-	LoadResource(path.GetAppendedRootPath(GlobalPath::EXPLODE));
+	/** Load images **/
+	LoadImages(GlobalPath::ROOT);
+	LoadImages(path.GetAppendedRootPath(GlobalPath::BACKGROUND));
+	LoadImages(path.GetAppendedRootPath(GlobalPath::CHARACTER));
+	LoadImages(path.GetAppendedRootPath(GlobalPath::RIDING));
+	LoadImages(path.GetAppendedRootPath(GlobalPath::ENEMY));
+	LoadImages(path.GetAppendedRootPath(GlobalPath::EXPLODE));
 
-	LoadResourceFolders(path.GetAppendedRootPath(GlobalPath::BOMB_ORG));
-	LoadResourceFolders(path.GetAppendedRootPath(GlobalPath::BOMB_RED));
-	LoadResourceFolders(path.GetAppendedRootPath(GlobalPath::OPENING));
-	LoadResourceFolders(path.GetTileStage1Path());
-	LoadResourceFolders(path.GetTileStage1GuidePath());
-	LoadResourceFolders(path.GetAppendedRootPath(GlobalPath::ANIM_CRUMBLING_BOX));
+	LoadImageFolders(path.GetAppendedRootPath(GlobalPath::BOMB_ORG));
+	LoadImageFolders(path.GetAppendedRootPath(GlobalPath::BOMB_RED));
+	LoadImageFolders(path.GetAppendedRootPath(GlobalPath::OPENING));
+	LoadImageFolders(path.GetTileStage1Path());
+	LoadImageFolders(path.GetTileStage1GuidePath());
+	LoadImageFolders(path.GetAppendedRootPath(GlobalPath::ANIM_CRUMBLING_BOX));
+
+	/* Load sounds */
+	LoadSounds("Resources\\Sounds");
 
 	/** Cutting **/
 	UImageManager& imgManager = UImageManager::GetInst();
@@ -84,45 +90,55 @@ void ContentsCore::InitResources()
 	imgManager.CuttingSprite("ExplodeRightMid.png", GlobalVar::BOMB_SIZE);
 }
 
-void ContentsCore::LoadResource(std::string_view _path, std::string_view _append, bool _isRecursive)
+void ContentsCore::LoadImages(std::string_view _path)
 {
 	UEngineDirectory dir;
-	dir.MoveParentToDirectory(_path);
+	bool isFind = dir.MoveRelative(_path);
 
-	if (_append.size() != 0)
+	if (!isFind)
 	{
-		dir.Append(_append);
-	}
-
-	if (false == dir.IsExists())
-	{
-		MSGASSERT("리소스 폴더를 찾지 못했습니다: " + dir.GetPathToString());
+		MSGASSERT("이미지 리소스 폴더를 찾지 못했습니다.");
 		return;
 	}
 
-	std::vector<UEngineFile> imageFiles = dir.GetAllFile(false);
-	for (size_t i = 0; i < imageFiles.size(); i++)
+	std::vector<UEngineFile> files = dir.GetAllFile(false);
+	for (size_t i = 0; i < files.size(); i++)
 	{
-		std::string&& filePath = imageFiles[i].GetPathToString();
+		std::string&& filePath = files[i].GetPathToString();
 		UImageManager::GetInst().Load(filePath);
 	}
 }
 
-void ContentsCore::LoadResourceFolders(std::string_view _path, std::string_view _append)
+void ContentsCore::LoadImageFolders(std::string_view _path, std::string_view _append)
 {
 	UEngineDirectory dir;
-	dir.MoveParentToDirectory(_path);
+	bool isFind = dir.MoveRelative(_path);
 
-	if (_append.size() != 0)
+	if (!isFind)
 	{
-		dir.Append(_append);
-	}
-
-	if (false == dir.IsExists())
-	{
-		MSGASSERT("리소스 폴더를 찾지 못했습니다: " + dir.GetPathToString());
+		MSGASSERT("이미지 리소스 폴더를 찾지 못했습니다.");
 		return;
 	}
+
 	std::string&& folderPath = dir.GetPathToString();
 	UImageManager::GetInst().LoadFolder(folderPath);
+}
+
+void ContentsCore::LoadSounds(std::string_view _path)
+{
+	UEngineDirectory dir;
+	bool isFind = dir.MoveRelative(_path);
+
+	if (!isFind)
+	{
+		MSGASSERT("사운드 리소스 폴더를 찾지 못했습니다.");
+		return;
+	}
+
+	std::vector<UEngineFile> files = dir.GetAllFile();
+	for (size_t i = 0; i < files.size(); i++)
+	{
+		std::string FilePath = files[i].GetPathToString();
+		UEngineSound::Load(FilePath);
+	}
 }

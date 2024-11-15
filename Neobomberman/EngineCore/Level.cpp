@@ -219,6 +219,11 @@ void ULevel::Collision(float _DeltaTime)
 			for (; StartRightIter != EndRightIter; ++StartRightIter)
 			{
 				U2DCollision* RightCollision = *StartRightIter;
+				if (LeftCollision == RightCollision)
+				{
+					continue;
+				}
+
 				if (false == RightCollision->IsActive())
 				{
 					continue;
