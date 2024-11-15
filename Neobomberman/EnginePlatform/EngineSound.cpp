@@ -116,7 +116,7 @@ USoundPlayer UEngineSound::Play(std::string_view _Name)
 	}
 
 	FMOD::Channel* pChannel = nullptr;
-	gSoundSystem->playSound(FindSound->SoundHandle, nullptr, true, &pChannel);
+	gSoundSystem->playSound(FindSound->SoundHandle, nullptr, false, &pChannel);
 	pChannel->setLoopCount(0);
 	pChannel->setVolume(1.0f);
 

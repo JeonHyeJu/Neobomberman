@@ -2,6 +2,7 @@
 #include "PlayGameMode.h"
 
 #include <EngineCore/Level.h>
+#include "Score.h"
 #include "PlayMap.h"
 #include "Player.h"
 #include "Mushroom.h"
@@ -20,6 +21,9 @@ void APlayGameMode::BeginPlay()
 	Super::BeginPlay();
 
 	ULevel* pLevel = GetWorld();
+
+	AScore* Score = pLevel->SpawnActor<AScore>();
+
 	APlayer* Player = pLevel->GetPawn<APlayer>();
 	//Player->SetCollisionImage("Bg_1-Col.png");
 

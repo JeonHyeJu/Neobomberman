@@ -93,6 +93,4 @@ private:
 	FVector2D Direction;
 	SAnimKeepInfo BlinkEyeAnimInfo;
 	SAnimKeepInfo DyingAnimInfo;
-
-	std::map<std::string, USoundPlayer> Sounds;
 };

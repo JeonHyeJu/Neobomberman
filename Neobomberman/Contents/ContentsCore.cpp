@@ -58,6 +58,7 @@ void ContentsCore::InitResources()
 	LoadImages(path.GetAppendedRootPath(GlobalPath::RIDING));
 	LoadImages(path.GetAppendedRootPath(GlobalPath::ENEMY));
 	LoadImages(path.GetAppendedRootPath(GlobalPath::EXPLODE));
+	LoadImages("Resources\\UI\\Score");	// temp
 
 	LoadImageFolders(path.GetAppendedRootPath(GlobalPath::BOMB_ORG));
 	LoadImageFolders(path.GetAppendedRootPath(GlobalPath::BOMB_RED));
@@ -89,6 +90,8 @@ void ContentsCore::InitResources()
 	imgManager.CuttingSprite("ExplodeDownMid.png", GlobalVar::BOMB_SIZE);
 	imgManager.CuttingSprite("ExplodeLeftMid.png", GlobalVar::BOMB_SIZE);
 	imgManager.CuttingSprite("ExplodeRightMid.png", GlobalVar::BOMB_SIZE);
+
+	imgManager.CuttingSprite("TimeCount.png", GlobalVar::TIME_COUNT_SIZE);
 }
 
 void ContentsCore::LoadImages(std::string_view _path)

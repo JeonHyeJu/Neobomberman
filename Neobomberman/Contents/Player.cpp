@@ -134,7 +134,6 @@ void APlayer::Tick(float _deltaTime)
 			//	iterSfx->second.On();
 			//}
 			USoundPlayer splayer = UEngineSound::Play("CreateBomb.mp3");
-
 			DropBomb();
 		}
 
