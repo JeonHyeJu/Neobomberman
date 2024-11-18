@@ -145,6 +145,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BossMap.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="Fade.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="Balloon.h">
       <SubType>
       </SubType>
@@ -156,6 +164,10 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="Mushroom.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="PlayBossMode.h">
       <SubType>
       </SubType>
     </ClInclude>
@@ -182,6 +194,14 @@
     <ClInclude Include="Title.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BossMap.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="Fade.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Balloon.cpp">
       <SubType>
       </SubType>
@@ -191,6 +211,10 @@
       </SubType>
     </ClCompile>
     <ClCompile Include="Mushroom.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="PlayBossMode.cpp">
       <SubType>
       </SubType>
     </ClCompile>

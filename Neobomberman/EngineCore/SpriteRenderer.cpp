@@ -62,6 +62,11 @@ void USpriteRenderer::ComponentTick(float _DeltaTime)
 
 	if (nullptr != CurAnimation)
 	{
+		if (CurAnimation->Name == "PainterDrawCircle")
+		{
+			int a = 0;
+		}
+
 		std::vector<int>& Indexs = CurAnimation->FrameIndex;
 		std::vector<float>& Times = CurAnimation->FrameTime;
 
@@ -85,15 +90,6 @@ void USpriteRenderer::ComponentTick(float _DeltaTime)
 
 			if (CurAnimation->CurIndex >= Indexs.size())
 			{
-				CurAnimation->IsEnd = true;
-			}
-			else
-			{
-				CurAnimation->IsEnd = false;
-			}
-
-			if (CurAnimation->CurIndex >= Indexs.size())
-			{
 				if (true == CurAnimation->Loop)
 				{
 					CurAnimation->CurIndex = 0;
@@ -108,6 +104,10 @@ void USpriteRenderer::ComponentTick(float _DeltaTime)
 					CurAnimation->IsEnd = true;
 					--CurAnimation->CurIndex;
 				}
+			}
+			else
+			{
+				CurAnimation->IsEnd = false;
 			}
 		}
 

@@ -31,10 +31,18 @@ public:
 	{
 		return MapBox;
 	}
-	void SetPortalIdx(const FIntPoint& _idx)
+	// Temp
+	inline bool GetIsMovablePortal(const FIntPoint& _Point) const
+	{
+		bool isPortal = _Point == FIntPoint({ 6, 10 });
+		return !isPortal;
+	}
+
+	inline void SetPortalIdx(const FIntPoint& _idx)
 	{
 		PortalIdx = _idx;
 	}
+	bool GetIsPortalOpened() const;
 
 protected:
 	 void BeginPlay() override;

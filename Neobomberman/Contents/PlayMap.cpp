@@ -33,6 +33,22 @@ void APlayMap::Tick(float _deltaTime)
 	RemoveExplodedBomb();
 	CheckExplodedBox();
 	ClearSplashArray();
+
+	static int cnt = 0;
+	static bool once = true;
+	if (cnt++ > 100)
+	{
+		cnt = 0;
+		if (once)
+		{
+			once = false;
+
+			if (MapGround)
+			{
+				return MapGround->SetPortalState(true);
+			}
+		}
+	}
 }
 
 void APlayMap::InitMap()
@@ -207,4 +223,13 @@ bool APlayMap::IsMove(const FIntPoint& _Point)
 
 	bool isBlocked = hasWall || hasBox || isPortal;
 	return !isBlocked;
+}
+
+bool APlayMap::GetIsPortalOpened() const
+{
+	if (MapGround)
+	{
+		return MapGround->GetIsOpenedPortal();
+	}
+	return false;
 }

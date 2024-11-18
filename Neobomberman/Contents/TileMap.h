@@ -69,6 +69,7 @@ public:
 	void SetTile(const FIntPoint& _Index, int _SpriteIndex, bool _isMove);
 	void SetTile(const FIntPoint& _Index, const FVector2D& _Pivot, const FVector2D& _SpriteScale, int _SpriteIndex, bool _isMove);
 	void SetPortal(const FIntPoint& _Index, const FVector2D& _Pivot, const FVector2D& _SpriteScale, std::string_view _spriteName);
+	void SetPortalState(bool _isOpen);
 
 	FIntPoint LocationToMatrixIdx(const FVector2D& _loc);
 	FVector2D MatrixIdxToLocation(const FIntPoint& _idx);
@@ -91,6 +92,10 @@ public:
 	{
 		return WholeTileType;
 	}
+	inline bool GetIsOpenedPortal() const
+	{
+		return IsPortalOpened;
+	}
 	bool GetIsMovable(const FVector2D& _loc);
 
 	Tile* GetTileRef(FIntPoint _idx);
@@ -111,10 +116,14 @@ protected:
 
 private:
 	void DestroySpriteAfterLoad(const FIntPoint& _idx);
+	void OnRunPortalMove();
 
 	std::string SpriteName = "";
 	FIntPoint TileCount;
 	FVector2D TileSize;
 	TileType WholeTileType = TileType::Ground;
 	std::vector<std::vector<Tile>> AllTiles;
+
+	bool IsPortalOpened = false;
+	FIntPoint PortalIdx;
 };

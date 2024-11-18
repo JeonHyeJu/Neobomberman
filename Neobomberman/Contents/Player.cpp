@@ -382,6 +382,25 @@ void APlayer::Moving(float _deltaTime)
 		bool isMovableBox = boxMap->GetIsMovable(nextPos);
 
 		isMove = (isMove && isMovableWall && isMovableBox);
+
+		// Portal
+		if (CurMap->GetIsPortalOpened())
+		{
+			// Temp
+			if (!CurMap->GetIsMovablePortal(CurMap->GetWallMap()->LocationToMatrixIdx(nextPos)))
+			{
+				UEngineAPICore::GetCore()->OpenLevel("Boss_Stage1");
+				return;
+			}
+		}
+		else
+		{
+			// Temp
+			if (!CurMap->GetIsMovablePortal(CurMap->GetWallMap()->LocationToMatrixIdx(nextPos)))
+			{
+				isMove = false;
+			}
+		}
 	}
 
 	if (isMove)

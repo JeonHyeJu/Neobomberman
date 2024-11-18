@@ -84,6 +84,15 @@
     <ClInclude Include="Score.h">
       <Filter>Actor</Filter>
     </ClInclude>
+    <ClInclude Include="Fade.h">
+      <Filter>Actor\NotGame</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayBossMode.h">
+      <Filter>GameMode</Filter>
+    </ClInclude>
+    <ClInclude Include="BossMap.h">
+      <Filter>Map</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Player.cpp">
@@ -133,6 +142,15 @@
     </ClCompile>
     <ClCompile Include="Score.cpp">
       <Filter>Actor</Filter>
+    </ClCompile>
+    <ClCompile Include="Fade.cpp">
+      <Filter>Actor\NotGame</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayBossMode.cpp">
+      <Filter>GameMode</Filter>
+    </ClCompile>
+    <ClCompile Include="BossMap.cpp">
+      <Filter>Map</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -90,6 +90,33 @@ void ATileMap::SetPortal(const FIntPoint& _Index, const FVector2D& _Pivot, const
 	AllTiles[_Index.Y][_Index.X].Scale = _SpriteScale;
 	AllTiles[_Index.Y][_Index.X].SpriteIndex = 0;
 	AllTiles[_Index.Y][_Index.X].IsMove = true;
+
+	AllTiles[_Index.Y][_Index.X].SpriteRenderer->CreateAnimation("PortalNormal", "ClosedPortal.png", 0, 1, 1.f);
+	AllTiles[_Index.Y][_Index.X].SpriteRenderer->CreateAnimation("PortalOpened", "OpenedPortal.png", 0, 4, .5f, false);
+	AllTiles[_Index.Y][_Index.X].SpriteRenderer->CreateAnimation("PortalMove", "OpenedPortalMove.png", 0, 2, .5f);
+	AllTiles[_Index.Y][_Index.X].SpriteRenderer->SetAnimationEvent("PortalOpened", 4, std::bind(&ATileMap::OnRunPortalMove, this));
+
+	AllTiles[_Index.Y][_Index.X].SpriteRenderer->ChangeAnimation("PortalNormal");
+
+	PortalIdx = _Index;
+}
+
+void ATileMap::SetPortalState(bool _isOpen)
+{
+	std::string animName = "";
+
+	if (_isOpen)
+	{
+		IsPortalOpened = true;
+		animName = "PortalOpened";
+	}
+	else
+	{
+		IsPortalOpened = false;
+		animName = "PortalClosed";
+	}
+
+	AllTiles[PortalIdx.Y][PortalIdx.X].SpriteRenderer->ChangeAnimation(animName.c_str());
 }
 
 bool ATileMap::IsIndexOver(FIntPoint _Index)
@@ -286,4 +313,9 @@ void ATileMap::DestroySpriteAfterLoad(const FIntPoint& _idx)
 	AllTiles[_idx.Y][_idx.X].SpriteRenderer->Destroy();
 	AllTiles[_idx.Y][_idx.X].SpriteRenderer = nullptr;
 	AllTiles[_idx.Y][_idx.X].IsMove = true;
+}
+
+void ATileMap::OnRunPortalMove()
+{
+	AllTiles[PortalIdx.Y][PortalIdx.X].SpriteRenderer->ChangeAnimation("PortalMove");
 }

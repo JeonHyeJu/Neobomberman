@@ -11,6 +11,7 @@
 #include "TitleGameMode.h"
 #include "TileMapGameMode.h"
 #include "PlayGameMode.h"
+#include "PlayBossMode.h"
 #include "Player.h"
 #include "GlobalVar.h"
 
@@ -36,8 +37,9 @@ void ContentsCore::BeginPlay()
 	//pCore->OpenLevel("TileMap");
 	//return;
 
-	pCore->CreateLevel<APlayGameMode, APlayer>("Play");
 	pCore->CreateLevel<ATitleGameMode, AActor>("Title");
+	pCore->CreateLevel<APlayGameMode, APlayer>("Play");
+	pCore->CreateLevel<APlayBossMode, APlayer>("Boss_Stage1");
 
 	pCore->OpenLevel("Title");
 }
@@ -59,6 +61,8 @@ void ContentsCore::InitResources()
 	LoadImages(path.GetAppendedRootPath(GlobalPath::ENEMY));
 	LoadImages(path.GetAppendedRootPath(GlobalPath::EXPLODE));
 	LoadImages("Resources\\UI\\Score");	// temp
+	LoadImages("Resources\\UI\\Title");	// temp
+	LoadImages("Resources\\UI\\SelectCount");	// temp
 
 	LoadImageFolders(path.GetAppendedRootPath(GlobalPath::BOMB_ORG));
 	LoadImageFolders(path.GetAppendedRootPath(GlobalPath::BOMB_RED));
@@ -66,6 +70,7 @@ void ContentsCore::InitResources()
 	LoadImageFolders(path.GetTileStage1Path());
 	LoadImageFolders(path.GetTileStage1GuidePath());
 	LoadImageFolders(path.GetAppendedRootPath(GlobalPath::ANIM_CRUMBLING_BOX));
+	LoadImageFolders("Resources\\SayHi");
 
 	/* Load sounds */
 	UEngineSound::InitFMOD();
@@ -92,6 +97,18 @@ void ContentsCore::InitResources()
 	imgManager.CuttingSprite("ExplodeRightMid.png", GlobalVar::BOMB_SIZE);
 
 	imgManager.CuttingSprite("TimeCount.png", GlobalVar::TIME_COUNT_SIZE);
+	imgManager.CuttingSprite("Title_countdown_24x24.png", GlobalVar::TITLE_TIME_COUNT_SIZE);
+	imgManager.CuttingSprite("BlueCount.png", { 24, 48 });	// Temp
+	imgManager.CuttingSprite("PinkCount.png", { 24, 48 });	// Temp
+	imgManager.CuttingSprite("YellowCount.png", { 24, 48 });	// Temp
+
+	imgManager.CuttingSprite("SelectPainterUpDown.png", GlobalVar::BOMBERMAN_SIZE);
+	imgManager.CuttingSprite("SelectPainterCircle.png", GlobalVar::BOMBERMAN_SIZE);
+	imgManager.CuttingSprite("brushCircle.png", { 128, 128 });
+
+	imgManager.CuttingSprite("ClosedPortal.png", GlobalVar::BOMB_SIZE);
+	imgManager.CuttingSprite("OpenedPortal.png", GlobalVar::BOMB_SIZE);
+	imgManager.CuttingSprite("OpenedPortalMove.png", GlobalVar::BOMB_SIZE);
 }
 
 void ContentsCore::LoadImages(std::string_view _path)

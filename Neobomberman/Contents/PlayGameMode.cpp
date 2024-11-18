@@ -1,5 +1,6 @@
 #include "PreCompile.h"
 #include "PlayGameMode.h"
+#include "Fade.h"
 
 #include <EngineCore/Level.h>
 #include "Score.h"
@@ -34,11 +35,14 @@ void APlayGameMode::BeginPlay()
 
 	FVector2D monsterStartingLoc = pStage1->GetPortalLoc();
 
-	// Temp. to test collision
-	AMushroom* monsterMushroom = pLevel->SpawnActor<AMushroom>();
+	// Temp. To test portal
+	Player->SetActorLocation(monsterStartingLoc + FVector2D({ 16.f, -16.f }));	// temp
+
+	// Temp. To test collision
+	/*AMushroom* monsterMushroom = pLevel->SpawnActor<AMushroom>();
 	monsterMushroom->SetCurMap(pStage1);
 	monsterMushroom->SetFirstDestination({ 0, 0 });
-	monsterMushroom->SetActorLocation(Player->GetActorLocation() + FVector2D({ 64, 0 }) - FVector2D({ 16, 16 }));
+	monsterMushroom->SetActorLocation(Player->GetActorLocation() + FVector2D({ 64, 0 }) - FVector2D({ 16, 16 }));*/
 	
 	// TODO: spawn delay
 	/*{
@@ -73,5 +77,8 @@ void APlayGameMode::BeginPlay()
 	}*/
 	
 	//pStage2->SetPortalIdx(FIntPoint(6, 10));	// temp
+
+	AFade* fade = GetWorld()->SpawnActor<AFade>();
+	fade->FadeIn();
 }
 
