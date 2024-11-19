@@ -32,9 +32,9 @@ void ATileMapGameMode::Tick(float _DeltaTime)
 	Super::Tick(_DeltaTime);
 
 	/** checking **/
-	if (TilePtrs.empty()) return;
+	if (EditorDatas.empty()) return;
 
-	ATileMap* curMapPtr = TilePtrs[CurTilePtrIdx];
+	ATileMap* curMapPtr = EditorDatas[CurTilePtrIdx].Container;
 	if (curMapPtr == nullptr) return;
 
 	/** logic **/
@@ -64,6 +64,14 @@ void ATileMapGameMode::Tick(float _DeltaTime)
 	}
 }
 
+void ATileMapGameMode::InitMouseRenderer()
+{
+	MouseSpriteRender = CreateDefaultSubObject<USpriteRenderer>();
+	MouseSpriteRender->SetSprite(GlobalPath::TILE_STAGE_1_GUIDE, 0);
+	MouseSpriteRender->SetComponentScale(GlobalVar::BOMB_SIZE);
+	MouseSpriteRender->SetOrder(ERenderOrder::UI);
+}
+
 void ATileMapGameMode::InitMap()
 {
 	FIntPoint titleIdxs = GlobalVar::BATTLE_GROUND_COUNT;
@@ -74,8 +82,6 @@ void ATileMapGameMode::InitMap()
 	FVector2D subSize = (winSize - mapSize) / 2;
 	FIntPoint moveLoc{ static_cast<int>(subSize.X), static_cast<int>(subSize.Y) };
 
-	TilePtrs.reserve(10);	// Temp. TODO: img count in directory
-
 	{
 		GroundTileMap = GetWorld()->SpawnActor<ATileMap>();
 		GroundTileMap->Init(GlobalPath::TILE_STAGE_1, titleIdxs, tileSize, TileType::Ground);
@@ -84,12 +90,15 @@ void ATileMapGameMode::InitMap()
 		{
 			for (int x = 0; x < titleIdxs.X; x++)
 			{
-				GroundTileMap->SetTile({ x, y }, static_cast<int>(TileType::Ground), true);
+				// Stage1. temp
+				//GroundTileMap->SetTile({ x, y }, static_cast<int>(TileType::Ground), true);
+
+				// Boss1. emp
+				GroundTileMap->SetTile({ x, y }, 5, true);
 			}
 		}
 
 		GroundTileMap->SetActorLocation(moveLoc);
-		TilePtrs.push_back(GroundTileMap);
 	}
 
 	{
@@ -97,7 +106,6 @@ void ATileMapGameMode::InitMap()
 		WallTileMap->Init(GlobalPath::TILE_STAGE_1, titleIdxs, tileSize, TileType::Wall);
 
 		WallTileMap->SetActorLocation(moveLoc);
-		TilePtrs.push_back(WallTileMap);
 	}
 
 	{
@@ -105,16 +113,40 @@ void ATileMapGameMode::InitMap()
 		BoxTileMap->Init(GlobalPath::TILE_STAGE_1, titleIdxs, tileSize, TileType::Box);
 
 		BoxTileMap->SetActorLocation(moveLoc);
-		TilePtrs.push_back(BoxTileMap);
 	}
-}
 
-void ATileMapGameMode::InitMouseRenderer()
-{
-	MouseSpriteRender = CreateDefaultSubObject<USpriteRenderer>();
-	MouseSpriteRender->SetSprite(GlobalPath::TILE_STAGE_1_GUIDE, 0);
-	MouseSpriteRender->SetComponentScale(GlobalVar::BOMB_SIZE);
-	MouseSpriteRender->SetOrder(ERenderOrder::UI);
+	// Init frame
+	{
+		// 241119 - number of files in Resources\Tiles\TileStage_1
+		UEngineDirectory dir;
+		dir.MoveRelative("Resources\\Tiles\\TileStage_1");	// Temp
+		std::vector<UEngineFile> files = dir.GetAllFile(false);
+
+		EditorDatas.reserve(files.size());
+		for (size_t i = 0, size = files.size(); i < size; ++i)
+		{
+			EditorData data;
+
+			// Temp
+			if (i == 2)
+			{
+				data.Type = TileType::Box;
+				data.Container = BoxTileMap;
+			}
+			else if (i == 1 || i == 4 || i == 6)
+			{
+				data.Type = TileType::Wall;
+				data.Container = WallTileMap;
+			}
+			else
+			{
+				data.Type = TileType::Ground;
+				data.Container = GroundTileMap;
+			}
+
+			EditorDatas.push_back(data);
+		}
+	}
 }
 
 void ATileMapGameMode::MoveMouseRenderer(ATileMap* _curMapPtr, const FVector2D& _mousePos)
@@ -138,7 +170,7 @@ void ATileMapGameMode::UpdateMouseRenderer()
 
 void ATileMapGameMode::NextTile()
 {
-	CurTilePtrIdx = (CurTilePtrIdx + 1) % TilePtrs.size();
+	CurTilePtrIdx = (CurTilePtrIdx + 1) % EditorDatas.size();
 	UpdateMouseRenderer();
 }
 
@@ -146,9 +178,9 @@ void ATileMapGameMode::AddTile(ATileMap* _curMapPtr, const FVector2D& _mousePos)
 {
 	// Remove existing tile
 	// Temp: i=1, 0 is ground.
-	for (int i = 1; i < TilePtrs.size(); i++)
+	for (int i = 1; i < EditorDatas.size(); i++)
 	{
-		ATileMap* otherMapPtr = TilePtrs[i];
+		ATileMap* otherMapPtr = EditorDatas[i].Container;
 		if (_curMapPtr != otherMapPtr)
 		{
 			Tile* tile = otherMapPtr->GetTileRef(_mousePos);
@@ -165,7 +197,7 @@ void ATileMapGameMode::AddTile(ATileMap* _curMapPtr, const FVector2D& _mousePos)
 	{
 		isMove = false;
 	}
-	_curMapPtr->SetTileWithLoc(_mousePos, static_cast<int>(_curMapPtr->GetType()), isMove);
+	_curMapPtr->SetTileWithLoc(_mousePos, CurTilePtrIdx, isMove);
 }
 
 void ATileMapGameMode::RemoveTile(ATileMap* _curMapPtr, const FVector2D& _mousePos)

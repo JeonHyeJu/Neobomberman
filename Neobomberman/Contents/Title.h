@@ -1,10 +1,23 @@
 #pragma once
 #include <EngineCore/Actor.h>
+#include <EngineBase/FSMStateManager.h>
 
-enum class SceneType
+enum class ESceneType
 {
 	START = 0,
 	SELECT,
+};
+
+enum class ETitleState
+{
+	OPENING = 0,
+	WAIT_START,
+	WAIT_SELECT_IDLE,
+	WAIT_SELECT,
+	RUN_CUT_SCENE_IDLE,
+	RUN_CUT_SCENE,
+	PREPARE_PLAY,
+	PREPARE_DISAPPEAR
 };
 
 class USpriteRenderer;
@@ -26,18 +39,30 @@ protected:
 
 private:
 	void ResetSeconds();
-	void AddCoin(unsigned __int8 _coinCnt);
+	void AddCoin(int _coinCnt);
 	void SwitchStartUi(bool _isShow);
 	void SwitchSelectUi(bool _isShow);
+	void SwitchCutSceneUi(bool _isShow);
 
-	void RunWaitSequence(float _deltaTime, const SceneType& _type);
+	void RunWaitSequence(float _deltaTime, const ESceneType& _type);
 	void RunPaintSequence(float _deltaTime);
-	void Countdown(const SceneType& _type);
+	void Countdown(const ESceneType& _type);
 
 	void OnEndAnimation();
 	void OnEndPainterDraw();
 	void OnEndCircleDraw();
 	void OnEndFadeOut();
+
+	void OnRunOpening();
+	void OnWaitToStart();
+	void OnSelectMode();
+	void OnRunCutScene();
+
+	void SelectingMode(float _deltaTime);
+	void WaitingToStart(float _deltaTime);
+	void RunningCutScene(float _deltaTime);
+
+	void CoinAction();
 
 	const char* ANIM_IDLE_NAME = "Opening_Idle";
 	const char* ANIM_RUN_NAME = "Opening_Run";
@@ -62,6 +87,9 @@ private:
 	USpriteRenderer* SRSelectPainter = nullptr;
 	USpriteRenderer* SRSelectCircle = nullptr;
 
+	USpriteRenderer* SRCutScene = nullptr;
+	USpriteRenderer* SRSpaceship = nullptr;
+
 	int Seconds = 0;
 	unsigned __int8 Coin = 0;
 
@@ -72,4 +100,6 @@ private:
 
 	bool isPainterMovingUp = false;
 	bool isPainterMovingDown = false;
+
+	UFSMStateManager FSM;
 };

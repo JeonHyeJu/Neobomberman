@@ -2,26 +2,44 @@
 #include <EngineCore/Actor.h>
 
 class USpriteRenderer;
-class AScore : public AActor
+class AGameTimer : public AActor
 {
 public:
-	AScore();
-	~AScore();
+	AGameTimer();
+	~AGameTimer();
 
-	AScore(const AScore& _other) = delete;
-	AScore(AScore&& _other) noexcept = delete;
-	AScore& operator=(const AScore& _other) = delete;
-	AScore& operator=(AScore&& _other) noexcept = delete;
+	AGameTimer(const AGameTimer& _other) = delete;
+	AGameTimer(AGameTimer&& _other) noexcept = delete;
+	AGameTimer& operator=(const AGameTimer& _other) = delete;
+	AGameTimer& operator=(AGameTimer&& _other) noexcept = delete;
 
 	void BeginPlay() override;
 	void Tick(float _DeltaTime) override;
 
+	static void Start()
+	{
+		IsStop = false;
+	}
+	static void Stop()
+	{
+		IsStop = true;
+	}
+
+	static void ResetTimer()
+	{
+		Seconds = START_SECONDS;
+	}
+	static int GetLastTime()
+	{
+		return Seconds;
+	}
+
 private:
-	void ResetTimer();
 	void Countdown();
 
-	const int START_SECONDS = 60 + 59;
-	int Seconds = 0;
+	static bool IsStop;
+	static int Seconds;
+	static const int START_SECONDS;
 
 	const char* SCORE_BAR_ADV_SPRITE_PATH = "ScoreBar_Adventure.png";
 	const char* SCORE_PUSH_START_PATH = "PushStart.png";

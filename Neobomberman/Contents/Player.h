@@ -11,6 +11,7 @@ enum class EPlayerState
 	IDLE,
 	MOVE,
 	DEAD,
+	PORTAL,
 };
 
 class APlayer : public AActor
@@ -52,6 +53,8 @@ public:
 		CurMap = _map;
 	}
 
+	void InitFadeEvent(class AFade* _ptr);
+
 protected:
 
 private:
@@ -67,11 +70,15 @@ private:
 	void OnReborn();
 	void OnIdle();
 	void OnDead();
+	void OnShift();
 
 	void Reborning(float _deltaTime);
 	void Idling(float _deltaTime);
 	void Moving(float _deltaTime);
 	void Dying(float _deltaTime);
+	void Shifting(float _deltaTime);
+
+	void OnEndFadeOut();
 
 	int CurIndex = 0;
 	const char* PLAYER_SPRITE_PATH = "MainCharater_White.png";	// 1024 x 640 (32x64)
@@ -93,4 +100,8 @@ private:
 	FVector2D Direction;
 	SAnimKeepInfo BlinkEyeAnimInfo;
 	SAnimKeepInfo DyingAnimInfo;
+
+	class AResult* ResultScene = nullptr;
+
+	int Score = 600;	// Temp
 };

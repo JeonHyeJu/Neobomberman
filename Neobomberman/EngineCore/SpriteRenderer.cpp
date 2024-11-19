@@ -62,58 +62,48 @@ void USpriteRenderer::ComponentTick(float _DeltaTime)
 
 	if (nullptr != CurAnimation)
 	{
-		if (CurAnimation->Name == "PainterDrawCircle")
-		{
-			int a = 0;
-		}
+		if (CurAnimation->IsEnd) return;
 
 		std::vector<int>& Indexs = CurAnimation->FrameIndex;
 		std::vector<float>& Times = CurAnimation->FrameTime;
 
-		Sprite = CurAnimation->Sprite;
-
-
 		CurAnimation->CurTime += _DeltaTime * CurAnimationSpeed;
 
-		float CurFrameTime = Times[CurAnimation->CurIndex];
+		float timePerFrame = Times[CurAnimation->CurIndex];
 
 		//                           0.1 0.1 0.1
-		if (CurAnimation->CurTime > CurFrameTime)
+		if (CurAnimation->CurTime > timePerFrame)
 		{
-			CurAnimation->CurTime -= CurFrameTime;
-			++CurAnimation->CurIndex;
-
-			if (CurAnimation->Events.contains(CurIndex))
+			CurAnimation->CurTime -= timePerFrame;
+			if (CurAnimation->CurIndex >= Indexs.size() - 1)
 			{
-				CurAnimation->Events[CurIndex]();
-			}
-
-			if (CurAnimation->CurIndex >= Indexs.size())
-			{
-				if (true == CurAnimation->Loop)
+				if (CurAnimation->CurIndex == Indexs.size() - 1)
 				{
-					CurAnimation->CurIndex = 0;
-
 					if (CurAnimation->Events.contains(CurIndex))
 					{
 						CurAnimation->Events[CurIndex]();
 					}
 				}
+
+				if (true == CurAnimation->Loop)
+				{
+					CurAnimation->CurIndex = 0;
+				}
 				else
 				{
 					CurAnimation->IsEnd = true;
-					--CurAnimation->CurIndex;
 				}
 			}
 			else
 			{
-				CurAnimation->IsEnd = false;
+				if (CurAnimation->Events.contains(CurIndex))
+				{
+					CurAnimation->Events[CurIndex]();
+				}
+
+				CurIndex = Indexs[++CurAnimation->CurIndex];
 			}
 		}
-
-		//         2 3 4           0
-		CurIndex = Indexs[CurAnimation->CurIndex];
-		// ++CurAnimation->CurIndex;
 	}
 
 }
@@ -267,11 +257,6 @@ void USpriteRenderer::ChangeAnimation(std::string_view _AnimationName, bool _For
 	CurAnimation = &FrameAnimations[UpperName];
 	CurAnimation->Reset();
 	CurIndex = CurAnimation->FrameIndex[CurAnimation->CurIndex];
-
-	if (CurAnimation->Events.contains(CurAnimation->CurIndex))
-	{
-		CurAnimation->Events[CurAnimation->CurIndex]();
-	}
 
 	Sprite = CurAnimation->Sprite;
 }

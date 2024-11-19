@@ -20,8 +20,19 @@ public:
 	void FadeOut();
 	void BindEndEvent(std::function<void()> _fn);
 
+	void SetFadeSpeed(float _val)
+	{
+		FadeSpeed = _val;
+	}
+
+	void SetFadeMinMax(float _min = 0.f, float _max = 1.f)
+	{
+		MinFadeVal = _min;
+		MaxFadeVal = _max;
+	}
+
 protected:
-	void LevelChangeStart()
+	void LevelChangeStart() override
 	{
 		MainFade = this;
 	}
@@ -35,4 +46,8 @@ private:
 
 	std::list<std::function<void()>> EndEvents;
 	bool IsFadeEnd = false;
+
+	float MaxFadeVal = 1.f;
+	float MinFadeVal = 0.f;
+	float FadeSpeed = 1.f;
 };

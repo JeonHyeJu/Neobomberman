@@ -171,7 +171,11 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="Score.h">
+    <ClInclude Include="Result.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="GameTimer.h">
       <SubType>
       </SubType>
     </ClInclude>
@@ -218,7 +222,11 @@
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="Score.cpp">
+    <ClCompile Include="Result.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="GameTimer.cpp">
       <SubType>
       </SubType>
     </ClCompile>

@@ -45,7 +45,7 @@ void APlayMap::Tick(float _deltaTime)
 
 			if (MapGround)
 			{
-				return MapGround->SetPortalState(true);
+				MapGround->OpenPortal();
 			}
 		}
 	}

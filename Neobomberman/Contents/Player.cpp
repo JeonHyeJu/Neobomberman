@@ -1,10 +1,13 @@
 #include "PreCompile.h"
 #include "ContentsEnum.h"
 #include "GlobalVar.h"
+#include "GameTimer.h"
 #include "TileMap.h"
 #include "PlayMap.h"
 #include "Player.h"
+#include "Result.h"
 #include "Bomb.h"
+#include "Fade.h"
 
 #include <EngineCore/EngineAPICore.h>
 #include <EngineCore/SpriteRenderer.h>
@@ -45,6 +48,7 @@ APlayer::APlayer()
 
 		SpriteRendererHead->CreateAnimation("BlinkingEyes", PLAYER_SPRITE_PATH, 580, 581, 0.3f);
 		SpriteRendererHead->CreateAnimation("Dead", PLAYER_SPRITE_PATH, 591, 600, 0.2f, false);
+		SpriteRendererHead->CreateAnimation("Ride_Portal", PLAYER_SPRITE_PATH, 583, 588, 0.2f, false);
 	}
 	
 	{
@@ -68,6 +72,7 @@ APlayer::APlayer()
 
 		SpriteRendererBody->CreateAnimation("BlinkingEyes", PLAYER_SPRITE_PATH, 612, 613, 0.3f);
 		SpriteRendererBody->CreateAnimation("Dead", PLAYER_SPRITE_PATH, 622, 631, 0.2f, false);
+		SpriteRendererBody->CreateAnimation("Ride_Portal", PLAYER_SPRITE_PATH, 615, 620, 0.2f, false);
 	}
 
 	{
@@ -99,6 +104,7 @@ APlayer::APlayer()
 	FsmH.CreateState(EPlayerState::IDLE, std::bind(&APlayer::Idling, this, std::placeholders::_1), std::bind(&APlayer::OnIdle, this));
 	FsmH.CreateState(EPlayerState::MOVE, std::bind(&APlayer::Moving, this, std::placeholders::_1));
 	FsmH.CreateState(EPlayerState::DEAD, std::bind(&APlayer::Dying, this, std::placeholders::_1), std::bind(&APlayer::OnDead, this));
+	FsmH.CreateState(EPlayerState::PORTAL, std::bind(&APlayer::Shifting, this, std::placeholders::_1), std::bind(&APlayer::OnShift, this));
 }
 
 APlayer::~APlayer()
@@ -122,7 +128,9 @@ void APlayer::Tick(float _deltaTime)
 	FsmH.Update(_deltaTime);
 
 	EPlayerState nowState = static_cast<EPlayerState>(FsmH.GetState());
-	if (nowState != EPlayerState::DEAD)
+
+	// state != DEAD and PORTAL
+	if (nowState < EPlayerState::DEAD)
 	{
 		bool isDownSpace = UEngineInput::GetInst().IsDown(VK_SPACE);
 		if (isDownSpace)
@@ -281,6 +289,12 @@ void APlayer::OnDead()
 	SpriteRendererBody->ChangeAnimation("Dead");
 }
 
+void APlayer::OnShift()
+{
+	SpriteRendererHead->ChangeAnimation("Ride_Portal");
+	SpriteRendererBody->ChangeAnimation("Ride_Portal");
+}
+
 /* FSM update functions */
 void APlayer::Reborning(float _deltaTime)
 {
@@ -387,9 +401,14 @@ void APlayer::Moving(float _deltaTime)
 		if (CurMap->GetIsPortalOpened())
 		{
 			// Temp
-			if (!CurMap->GetIsMovablePortal(CurMap->GetWallMap()->LocationToMatrixIdx(nextPos)))
+			if (!CurMap->GetIsMovablePortal(CurMap->GetWallMap()->LocationToMatrixIdx(GetActorLocation())))
 			{
-				UEngineAPICore::GetCore()->OpenLevel("Boss_Stage1");
+				// Temp
+				FVector2D organizedLoc = CurMap->GetGroundMap()->MatrixIdxToLocation({6, 10}) + GlobalVar::BOMBERMAN_SIZE.Half().Half();
+				SetActorLocation(organizedLoc);
+
+				FsmH.ChangeState(EPlayerState::PORTAL);
+				AGameTimer::Stop();
 				return;
 			}
 		}
@@ -449,4 +468,37 @@ void APlayer::Dying(float _deltaTime)
 			}
 		}
 	}
+}
+
+void APlayer::Shifting(float _deltaTime)
+{
+	static bool onlyOnce = true;
+	if (SpriteRendererHead->IsCurAnimationEnd())
+	{
+		if (onlyOnce)
+		{
+			onlyOnce = false;
+			AFade::MainFade->SetFadeMinMax(0.f, .5f);
+			AFade::MainFade->SetFadeSpeed(.5f);
+			AFade::MainFade->FadeOut();
+		}
+	}
+}
+
+void APlayer::OnEndFadeOut()
+{
+	// TODO: Move to map or gamemode?
+	ResultScene = GetWorld()->SpawnActor<AResult>();
+
+	int lastTime = AGameTimer::GetLastTime();
+	ResultScene->SetLastSecs(lastTime);
+	ResultScene->SetTotal(Score);
+
+	//UEngineAPICore::GetCore()->OpenLevel("Boss_Stage1");
+}
+
+// Temp
+void APlayer::InitFadeEvent(AFade* _ptr)
+{
+	_ptr->BindEndEvent(std::bind(&APlayer::OnEndFadeOut, this));
 }

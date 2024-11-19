@@ -9,8 +9,6 @@ UEngineTimer::UEngineTimer()
 
 	QueryPerformanceCounter(&PrevTime);
 	QueryPerformanceCounter(&CurTime);
-
-	int a = 0;
 }
 
 UEngineTimer::~UEngineTimer()

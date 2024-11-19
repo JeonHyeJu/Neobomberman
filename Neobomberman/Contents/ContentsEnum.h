@@ -9,8 +9,10 @@ enum class ERenderOrder
 	CRUMBLING_BOX = 9998,
 	MONSTER = 9999,
 	PLAYER = 10000,
-	FADE = 19000,
-	UI = 20000,
+	UI = 19000,
+	FADE = 20000,
+	RESULT = 20001,
+	RESULT_STAMP = 20002,
 };
 
 enum class EBombType

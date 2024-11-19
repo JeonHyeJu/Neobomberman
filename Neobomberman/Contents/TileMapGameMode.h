@@ -6,6 +6,12 @@
 class ATileMapGameMode : public AGameMode
 {
 public:
+	struct EditorData
+	{
+		TileType Type;
+		ATileMap* Container = nullptr;
+	};
+
 	ATileMapGameMode();
 	~ATileMapGameMode();
 
@@ -20,9 +26,11 @@ protected:
 
 private:
 	void InitMap();
+
 	void InitMouseRenderer();
 	void MoveMouseRenderer(ATileMap* _curMapPtr, const FVector2D& _mousePos);
 	void UpdateMouseRenderer();
+
 	void NextTile();
 	void AddTile(ATileMap* _curMapPtr, const FVector2D& _mousePos);
 	void RemoveTile(ATileMap* _curMapPtr, const FVector2D& _mousePos);
@@ -39,8 +47,9 @@ private:
 	class USpriteRenderer* MouseSpriteRender = nullptr;
 	std::string TileDataPath = "";
 
-	std::vector<ATileMap*> TilePtrs;
-	int CurTilePtrIdx = 0;
 	FIntPoint MouseIdx;
+	int CurTilePtrIdx = 0;
+
+	std::vector<EditorData> EditorDatas;
 };
 

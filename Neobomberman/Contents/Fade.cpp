@@ -27,7 +27,7 @@ void AFade::FadeIn()
 	IsFadeEnd = false;
 	FadeValue = 1.0f;
 	FadeDir = -1.0f;
-	TimeEventer.PushEvent(2.0f, std::bind(&AFade::FadeChange, this), true, false);
+	TimeEventer.PushEvent(2.f, std::bind(&AFade::FadeChange, this), true, false);
 }
 
 void AFade::FadeOut()
@@ -35,7 +35,7 @@ void AFade::FadeOut()
 	IsFadeEnd = false;
 	FadeValue = 0.0f;
 	FadeDir = 1.0f;
-	TimeEventer.PushEvent(2.0f, std::bind(&AFade::FadeChange, this), true, false);
+	TimeEventer.PushEvent(2.f, std::bind(&AFade::FadeChange, this), true, false);
 }
 
 void AFade::FadeChange()
@@ -43,14 +43,13 @@ void AFade::FadeChange()
 	if (IsFadeEnd) return;
 
 	float DeltaTime = UEngineAPICore::GetCore()->GetDeltaTime();
-	FadeValue += DeltaTime * 1.f * FadeDir;
+	FadeValue += DeltaTime * FadeSpeed * FadeDir;
+
 	SRScreen->SetAlphafloat(FadeValue);
 
 	if (std::abs(FadeDir - 1.0f) < 1e-4)	// FadeOut
 	{
-		float temp = FadeValue - 2.0f;
-		int a = 0;
-		if (FadeValue >= 2.f)
+		if (FadeValue >= MaxFadeVal)
 		{
 			IsFadeEnd = true;
 
@@ -62,7 +61,7 @@ void AFade::FadeChange()
 	}
 	else
 	{
-		if (FadeValue < -1.f)
+		if (FadeValue <= MinFadeVal)
 		{
 			IsFadeEnd = true;
 		}

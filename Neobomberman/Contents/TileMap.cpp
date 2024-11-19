@@ -101,22 +101,9 @@ void ATileMap::SetPortal(const FIntPoint& _Index, const FVector2D& _Pivot, const
 	PortalIdx = _Index;
 }
 
-void ATileMap::SetPortalState(bool _isOpen)
+void ATileMap::OpenPortal()
 {
-	std::string animName = "";
-
-	if (_isOpen)
-	{
-		IsPortalOpened = true;
-		animName = "PortalOpened";
-	}
-	else
-	{
-		IsPortalOpened = false;
-		animName = "PortalClosed";
-	}
-
-	AllTiles[PortalIdx.Y][PortalIdx.X].SpriteRenderer->ChangeAnimation(animName.c_str());
+	AllTiles[PortalIdx.Y][PortalIdx.X].SpriteRenderer->ChangeAnimation("PortalOpened");
 }
 
 bool ATileMap::IsIndexOver(FIntPoint _Index)
@@ -317,5 +304,6 @@ void ATileMap::DestroySpriteAfterLoad(const FIntPoint& _idx)
 
 void ATileMap::OnRunPortalMove()
 {
+	IsPortalOpened = true;
 	AllTiles[PortalIdx.Y][PortalIdx.X].SpriteRenderer->ChangeAnimation("PortalMove");
 }

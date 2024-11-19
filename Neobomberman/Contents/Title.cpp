@@ -180,8 +180,38 @@ ATitle::ATitle()
 		SRSelectCircle->SetActive(false);
 	}
 
+	{
+		FVector2D size = { 608, 304 };
+		SRCutScene = CreateDefaultSubObject<USpriteRenderer>();
+		SRCutScene->SetSprite("CutSceneStage1");
+		SRCutScene->SetComponentLocation({ size.hX(), 220.f });
+		SRCutScene->SetComponentScale(size);
+
+		SRCutScene->CreateAnimation("Wait", "CutSceneStage1", 0, 0, 1.f);
+		SRCutScene->CreateAnimation("Run", "CutSceneStage1", 0, 9, .5f, false);
+
+		SRCutScene->ChangeAnimation("Wait");
+	}
+
+	{
+		FVector2D size = { 256, 256 };
+		SRSpaceship = CreateDefaultSubObject<USpriteRenderer>();
+		SRSpaceship->SetSprite("Spaceship.png");
+		SRSpaceship->SetComponentLocation({ winSize.hX(), winSize.hY() * 1.5f });
+		SRSpaceship->SetComponentScale(size);
+	}
+
 	SwitchStartUi(false);
 	SwitchSelectUi(false);
+	SwitchCutSceneUi(false);
+
+	FSM.CreateState(ETitleState::OPENING, nullptr, std::bind(&ATitle::OnRunOpening, this));
+	FSM.CreateState(ETitleState::WAIT_START, std::bind(&ATitle::WaitingToStart, this, std::placeholders::_1), std::bind(&ATitle::OnWaitToStart, this));
+	FSM.CreateState(ETitleState::WAIT_SELECT_IDLE, nullptr);
+	FSM.CreateState(ETitleState::WAIT_SELECT, std::bind(&ATitle::SelectingMode, this, std::placeholders::_1), std::bind(&ATitle::OnSelectMode, this));
+	FSM.CreateState(ETitleState::RUN_CUT_SCENE_IDLE, nullptr);
+	FSM.CreateState(ETitleState::RUN_CUT_SCENE, std::bind(&ATitle::RunningCutScene, this, std::placeholders::_1), std::bind(&ATitle::OnRunCutScene, this));
+	FSM.CreateState(ETitleState::PREPARE_PLAY, nullptr);
 }
 
 ATitle::~ATitle()
@@ -199,23 +229,14 @@ void ATitle::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SROpening->ChangeAnimation(ANIM_RUN_NAME);
-	ResetSeconds();
+	FSM.ChangeState(ETitleState::OPENING);
 }
 
 void ATitle::Tick(float _deltaTime)
 {
 	Super::Tick(_deltaTime);
 
-	// TODO: move to FSM
-	static bool isWaitToStart = false;
-	static bool isWaitToSelect = false;
-	bool isDownF1 = UEngineInput::GetInst().IsDown(VK_F1);
-	bool isDownF3 = UEngineInput::GetInst().IsDown(VK_F3);
-	bool isDownF4 = UEngineInput::GetInst().IsDown(VK_F4);
-	bool isDownA = UEngineInput::GetInst().IsDown('A');
-	bool isDownUp = UEngineInput::GetInst().IsDown(VK_UP);
-	bool isDownDown = UEngineInput::GetInst().IsDown(VK_DOWN);
+	CoinAction();
 
 	if (isPainterMovingUp || isPainterMovingDown)
 	{
@@ -223,66 +244,10 @@ void ATitle::Tick(float _deltaTime)
 		return;
 	}
 
-	if (isWaitToSelect)
-	{
-		RunWaitSequence(_deltaTime, SceneType::SELECT);
-	}
-	else if (isWaitToStart)
-	{
-		RunWaitSequence(_deltaTime, SceneType::START);
-	}
-
-	if (isDownF1 && Coin > 0)
-	{
-		isWaitToSelect = true;
-
-		ResetSeconds();
-		SwitchSelectUi(true);
-
-		SRSelectSayHi->ChangeAnimation("SayHi");
-	}
-	else if (isDownF3 || isDownF4)
-	{
-		unsigned __int8 coin = (isDownF3 ? 1 : 2);
-		ResetSeconds();
-		AddCoin(coin);
-
-		if (!isWaitToStart)
-		{
-			isWaitToStart = true;
-			OnEndAnimation();
-		}
-	}
-	else if (isDownA)
-	{
-		// TODO: state check
-		if (isWaitToSelect)
-		{
-			// TODO: run circle anim
-			SRSelectPainter->ChangeAnimation("DrawCircle", true);
-		}
-	}
-	else if (isDownUp)
-	{
-		FVector2D curLoc = SRSelectPainter->GetComponentLocation();
-		if (curLoc.Y >= PAINTER_END_LOC.Y)
-		{
-			SRSelectPainter->SetComponentLocation({ curLoc.X, curLoc.Y - 1 });
-			isPainterMovingUp = true;
-		}
-	}
-	else if (isDownDown)
-	{
-		FVector2D curLoc = SRSelectPainter->GetComponentLocation();
-		if (curLoc.Y <= PAINTER_START_LOC.Y)
-		{
-			SRSelectPainter->SetComponentLocation({ curLoc.X, curLoc.Y + 1 });
-			isPainterMovingDown = true;
-		}
-	}
+	FSM.Update(_deltaTime);
 }
 
-void ATitle::AddCoin(unsigned __int8 _coinCnt)
+void ATitle::AddCoin(int _coinCnt)
 {
 	if (Coin >= 99) return;
 
@@ -319,6 +284,12 @@ void ATitle::SwitchSelectUi(bool _isShow)
 	}
 	SRSelectSayHi->SetActive(_isShow);
 	SRSelectPainter->SetActive(_isShow);
+}
+
+void ATitle::SwitchCutSceneUi(bool _isShow)
+{
+	SRCutScene->SetActive(_isShow);
+	SRSpaceship->SetActive(_isShow);
 }
 
 void ATitle::RunPaintSequence(float _deltaTime)
@@ -365,7 +336,7 @@ void ATitle::RunPaintSequence(float _deltaTime)
 	}
 }
 
-void ATitle::RunWaitSequence(float _deltaTime, const SceneType& _type)
+void ATitle::RunWaitSequence(float _deltaTime, const ESceneType& _type)
 {
 	static float elapsedSecs = 0.f;
 	elapsedSecs += _deltaTime;
@@ -377,11 +348,11 @@ void ATitle::RunWaitSequence(float _deltaTime, const SceneType& _type)
 	}
 }
 
-void ATitle::Countdown(const SceneType& _type)
+void ATitle::Countdown(const ESceneType& _type)
 {
 	if (Seconds < 0)
 	{
-		if (_type == SceneType::START)
+		if (_type == ESceneType::START)
 		{
 			// TODO: go to Select
 		}
@@ -395,7 +366,7 @@ void ATitle::Countdown(const SceneType& _type)
 	int base10 = Seconds / 10;
 	int base1 = Seconds % 10;
 
-	if (_type == SceneType::START)
+	if (_type == ESceneType::START)
 	{
 		SRTimeCount[0]->SetSprite(SPRITE_TIME_COUNT, base10);
 		SRTimeCount[1]->SetSprite(SPRITE_TIME_COUNT, base1);
@@ -418,10 +389,26 @@ void ATitle::Countdown(const SceneType& _type)
 	Seconds--;
 }
 
+void ATitle::CoinAction()
+{
+	bool isDownF3 = UEngineInput::GetInst().IsDown(VK_F3);
+	bool isDownF4 = UEngineInput::GetInst().IsDown(VK_F4);
+
+	if (isDownF3 || isDownF4)
+	{
+		int coin = (isDownF3 ? 1 : 2);
+		ResetSeconds();
+		AddCoin(coin);
+		OnEndAnimation();
+	}
+}
+
 void ATitle::OnEndAnimation()
 {
-	SROpening->ChangeAnimation(ANIM_IDLE_NAME);
-	SwitchStartUi(true);
+	if (FSM.GetState() < static_cast<int>(ETitleState::WAIT_START))
+	{
+		FSM.ChangeState(ETitleState::WAIT_START);
+	}
 }
 
 void ATitle::OnEndPainterDraw()
@@ -432,15 +419,148 @@ void ATitle::OnEndPainterDraw()
 
 void ATitle::OnEndCircleDraw()
 {
-	static bool tempFlag = true;
-	if (tempFlag)
-	{
-		tempFlag = false;
-		AFade::MainFade->FadeOut();
-	}
+	AFade::MainFade->FadeOut();
 }
 
 void ATitle::OnEndFadeOut()
 {
-	UEngineAPICore::GetCore()->OpenLevel("Play");
+	ETitleState state = static_cast<ETitleState>(FSM.GetState());
+
+	switch (state)
+	{
+	case ETitleState::WAIT_SELECT_IDLE:
+		FSM.ChangeState(ETitleState::WAIT_SELECT);
+		AFade::MainFade->FadeIn();
+		break;
+	case ETitleState::RUN_CUT_SCENE_IDLE:
+		FSM.ChangeState(ETitleState::RUN_CUT_SCENE);
+		AFade::MainFade->FadeIn();
+		break;
+	case ETitleState::PREPARE_PLAY:
+		FSM.ChangeState(ETitleState::PREPARE_DISAPPEAR);
+		UEngineAPICore::GetCore()->OpenLevel("Play");
+	default:
+		break;
+	}
+}
+
+void ATitle::OnRunOpening()
+{
+	SROpening->ChangeAnimation(ANIM_RUN_NAME);
+}
+
+/* FSM */
+void ATitle::OnWaitToStart()
+{
+	ResetSeconds();
+	SROpening->ChangeAnimation(ANIM_IDLE_NAME);
+	SwitchStartUi(true);
+}
+
+void ATitle::OnSelectMode()
+{
+	ResetSeconds();
+	SROpening->SetActive(false);
+	SwitchStartUi(false);
+	SwitchSelectUi(true);
+	SRSelectSayHi->ChangeAnimation("SayHi");
+}
+
+void ATitle::OnRunCutScene()
+{
+	SwitchStartUi(false);
+	SwitchSelectUi(false);
+	SwitchCutSceneUi(true);
+}
+
+void ATitle::WaitingToStart(float _deltaTime)
+{
+	RunWaitSequence(_deltaTime, ESceneType::START);
+
+	bool isDownF1 = UEngineInput::GetInst().IsDown(VK_F1);
+	if (isDownF1)
+	{
+		if (FSM.GetState() < static_cast<int>(ETitleState::WAIT_SELECT_IDLE))
+		{
+			AddCoin(-1);
+			AFade::MainFade->FadeOut();
+			FSM.ChangeState(ETitleState::WAIT_SELECT_IDLE);
+		}
+	}
+}
+
+void ATitle::SelectingMode(float _deltaTime)
+{
+	RunWaitSequence(_deltaTime, ESceneType::SELECT);
+
+	bool isDownA = UEngineInput::GetInst().IsDown('A');
+	if (isDownA)
+	{
+		if (FSM.GetState() < static_cast<int>(ETitleState::RUN_CUT_SCENE_IDLE))
+		{
+			FSM.ChangeState(ETitleState::RUN_CUT_SCENE_IDLE);
+			SRSelectPainter->ChangeAnimation("DrawCircle", true);
+			return;
+		}
+	}
+
+	bool isDownUp = UEngineInput::GetInst().IsDown(VK_UP);
+	bool isDownDown = UEngineInput::GetInst().IsDown(VK_DOWN);
+
+	if (isDownUp)
+	{
+		FVector2D curLoc = SRSelectPainter->GetComponentLocation();
+		if (curLoc.Y >= PAINTER_END_LOC.Y)
+		{
+			SRSelectPainter->SetComponentLocation({ curLoc.X, curLoc.Y - 1 });
+			isPainterMovingUp = true;
+		}
+	}
+	else if (isDownDown)
+	{
+		FVector2D curLoc = SRSelectPainter->GetComponentLocation();
+		if (curLoc.Y <= PAINTER_START_LOC.Y)
+		{
+			SRSelectPainter->SetComponentLocation({ curLoc.X, curLoc.Y + 1 });
+			isPainterMovingDown = true;
+		}
+	}
+}
+
+void ATitle::RunningCutScene(float _deltaTime)
+{
+	static float elapsedTime = 0.f;
+	elapsedTime += _deltaTime;
+
+	if (elapsedTime > 5.f)
+	{
+		float spaceshipSpeed = 200.f;
+		FVector2D loc = SRSpaceship->GetComponentLocation();
+
+		// Temp
+		if (loc.Y > 100)
+		{
+			SRSpaceship->SetComponentLocation(loc - FVector2D{ -1.f * spaceshipSpeed * _deltaTime, 0.f });
+		}
+	}
+	else if (elapsedTime > 10.f)
+	{
+		if (SRCutScene->GetCurAnimName() != "Run")
+		{
+			SRCutScene->ChangeAnimation("Run");
+		}
+	}
+	else if (elapsedTime > 15.f)
+	{
+		elapsedTime = 0.f;
+	}
+
+	if (UEngineInput::GetInst().IsDown('A'))
+	{
+		if (FSM.GetState() < static_cast<int>(ETitleState::PREPARE_PLAY))
+		{
+			AFade::MainFade->FadeOut();
+			FSM.ChangeState(ETitleState::PREPARE_PLAY);
+		}
+	}
 }

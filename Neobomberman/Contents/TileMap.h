@@ -12,7 +12,6 @@ enum class TileType
 	Ground = 0,
 	Wall,
 	Box,
-	ExplosionMatrix,
 };
 
 class Tile : public ISerializObject
@@ -69,7 +68,7 @@ public:
 	void SetTile(const FIntPoint& _Index, int _SpriteIndex, bool _isMove);
 	void SetTile(const FIntPoint& _Index, const FVector2D& _Pivot, const FVector2D& _SpriteScale, int _SpriteIndex, bool _isMove);
 	void SetPortal(const FIntPoint& _Index, const FVector2D& _Pivot, const FVector2D& _SpriteScale, std::string_view _spriteName);
-	void SetPortalState(bool _isOpen);
+	void OpenPortal();
 
 	FIntPoint LocationToMatrixIdx(const FVector2D& _loc);
 	FVector2D MatrixIdxToLocation(const FIntPoint& _idx);

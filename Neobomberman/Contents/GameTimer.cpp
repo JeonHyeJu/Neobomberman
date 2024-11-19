@@ -1,10 +1,14 @@
 #include "PreCompile.h"
 #include "ContentsEnum.h"
 #include "GlobalVar.h"
-#include "Score.h"
+#include "GameTimer.h"
 #include <EngineCore/SpriteRenderer.h>
 
-AScore::AScore()
+bool AGameTimer::IsStop = true;
+int AGameTimer::Seconds = 0;
+const int AGameTimer::START_SECONDS = 60 + 59;
+
+AGameTimer::AGameTimer()
 {
 	FVector2D size = { GlobalVar::WINDOW_SIZE.X, 44.f };
 	SRBar = CreateDefaultSubObject<USpriteRenderer>();
@@ -66,25 +70,33 @@ AScore::AScore()
 
 		SRTimerCounts.push_back(sprite);
 	}
+
+	ResetTimer();
 }
 
-AScore::~AScore()
+AGameTimer::~AGameTimer()
 {
 }
 
-void AScore::BeginPlay()
+void AGameTimer::BeginPlay()
 {
 	Super::BeginPlay();
 
 	ResetTimer();
 }
 
-void AScore::Tick(float _deltaTime)
+void AGameTimer::Tick(float _deltaTime)
 {
 	Super::Tick(_deltaTime);
 
 	static float elapsedTime = 0.f;
 	static bool isBright = true;
+
+	if (IsStop)
+	{
+		elapsedTime = 0.f;
+		return;
+	}
 
 	elapsedTime += _deltaTime;
 	if (elapsedTime > 1.2f)
@@ -108,12 +120,7 @@ void AScore::Tick(float _deltaTime)
 	}
 }
 
-void AScore::ResetTimer()
-{
-	Seconds = START_SECONDS;
-}
-
-void AScore::Countdown()
+void AGameTimer::Countdown()
 {
 	if (Seconds < 0)
 	{

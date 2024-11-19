@@ -28,7 +28,7 @@ void ContentsCore::BeginPlay()
 	UEngineAPICore* pCore = UEngineAPICore::GetCore();
 
 	pCore->GetMainWindow().SetWindowTitle("Neobomberman");
-	pCore->GetMainWindow().SetWindowPosAndScale({ 0, 0 }, FVector2D(GlobalVar::WINDOW_SIZE));	// You must call this.
+	pCore->GetMainWindow().SetWindowPosAndScale(GlobalVar::WINDOW_SIZE.Half(), FVector2D(GlobalVar::WINDOW_SIZE));	// You must call this.
 
 	InitResources();
 
@@ -42,6 +42,7 @@ void ContentsCore::BeginPlay()
 	pCore->CreateLevel<APlayBossMode, APlayer>("Boss_Stage1");
 
 	pCore->OpenLevel("Title");
+	//pCore->OpenLevel("Play");
 }
 
 void ContentsCore::Tick()
@@ -63,6 +64,8 @@ void ContentsCore::InitResources()
 	LoadImages("Resources\\UI\\Score");	// temp
 	LoadImages("Resources\\UI\\Title");	// temp
 	LoadImages("Resources\\UI\\SelectCount");	// temp
+	LoadImages("Resources\\Result");	// temp
+	LoadImages("Resources\\CutScene");	// temp
 
 	LoadImageFolders(path.GetAppendedRootPath(GlobalPath::BOMB_ORG));
 	LoadImageFolders(path.GetAppendedRootPath(GlobalPath::BOMB_RED));
@@ -71,6 +74,8 @@ void ContentsCore::InitResources()
 	LoadImageFolders(path.GetTileStage1GuidePath());
 	LoadImageFolders(path.GetAppendedRootPath(GlobalPath::ANIM_CRUMBLING_BOX));
 	LoadImageFolders("Resources\\SayHi");
+	LoadImageFolders("Resources\\Result\\StageClear");
+	LoadImageFolders("Resources\\CutScene\\CutSceneStage1");	
 
 	/* Load sounds */
 	UEngineSound::InitFMOD();
@@ -109,6 +114,9 @@ void ContentsCore::InitResources()
 	imgManager.CuttingSprite("ClosedPortal.png", GlobalVar::BOMB_SIZE);
 	imgManager.CuttingSprite("OpenedPortal.png", GlobalVar::BOMB_SIZE);
 	imgManager.CuttingSprite("OpenedPortalMove.png", GlobalVar::BOMB_SIZE);
+
+	imgManager.CuttingSprite("ResultCount.png", GlobalVar::BOMB_SIZE);
+	imgManager.CuttingSprite("Score100.png", GlobalVar::BOMB_SIZE);
 }
 
 void ContentsCore::LoadImages(std::string_view _path)

@@ -3,7 +3,7 @@
 #include "Fade.h"
 
 #include <EngineCore/Level.h>
-#include "Score.h"
+#include "GameTimer.h"
 #include "PlayMap.h"
 #include "Player.h"
 #include "Mushroom.h"
@@ -23,7 +23,7 @@ void APlayGameMode::BeginPlay()
 
 	ULevel* pLevel = GetWorld();
 
-	AScore* Score = pLevel->SpawnActor<AScore>();
+	AGameTimer* gameTimer = pLevel->SpawnActor<AGameTimer>();
 
 	APlayer* Player = pLevel->GetPawn<APlayer>();
 	//Player->SetCollisionImage("Bg_1-Col.png");
@@ -78,7 +78,10 @@ void APlayGameMode::BeginPlay()
 	
 	//pStage2->SetPortalIdx(FIntPoint(6, 10));	// temp
 
-	AFade* fade = GetWorld()->SpawnActor<AFade>();
+	AFade* fade = pLevel->SpawnActor<AFade>();
 	fade->FadeIn();
+
+	Player->InitFadeEvent(fade);
+	gameTimer->Start();
 }
 

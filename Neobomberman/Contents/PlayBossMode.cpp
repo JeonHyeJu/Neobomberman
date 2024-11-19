@@ -4,7 +4,7 @@
 
 #include <EngineCore/Level.h>
 
-#include "Score.h"
+#include "GameTimer.h"
 #include "BossMap.h"
 #include "Player.h"
 
@@ -22,7 +22,7 @@ void APlayBossMode::BeginPlay()
 
 	ULevel* pLevel = GetWorld();
 
-	AScore* Score = pLevel->SpawnActor<AScore>();
+	AGameTimer* gameTimer = pLevel->SpawnActor<AGameTimer>();
 
 	APlayer* Player = pLevel->GetPawn<APlayer>();
 	//Player->SetCollisionImage("Bg_1-Col.png");
@@ -35,7 +35,7 @@ void APlayBossMode::BeginPlay()
 	// Temp. To test portal
 	//Player->SetActorLocation(monsterStartingLoc + FVector2D({ 16.f, -16.f }));	// temp
 
-	//AFade* fade = GetWorld()->SpawnActor<AFade>();
-	//fade->FadeIn();
+	AFade* fade = GetWorld()->SpawnActor<AFade>();
+	fade->FadeIn();
 }
 
