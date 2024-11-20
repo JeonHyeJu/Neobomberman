@@ -31,12 +31,11 @@ void ABaseMap::Tick(float _deltaTime)
 	CheckLaunchedBomb();
 	RemoveExplodedBomb();
 	CheckExplodedBox();
+	if (SplashTileIdxs.size() > 0 && ExplodeEvent != nullptr)
+	{
+		ExplodeEvent();
+	}
 	ClearSplashArray();
-}
-
-void ABaseMap::LevelChangeStart()
-{
-	IsPortalOpened = false;
 }
 
 bool ABaseMap::Deserialize(ATileMap* _tileMap, std::string_view _savePath, std::string_view _saveName)
@@ -84,19 +83,23 @@ bool ABaseMap::CanMove(const FIntPoint& _idx)
 	return !isBlocked;
 }
 
+bool ABaseMap::GetIsPortalOpened() const
+{
+	if (MapGround)
+	{
+		return MapGround->GetIsPortalOpened();
+	}
+	return false;
+}
+
 void ABaseMap::OpenPortal()
 {
-	if (!IsPortalOpened)
+	// Don't have any portal.
+	if (PortalIdx != FIntPoint::NEGATIVE_ONE)
 	{
-		IsPortalOpened = true;
-
-		// Don't have any portal.
-		if (PortalIdx != FIntPoint::NEGATIVE_ONE)
+		if (MapGround)
 		{
-			if (MapGround)
-			{
-				MapGround->OpenPortal();
-			}
+			MapGround->OpenPortal();
 		}
 	}
 }

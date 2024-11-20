@@ -2,6 +2,8 @@
 #include "ContentsEnum.h"
 #include "GlobalVar.h"
 #include "GameTimer.h"
+#include "GameData.h"
+#include "UtilFn.h"
 #include <EngineCore/SpriteRenderer.h>
 
 bool AGameTimer::IsStop = true;
@@ -34,8 +36,6 @@ AGameTimer::AGameTimer()
 	SRPushStartBr->SetOrder(ERenderOrder::UI);
 	SRPushStartBr->SetActive(false);
 
-	SRTimerCounts.reserve(3);
-
 	FVector2D countSize = GlobalVar::TIME_COUNT_SIZE;
 	const float countMarginX = 270 + countSize.hX();
 	int initIdxs[3] = { 2, 6, 10 };
@@ -49,7 +49,8 @@ AGameTimer::AGameTimer()
 		sprite->SetOrder(ERenderOrder::UI);
 	}
 
-	for (size_t i = 0; i < SRTimerCounts.capacity(); ++i)
+	int numCnt = sizeof(SRTimerCounts) / sizeof(USpriteRenderer*);
+	for (int i = 0; i < numCnt; ++i)
 	{
 		FVector2D loc = { countMarginX, 14.f };		// First location
 		if (i == 1)
@@ -61,14 +62,36 @@ AGameTimer::AGameTimer()
 			loc = SRTimerCounts[i - 1]->GetComponentLocation() + FVector2D{ 16, 0 };
 		}
 
-		USpriteRenderer* sprite = CreateDefaultSubObject<USpriteRenderer>();
-		sprite->SetSprite(SCORE_TIME_COUNT, initIdxs[i]);
-		sprite->SetComponentLocation(loc);
-		sprite->SetComponentScale(countSize);
-		sprite->SetPivotType(PivotType::Top);
-		sprite->SetOrder(ERenderOrder::UI);
+		SRTimerCounts[i] = CreateDefaultSubObject<USpriteRenderer>();
+		SRTimerCounts[i]->SetSprite(SCORE_TIME_COUNT, initIdxs[i]);
+		SRTimerCounts[i]->SetComponentLocation(loc);
+		SRTimerCounts[i]->SetComponentScale(countSize);
+		SRTimerCounts[i]->SetPivotType(PivotType::Top);
+		SRTimerCounts[i]->SetOrder(ERenderOrder::UI);
+	}
 
-		SRTimerCounts.push_back(sprite);
+	{
+		FVector2D loc{ 96.f, 14.f };		// First location
+
+		SRPlayerLife = CreateDefaultSubObject<USpriteRenderer>();
+		SRPlayerLife->SetSprite(BAR_SCORE_NUMBER_PATH, 2);
+		SRPlayerLife->SetComponentLocation(loc);
+		SRPlayerLife->SetComponentScale(GlobalVar::BAR_SCORE_NUMBER);
+		SRPlayerLife->SetPivotType(PivotType::Top);
+		SRPlayerLife->SetOrder(ERenderOrder::UI);
+	}
+
+	numCnt = sizeof(SRPlayerScore) / sizeof(USpriteRenderer*);
+	for (int i = 0; i < numCnt; ++i)
+	{
+		FVector2D loc{ 134.f + i * (countSize.X * .8f), 14.f };		// First location
+
+		SRPlayerScore[i] = CreateDefaultSubObject<USpriteRenderer>();
+		SRPlayerScore[i]->SetSprite(BAR_SCORE_NUMBER_PATH);
+		SRPlayerScore[i]->SetComponentLocation(loc);
+		SRPlayerScore[i]->SetComponentScale(GlobalVar::BAR_SCORE_NUMBER);
+		SRPlayerScore[i]->SetPivotType(PivotType::Top);
+		SRPlayerScore[i]->SetOrder(ERenderOrder::UI_PLUS);
 	}
 
 	ResetTimer();
@@ -118,6 +141,8 @@ void AGameTimer::Tick(float _deltaTime)
 
 		isBright = !isBright;
 	}
+
+	UpdateScoreSprite();
 }
 
 void AGameTimer::Countdown()
@@ -138,4 +163,31 @@ void AGameTimer::Countdown()
 	SRTimerCounts[2]->SetSprite(SCORE_TIME_COUNT, base1+1);
 
 	Seconds--;
+}
+
+void AGameTimer::UpdateScoreSprite()
+{
+	int p1Score = GameData::GetInstance().GetPlayer1Score();
+
+	if (PrevScore != p1Score)
+	{
+		PrevScore = p1Score;
+
+		int size = sizeof(SRPlayerScore) / sizeof(USpriteRenderer*);
+		std::vector<int>&& scoreVec = UtilFn::IntToVector(p1Score, size);
+
+		for (int i = size - 1; i >= 0; --i)
+		{
+			int val = scoreVec[i];
+			if (val != -1)
+			{
+				SRPlayerScore[i]->SetSprite(BAR_SCORE_NUMBER_PATH, val);
+				SRPlayerScore[i]->SetActive(true);
+			}
+			else
+			{
+				SRPlayerScore[i]->SetActive(false);
+			}
+		}
+	}
 }

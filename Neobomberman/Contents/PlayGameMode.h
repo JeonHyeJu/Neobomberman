@@ -20,6 +20,8 @@ public:
 protected:
 
 private:
+	void OnExplodeBomb();
+
 	class ABaseMap* CurMapPtr = nullptr;
 	std::vector<class AMonster*> MonsterList;
 	const int MONSTER_CNT_STAGE_1 = 4;

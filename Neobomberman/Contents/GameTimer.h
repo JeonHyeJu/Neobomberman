@@ -35,6 +35,7 @@ public:
 	}
 
 private:
+	void UpdateScoreSprite();
 	void Countdown();
 
 	static bool IsStop;
@@ -45,15 +46,16 @@ private:
 	const char* SCORE_PUSH_START_PATH = "PushStart.png";
 	const char* SCORE_PUSH_START_BR_PATH = "PushStart_Bright.png";
 	const char* SCORE_TIME_COUNT = "TimeCount.png";
+	const char* BAR_SCORE_NUMBER_PATH = "BarScoreNumber.png";
 
 	USpriteRenderer* SRBar = nullptr;
 	USpriteRenderer* SRPushStart = nullptr;
 	USpriteRenderer* SRPushStartBr = nullptr;
 
-	std::vector<USpriteRenderer*> SRTimerCounts;
+	USpriteRenderer* SRPlayerLife = nullptr;
+	USpriteRenderer* SRPlayerScore[8] = { nullptr, };	// 7: temp
 
-	USpriteRenderer* SRTimerCount_1 = nullptr;		// [1] : 59
-	USpriteRenderer* SRTimerCount_Col = nullptr;	// 1 [:] 59
-	USpriteRenderer* SRTimerCount_2 = nullptr;		// 1 : [5]9
-	USpriteRenderer* SRTimerCount_3 = nullptr;		// // 1 : 5[9]
+	USpriteRenderer* SRTimerCounts[3] = { nullptr, };
+
+	int PrevScore = -1;
 };

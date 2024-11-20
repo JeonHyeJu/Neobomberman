@@ -14,6 +14,7 @@ enum class ERenderOrder
 	MONSTER = 9999,
 	PLAYER = 10000,
 	UI = 19000,
+	UI_PLUS = 19001,
 	FADE = 20000,
 	UI_OVER_FADE = 20001,
 	RESULT = 20002,

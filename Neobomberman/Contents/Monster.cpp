@@ -17,6 +17,8 @@ AMonster::AMonster()
 	Fsm.CreateState(EMonsterState::INIT_WALKING, std::bind(&AMonster::WalkingForStart, this, std::placeholders::_1));
 	Fsm.CreateState(EMonsterState::THINKING, std::bind(&AMonster::Thinking, this, std::placeholders::_1));
 	Fsm.CreateState(EMonsterState::WALKING, std::bind(&AMonster::Walking, this, std::placeholders::_1));
+	Fsm.CreateState(EMonsterState::DYING, std::bind(&AMonster::Dying, this, std::placeholders::_1));
+	Fsm.CreateState(EMonsterState::PASS_AWAY, nullptr, std::bind(&AMonster::OnPassaway, this));
 
 	FVector2D collSize = GlobalVar::BOMB_SIZE;
 	Collision = CreateDefaultSubObject<U2DCollision>();
@@ -25,7 +27,24 @@ AMonster::AMonster()
 	Collision->SetCollisionGroup(ECollisionGroup::MonsterBody);
 	Collision->SetCollisionType(ECollisionType::CirCle);
 
-	DebugOn();
+	{
+		FVector2D size = GlobalVar::BOMBERMAN_SIZE;
+		SRCloud = CreateDefaultSubObject<USpriteRenderer>();
+		SRCloud->SetSprite(CLOUD_SPRITE_PATH);
+		SRCloud->SetComponentLocation(size.Half().Half().Half() + FVector2D{ 0, 16 });	// Temp
+		SRCloud->SetComponentScale(size);
+		SRCloud->CreateAnimation("Disappear", CLOUD_SPRITE_PATH, 0, 7, .25f, false);
+		SRCloud->SetActive(false);
+	}
+
+	//DebugOn();
+}
+
+void AMonster::SetScore(EMonsterScore _score)
+{
+	Score = _score;
+
+	
 }
 
 AMonster::~AMonster()
@@ -38,7 +57,7 @@ void AMonster::BeginPlay()
 	Super::BeginPlay();
 
 	Init();
-	SpriteRenderer->SetActive(false);
+	SRBody->SetActive(false);
 }
 
 void AMonster::Tick(float _deltaTime)
@@ -53,7 +72,7 @@ void AMonster::Tick(float _deltaTime)
 		{
 			IsInited = true;
 			Fsm.ChangeState(EMonsterState::INIT_BLINK);
-			SpriteRenderer->SetActive(true);
+			SRBody->SetActive(true);
 		}
 
 		return;	// TODO
@@ -110,19 +129,19 @@ void AMonster::Move(const FVector2D& direction, float _deltaTime)
 {
 	if (direction == FVector2D::UP)
 	{
-		SpriteRenderer->ChangeAnimation("Run_Up");
+		SRBody->ChangeAnimation("Run_Up");
 	}
 	else if (direction == FVector2D::DOWN)
 	{
-		SpriteRenderer->ChangeAnimation("Run_Down");
+		SRBody->ChangeAnimation("Run_Down");
 	}
 	else if (direction == FVector2D::LEFT)
 	{
-		SpriteRenderer->ChangeAnimation("Run_Left");
+		SRBody->ChangeAnimation("Run_Left");
 	}
 	else if (direction == FVector2D::RIGHT)
 	{
-		SpriteRenderer->ChangeAnimation("Run_Right");
+		SRBody->ChangeAnimation("Run_Right");
 	}
 
 	AddActorLocation(direction * _deltaTime * Speed);
@@ -156,7 +175,7 @@ void AMonster::Blinking(float _deltaTime)
 	if (accumulatedSecs >= BLINK_SECONDS)
 	{
 		accumulatedSecs = 0.f;
-		SpriteRenderer->SetActive(true);
+		SRBody->SetActive(true);
 		Fsm.ChangeState(EMonsterState::INIT_WALKING);
 		return;
 	}
@@ -165,7 +184,7 @@ void AMonster::Blinking(float _deltaTime)
 	if (blinkElapsedSecs > 0.1f)
 	{
 		blinkElapsedSecs = 0.f;
-		SpriteRenderer->SetActiveSwitch();
+		SRBody->SetActiveSwitch();
 	}
 }
 
@@ -247,4 +266,39 @@ void AMonster::Walking(float _deltaTime)
 	FVector2D direction = GetDirection(destRealLocInt - monsterRealLocInt);
 
 	Move(direction, _deltaTime);
+}
+
+void AMonster::Dying(float _deltaTime)
+{
+	static float accumulatedSecs = 0.f;
+	static float blinkElapsedSecs = 0.f;
+
+	accumulatedSecs += _deltaTime;
+	if (accumulatedSecs >= BLINK_SECONDS)
+	{
+		accumulatedSecs = 0.f;
+		SRBody->SetActive(false);
+		Fsm.ChangeState(EMonsterState::PASS_AWAY);
+		return;
+	}
+
+	blinkElapsedSecs += _deltaTime;
+	if (blinkElapsedSecs > 0.1f)
+	{
+		blinkElapsedSecs = 0.f;
+		SRBody->SetActiveSwitch();
+	}
+}
+
+void AMonster::Kill()
+{
+	Fsm.ChangeState(EMonsterState::DYING);
+}
+
+void AMonster::OnPassaway()
+{
+	SRCloud->SetActive(true);
+	SRCloud->ChangeAnimation("Disappear", true);
+
+	ShowScore();
 }

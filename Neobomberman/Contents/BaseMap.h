@@ -38,26 +38,34 @@ public:
 	{
 		return PortalIdx;
 	}
+	bool GetIsPortalOpened() const;
 	FVector2D GetPortalLoc() const;
 	void OpenPortal();
 	FIntPoint LocationToMatrixIdx(const FVector2D& _loc);
 	FVector2D MatrixIdxToLocation(const FIntPoint& _idx);
-
-	// Temp
-	inline bool GetIsMovablePortal(const FIntPoint& _Point) const
+	void BindExplodeEvent(std::function<void()> _fn)
 	{
-		bool isPortal = _Point == FIntPoint({ 6, 10 });
-		return !isPortal;
+		ExplodeEvent = _fn;
 	}
-	bool GetIsPortalOpened() const
+	const std::vector<FIntPoint>& GetSplashTileIdxs() const
 	{
-		return IsPortalOpened;
+		return SplashTileIdxs;
+	}
+	bool IsInSplash(const FIntPoint& _pt)
+	{
+		for (size_t i = 0, size = SplashTileIdxs.size(); i < size; ++i)
+		{
+			if (_pt == SplashTileIdxs[i])
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float _deltaTime) override;
-	virtual void LevelChangeStart() override;
 
 	void AppendSplash(const std::vector<FIntPoint>& _appendIdxs);
 	void CheckLaunchedBomb();
@@ -70,7 +78,8 @@ protected:
 	ATileMap* MapBox = nullptr;
 
 	FIntPoint PortalIdx = FIntPoint::NEGATIVE_ONE;
-	bool IsPortalOpened = false;
 
 	std::vector<FIntPoint> SplashTileIdxs;
+
+	std::function<void()> ExplodeEvent = nullptr;
 };

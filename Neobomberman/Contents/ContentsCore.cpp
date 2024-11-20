@@ -42,8 +42,8 @@ void ContentsCore::BeginPlay()
 	pCore->CreateLevel<APlayBossMode, APlayer>("Boss_Stage1");
 
 	//pCore->OpenLevel("Title");
-	//pCore->OpenLevel("Play");
-	pCore->OpenLevel("Boss_Stage1");
+	pCore->OpenLevel("Play");
+	//pCore->OpenLevel("Boss_Stage1");
 }
 
 void ContentsCore::Tick()
@@ -117,7 +117,9 @@ void ContentsCore::InitResources()
 	imgManager.CuttingSprite("OpenedPortalMove.png", GlobalVar::BOMB_SIZE);
 
 	imgManager.CuttingSprite("ResultCount.png", GlobalVar::BOMB_SIZE);
-	imgManager.CuttingSprite("Score100.png", GlobalVar::BOMB_SIZE);
+	imgManager.CuttingSprite("BarScoreNumber.png", GlobalVar::BAR_SCORE_NUMBER);
+	imgManager.CuttingSprite("MonsterCloud.png", GlobalVar::BOMBERMAN_SIZE);
+	imgManager.CuttingSprite("MonsterScore.png", GlobalVar::BOMB_SIZE);
 }
 
 void ContentsCore::LoadImages(std::string_view _path)

@@ -12,6 +12,7 @@ AMushroom::AMushroom()
 	Random.SetSeed(MonsterIdx);
 
 	Fsm.CreateState(EMonsterState::JUMPING, std::bind(&AMushroom::Jumping, this, std::placeholders::_1));
+	SetName("Mushroom");
 }
 
 AMushroom::~AMushroom()
@@ -33,22 +34,22 @@ void AMushroom::Init()
 	FVector2D size = GlobalVar::BOMBERMAN_SIZE;
 	const float animTime = 0.5f;
 
-	SpriteRenderer = CreateDefaultSubObject<USpriteRenderer>();
-	SpriteRenderer->SetSprite(SPRITE_NAME);
-	SpriteRenderer->SetComponentLocation({ size.X * .25f, size.Y * .5f });
-	SpriteRenderer->SetComponentScale(size);
-	SpriteRenderer->SetPivotType(PivotType::Bot);
-	SpriteRenderer->SetOrder(ERenderOrder::MONSTER);
+	SRBody = CreateDefaultSubObject<USpriteRenderer>();
+	SRBody->SetSprite(SPRITE_NAME);
+	SRBody->SetComponentLocation({ size.X * .25f, size.Y * .5f });
+	SRBody->SetComponentScale(size);
+	SRBody->SetPivotType(PivotType::Bot);
+	SRBody->SetOrder(ERenderOrder::MONSTER);
 
-	SpriteRenderer->CreateAnimation("Idle_Up", SPRITE_NAME, 0, 0, animTime);
-	SpriteRenderer->CreateAnimation("Idle_Down", SPRITE_NAME, 22, 22, animTime);
-	SpriteRenderer->CreateAnimation("Idle_Left", SPRITE_NAME, 33, 33, animTime);
-	SpriteRenderer->CreateAnimation("Idle_Right", SPRITE_NAME, 11, 11, animTime);
+	SRBody->CreateAnimation("Idle_Up", SPRITE_NAME, 0, 0, animTime);
+	SRBody->CreateAnimation("Idle_Down", SPRITE_NAME, 22, 22, animTime);
+	SRBody->CreateAnimation("Idle_Left", SPRITE_NAME, 33, 33, animTime);
+	SRBody->CreateAnimation("Idle_Right", SPRITE_NAME, 11, 11, animTime);
 
-	SpriteRenderer->CreateAnimation("Run_Up", SPRITE_NAME, 1, 6, animTime);
-	SpriteRenderer->CreateAnimation("Run_Down", SPRITE_NAME, 23, 28, animTime);
-	SpriteRenderer->CreateAnimation("Run_Left", SPRITE_NAME, 34, 39, animTime);
-	SpriteRenderer->CreateAnimation("Run_Right", SPRITE_NAME, 12, 17, animTime);
+	SRBody->CreateAnimation("Run_Up", SPRITE_NAME, 1, 6, animTime);
+	SRBody->CreateAnimation("Run_Down", SPRITE_NAME, 23, 28, animTime);
+	SRBody->CreateAnimation("Run_Left", SPRITE_NAME, 34, 39, animTime);
+	SRBody->CreateAnimation("Run_Right", SPRITE_NAME, 12, 17, animTime);
 
 	std::vector<int> indexes;
 	std::vector<float> times;
@@ -72,7 +73,26 @@ void AMushroom::Init()
 		}
 		
 	}
-	SpriteRenderer->CreateAnimation("Jump", SPRITE_NAME, indexes, times, false);
+	SRBody->CreateAnimation("Jump", SPRITE_NAME, indexes, times, false);
+
+	{
+		FVector2D size = GlobalVar::BOMB_SIZE;
+
+		SRScore = CreateDefaultSubObject<USpriteRenderer>();
+		SRScore->SetSprite(MONSTER_SCORE_PATH);
+		SRScore->SetComponentLocation(size.Half().Half());
+		SRScore->SetComponentScale(size);
+		SRScore->CreateAnimation("Disappear", MONSTER_SCORE_PATH, 0, 6, .25f, false);
+		SRScore->SetActive(false);
+	}
+
+	Score = EMonsterScore::S100;
+}
+
+void AMushroom::ShowScore()
+{
+	SRScore->ChangeAnimation("Disappear");
+	SRScore->SetActive(true);
 }
 
 bool AMushroom::IsJump()
@@ -109,9 +129,9 @@ void AMushroom::Thinking(float _deltaTime)
 
 void AMushroom::Jumping(float _deltaTime)
 {
-	SpriteRenderer->ChangeAnimation("Jump");
+	SRBody->ChangeAnimation("Jump");
 
-	if (SpriteRenderer->IsCurAnimationEnd())
+	if (SRBody->IsCurAnimationEnd())
 	{
 		Fsm.ChangeState(EMonsterState::THINKING);
 	}

@@ -36,6 +36,7 @@ void APlayGameMode::BeginPlay()
 	/* Stage 1-1 */
 	APlayMap* pStage1 = pLevel->SpawnActor<APlayMap>();
 	pStage1->SetPortalIdx(PORTAL_IDX_STAGE_1);
+	pStage1->BindExplodeEvent(std::bind(&APlayGameMode::OnExplodeBomb, this));
 	CurMapPtr = pStage1;
 
 	pStage1->InitMap();
@@ -44,13 +45,14 @@ void APlayGameMode::BeginPlay()
 	FVector2D monsterStartingLoc = pStage1->GetPortalLoc();
 
 	// Temp. To test portal
-	Player->SetActorLocation(monsterStartingLoc + FVector2D({ 16.f, -16.f }));	// temp
+	//Player->SetActorLocation(monsterStartingLoc + FVector2D({ 16.f, -16.f }));	// temp
 
 	// Temp. To test collision
-	/*AMushroom* monsterMushroom = pLevel->SpawnActor<AMushroom>();
-	monsterMushroom->SetCurMap(pStage1);
-	monsterMushroom->SetFirstDestination({ 0, 0 });
-	monsterMushroom->SetActorLocation(Player->GetActorLocation() + FVector2D({ 64, 0 }) - FVector2D({ 16, 16 }));*/
+	AMushroom* monster = pLevel->SpawnActor<AMushroom>();
+	monster->SetCurMap(pStage1);
+	monster->SetFirstDestination({ 0, 0 });
+	monster->SetActorLocation(Player->GetActorLocation() + FVector2D({ 64, 0 }) - FVector2D({ 16, 16 }));
+	MonsterList.push_back(monster);
 	
 	// TODO: spawn delay
 	/*{
@@ -125,4 +127,20 @@ void APlayGameMode::Tick(float _deltaTime)
 void APlayGameMode::GoNextStage()
 {
 	CurMapPtr->OpenPortal();
+}
+
+void APlayGameMode::OnExplodeBomb()
+{
+	if (CurMapPtr == nullptr) return;
+
+	const std::vector<FIntPoint>& vec = CurMapPtr->GetSplashTileIdxs();
+
+	for (size_t i = 0, size = MonsterList.size(); i < size; ++i)
+	{
+		FIntPoint curIdx = CurMapPtr->LocationToMatrixIdx(MonsterList[i]->GetActorLocation());
+		if (CurMapPtr->IsInSplash(curIdx))
+		{
+			MonsterList[i]->Kill();
+		}
+	}
 }

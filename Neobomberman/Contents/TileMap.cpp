@@ -103,7 +103,10 @@ void ATileMap::SetPortal(const FIntPoint& _Index, const FVector2D& _Pivot, const
 
 void ATileMap::OpenPortal()
 {
-	AllTiles[PortalIdx.Y][PortalIdx.X].SpriteRenderer->ChangeAnimation("PortalOpened");
+	if (AllTiles[PortalIdx.Y][PortalIdx.X].SpriteRenderer->GetCurAnimName() != "PortalOpened")
+	{
+		AllTiles[PortalIdx.Y][PortalIdx.X].SpriteRenderer->ChangeAnimation("PortalOpened");
+	}
 }
 
 bool ATileMap::IsIndexOver(FIntPoint _Index)

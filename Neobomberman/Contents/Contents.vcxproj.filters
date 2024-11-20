@@ -105,6 +105,9 @@
     <ClInclude Include="BaseMap.h">
       <Filter>Map</Filter>
     </ClInclude>
+    <ClInclude Include="UtilFn.h">
+      <Filter>Util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Player.cpp">
@@ -172,6 +175,9 @@
     </ClCompile>
     <ClCompile Include="BaseMap.cpp">
       <Filter>Map</Filter>
+    </ClCompile>
+    <ClCompile Include="UtilFn.cpp">
+      <Filter>Util</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

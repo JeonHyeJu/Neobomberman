@@ -254,8 +254,8 @@ void APlayer::DropBomb()
 
 void APlayer::OnEnterCollision(AActor* _actor)
 {
-	_actor->SetActive(false);	// temp
-	FsmH.ChangeState(EPlayerState::DEAD);
+	//_actor->SetActive(false);	// temp
+	//FsmH.ChangeState(EPlayerState::DEAD);
 }
 
 void APlayer::OnEndPortalAnim()
@@ -486,8 +486,6 @@ void APlayer::OnEndFadeOut()
 	int lastTime = AGameTimer::GetLastTime();
 	ResultScene->SetLastSecs(lastTime);
 	ResultScene->SetTotal(Score);
-
-	//UEngineAPICore::GetCore()->OpenLevel("Boss_Stage1");
 }
 
 // Temp

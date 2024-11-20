@@ -2,6 +2,7 @@
 #include "Result.h"
 #include "ContentsEnum.h"
 #include "GlobalVar.h"
+#include "UtilFn.h"
 #include <EngineCore/Actor.h>
 #include <EngineCore/SpriteRenderer.h>
 #include <EngineCore/EngineAPICore.h>
@@ -62,7 +63,7 @@ AResult::AResult()
 		{
 			SRBonus[i] = CreateDefaultSubObject<USpriteRenderer>();
 			SRBonus[i]->SetSprite(RESULT_COUNT_PATH);
-			SRBonus[i]->SetComponentLocation(FVector2D{ 94, 306 } + size.Half() + FVector2D{ i * size.X, 0.f });
+			SRBonus[i]->SetComponentLocation(FVector2D{ 30, 306 } + size.Half() + FVector2D{ i * size.X, 0.f });
 			SRBonus[i]->SetComponentScale(size);
 			SRBonus[i]->SetOrder(ERenderOrder::RESULT);
 		}
@@ -71,7 +72,7 @@ AResult::AResult()
 		{
 			SRTotal[i] = CreateDefaultSubObject<USpriteRenderer>();
 			SRTotal[i]->SetSprite(RESULT_COUNT_PATH);
-			SRTotal[i]->SetComponentLocation(FVector2D{ 94, 368 } + size.Half() + FVector2D{ i * size.X, 0.f });
+			SRTotal[i]->SetComponentLocation(FVector2D{ 30, 368 } + size.Half() + FVector2D{ i * size.X, 0.f });
 			SRTotal[i]->SetComponentScale(size);
 			SRTotal[i]->SetOrder(ERenderOrder::RESULT);
 		}
@@ -136,104 +137,57 @@ void AResult::SetLastTimeUI(int _lastSecs)
 
 void AResult::SetBonusUI(int _bonus)
 {
-	static int CurNumCnt = 0;
+	static int PrevBonus = -1;
 
-	Bonus = _bonus;
-	int total = Bonus;
-	int numCnt = 0;
-
-	while (total != 0)
+	if (_bonus != PrevBonus)
 	{
-		total /= 10;
-		numCnt++;
-	}
+		PrevBonus = _bonus;
+		Bonus = _bonus;
 
-	total = Bonus;
-	for (int i = numCnt - 1; i >= 0; --i)
-	{
-		int denorm = static_cast<int>(std::pow(10, i));
-		int val = total / denorm;
-		SRBonus[SHOW_NUMBER_CNT - i - 1]->SetSprite(RESULT_COUNT_PATH, val);
-		total %= denorm;
-	}
+		int size = sizeof(SRBonus) / sizeof(USpriteRenderer*);
+		std::vector<int>&& bonusVec = UtilFn::IntToVector(_bonus, size);
 
-	if (CurNumCnt != numCnt)
-	{
-		CurNumCnt = numCnt;
-		int compVal = SHOW_NUMBER_CNT - CurNumCnt;
-		for (int i = 0; i < SHOW_NUMBER_CNT; ++i)
+		for (int i = size - 1; i >= 0; --i)
 		{
-			if (i < compVal)
+			int val = bonusVec[i];
+			if (val != -1)
 			{
-				SRBonus[i]->SetActive(false);
+				SRBonus[i]->SetSprite(RESULT_COUNT_PATH, val);
+				SRBonus[i]->SetActive(true);
 			}
 			else
 			{
-				SRBonus[i]->SetActive(true);
+				SRBonus[i]->SetActive(false);
 			}
 		}
-	}
-
-	// Temp
-	if (Bonus == 0)
-	{
-		SRBonus[SHOW_NUMBER_CNT - 1]->SetSprite(RESULT_COUNT_PATH, 0);
-		SRBonus[SHOW_NUMBER_CNT - 1]->SetActive(true);
 	}
 }
 
 void AResult::SetTotalUI(int _total)
 {
-	static int CurNumCnt = 0;
+	static int PrevTotal = -1;
 
-	Total = _total;
-	int total = Total;
-	int numCnt = 0;
-	
-	// Total 600
-	// 600 / 10 -> 60
-	// 60 / 10 -> 6
-	// 6 / 10 -> 0
-	while (total != 0)
+	if (_total != PrevTotal)
 	{
-		total /= 10;
-		numCnt++;
-	}
+		PrevTotal = _total;
+		Total = _total;
 
-	total = Total;
-	// 652 / 100 = 6, rest: 52
-	// 52 / 10 = 5, rest 2
-	// 2 / 1 = 2, rest 0
-	for (int i = numCnt - 1; i >= 0; --i)
-	{
-		int denorm = static_cast<int>(std::pow(10, i));
-		int val = total / denorm;
-		SRTotal[SHOW_NUMBER_CNT - i - 1]->SetSprite(RESULT_COUNT_PATH, val);
-		total %= denorm;
-	}
+		int size = sizeof(SRTotal) / sizeof(USpriteRenderer*);
+		std::vector<int>&& bonusVec = UtilFn::IntToVector(_total, size);
 
-	if (CurNumCnt != numCnt)
-	{
-		CurNumCnt = numCnt;
-		int compVal = SHOW_NUMBER_CNT - CurNumCnt;
-		for (int i = 0; i < SHOW_NUMBER_CNT; ++i)
+		for (int i = size - 1; i >= 0; --i)
 		{
-			if (i < compVal)
+			int val = bonusVec[i];
+			if (val != -1)
 			{
-				SRTotal[i]->SetActive(false);
+				SRTotal[i]->SetSprite(RESULT_COUNT_PATH, val);
+				SRTotal[i]->SetActive(true);
 			}
 			else
 			{
-				SRTotal[i]->SetActive(true);
+				SRTotal[i]->SetActive(false);
 			}
 		}
-	}
-
-	// Temp
-	if (Total == 0)
-	{
-		SRTotal[SHOW_NUMBER_CNT - 1]->SetSprite(RESULT_COUNT_PATH, 0);
-		SRTotal[SHOW_NUMBER_CNT - 1]->SetActive(true);
 	}
 }
 

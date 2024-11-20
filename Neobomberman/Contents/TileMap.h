@@ -91,7 +91,7 @@ public:
 	{
 		return WholeTileType;
 	}
-	inline bool GetIsOpenedPortal() const
+	inline bool GetIsPortalOpened() const
 	{
 		return IsPortalOpened;
 	}

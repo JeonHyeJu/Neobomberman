@@ -202,6 +202,10 @@
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TitleGameMode.h" />
     <ClInclude Include="Title.h" />
+    <ClInclude Include="UtilFn.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BaseMap.cpp">
@@ -259,6 +263,10 @@
     <ClCompile Include="TileMapGameMode.cpp" />
     <ClCompile Include="TitleGameMode.cpp" />
     <ClCompile Include="Title.cpp" />
+    <ClCompile Include="UtilFn.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

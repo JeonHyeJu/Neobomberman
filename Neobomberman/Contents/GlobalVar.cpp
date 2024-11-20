@@ -8,6 +8,7 @@ const FVector2D GlobalVar::BOMB_SIZE = { 32, 32 };			// { 16, 16 }
 const FIntPoint GlobalVar::BATTLE_GROUND_COUNT = { 13, 11 };
 const FVector2D GlobalVar::TIME_COUNT_SIZE = { 20, 20 };
 const FVector2D GlobalVar::TITLE_TIME_COUNT_SIZE = { 24, 24 };
+const FVector2D GlobalVar::BAR_SCORE_NUMBER = { 16, 16 };
 const int GlobalVar::STAGE_H_MARGIN = 64;	// 32
 const int GlobalVar::MAX_BOMB_CNT = 5;		// 5
 const int GlobalVar::ORG_BOMB_POWER = 1;

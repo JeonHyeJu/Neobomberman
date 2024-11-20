@@ -10,6 +10,7 @@ public:
 	static const FVector2D BOMB_SIZE;
 	static const FVector2D TIME_COUNT_SIZE;
 	static const FVector2D TITLE_TIME_COUNT_SIZE;
+	static const FVector2D BAR_SCORE_NUMBER;
 	static const int STAGE_H_MARGIN;
 	static const int MAX_BOMB_CNT;
 	static const int ORG_BOMB_POWER;

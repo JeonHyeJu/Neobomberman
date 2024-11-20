@@ -12,11 +12,12 @@ public:
 	ABalloon& operator=(const ABalloon& _other) = delete;
 	ABalloon& operator=(ABalloon&& _other) noexcept = delete;
 
-	void Init() override;
-
 protected:
 	void BeginPlay() override;
 	void Tick(float _deltaTime) override;
+
+	void Init() override;
+	void ShowScore() override;
 
 private:
 	const char* SPRITE_NAME = "Balloon_long.png";

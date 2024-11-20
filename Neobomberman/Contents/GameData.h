@@ -45,10 +45,21 @@ public:
 		return Player1Life;
 	}
 
+	inline int GetPlayer1Score() const
+	{
+		return Player1Score;
+	}
+	int AddPlayer1Score(int _val)
+	{
+		Player1Score += _val;
+		return Player1Score;
+	}
+
 	const unsigned __int8 MAX_PLAYER_LIFE = 2;
 	const unsigned __int8 MAX_COIN = 99;
 
 private:
 	unsigned __int8 Coin = 0;
 	unsigned __int8 Player1Life = 2;
+	int Player1Score = 0;
 };

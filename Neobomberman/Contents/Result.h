@@ -2,7 +2,7 @@
 #include <EngineCore/Actor.h>
 #include <EngineBase/FSMStateManager.h>
 
-#define SHOW_NUMBER_CNT 6
+#define SHOW_NUMBER_CNT 8
 
 enum class EResultState
 {
@@ -41,6 +41,8 @@ public:
 
 private:
 	void SetLastTimeUI(int _lastSecs);
+	void _SetNumberUI(USpriteRenderer** _arr, int _val);
+
 	void SetBonusUI(int _bonus);
 	void SetTotalUI(int _total);
 
