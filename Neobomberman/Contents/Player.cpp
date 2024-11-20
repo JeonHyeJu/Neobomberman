@@ -3,7 +3,7 @@
 #include "GlobalVar.h"
 #include "GameTimer.h"
 #include "TileMap.h"
-#include "PlayMap.h"
+#include "BaseMap.h"
 #include "Player.h"
 #include "Result.h"
 #include "Bomb.h"
@@ -46,9 +46,12 @@ APlayer::APlayer()
 		SpriteRendererHead->CreateAnimation("Idle_Right", PLAYER_SPRITE_PATH, 24, 24, 0.1f);
 		SpriteRendererHead->CreateAnimation("Run_Right", PLAYER_SPRITE_PATH, 25, 30, 0.1f);
 
-		SpriteRendererHead->CreateAnimation("BlinkingEyes", PLAYER_SPRITE_PATH, 580, 581, 0.3f);
+		std::vector<int> idxs{ 580, 581, 580, 581, 580 };
+		idxs.resize(5);
+		SpriteRendererHead->CreateAnimation("BlinkingEyes", PLAYER_SPRITE_PATH, idxs, 0.3f);
 		SpriteRendererHead->CreateAnimation("Dead", PLAYER_SPRITE_PATH, 591, 600, 0.2f, false);
-		SpriteRendererHead->CreateAnimation("Ride_Portal", PLAYER_SPRITE_PATH, 583, 588, 0.2f, false);
+		SpriteRendererHead->CreateAnimation("Ride_Portal", PLAYER_SPRITE_PATH, 583, 589, 0.1f, false);
+		SpriteRendererHead->SetAnimationEvent("Ride_Portal", 589, std::bind(&APlayer::OnEndPortalAnim, this));
 	}
 	
 	{
@@ -72,7 +75,7 @@ APlayer::APlayer()
 
 		SpriteRendererBody->CreateAnimation("BlinkingEyes", PLAYER_SPRITE_PATH, 612, 613, 0.3f);
 		SpriteRendererBody->CreateAnimation("Dead", PLAYER_SPRITE_PATH, 622, 631, 0.2f, false);
-		SpriteRendererBody->CreateAnimation("Ride_Portal", PLAYER_SPRITE_PATH, 615, 620, 0.2f, false);
+		SpriteRendererBody->CreateAnimation("Ride_Portal", PLAYER_SPRITE_PATH, 615, 621, 0.1f, false);
 	}
 
 	{
@@ -104,7 +107,7 @@ APlayer::APlayer()
 	FsmH.CreateState(EPlayerState::IDLE, std::bind(&APlayer::Idling, this, std::placeholders::_1), std::bind(&APlayer::OnIdle, this));
 	FsmH.CreateState(EPlayerState::MOVE, std::bind(&APlayer::Moving, this, std::placeholders::_1));
 	FsmH.CreateState(EPlayerState::DEAD, std::bind(&APlayer::Dying, this, std::placeholders::_1), std::bind(&APlayer::OnDead, this));
-	FsmH.CreateState(EPlayerState::PORTAL, std::bind(&APlayer::Shifting, this, std::placeholders::_1), std::bind(&APlayer::OnShift, this));
+	FsmH.CreateState(EPlayerState::PORTAL, nullptr, std::bind(&APlayer::OnShift, this));
 }
 
 APlayer::~APlayer()
@@ -177,40 +180,40 @@ void APlayer::InitSounds()
 
 bool APlayer::IsDownAnyKeyWithSetDir()
 {
-	bool isDownD = UEngineInput::GetInst().IsDown('D');
-	bool isDownA = UEngineInput::GetInst().IsDown('A');
-	bool isDownS = UEngineInput::GetInst().IsDown('S');
-	bool isDownW = UEngineInput::GetInst().IsDown('W');
+	bool isDownRight = UEngineInput::GetInst().IsDown(VK_RIGHT);
+	bool isDownLeft = UEngineInput::GetInst().IsDown(VK_LEFT);
+	bool isDownDown = UEngineInput::GetInst().IsDown(VK_DOWN);
+	bool isDownUp = UEngineInput::GetInst().IsDown(VK_UP);
 
-	if (isDownD)
+	if (isDownRight)
 	{
 		Direction = FVector2D::RIGHT;
 	}
-	else if (isDownA)
+	else if (isDownLeft)
 	{
 		Direction = FVector2D::LEFT;
 	}
-	else if (isDownS)
+	else if (isDownDown)
 	{
 		Direction = FVector2D::DOWN;
 	}
-	else if (isDownW)
+	else if (isDownUp)
 	{
 		Direction = FVector2D::UP;
 	}
 
-	bool ret = isDownD || isDownA || isDownS || isDownW;
+	bool ret = isDownRight || isDownLeft || isDownDown || isDownUp;
 	return ret;
 }
 
 bool APlayer::IsPressedAnyKey()
 {
-	bool isPressedD = UEngineInput::GetInst().IsPress('D');
-	bool isPressedA = UEngineInput::GetInst().IsPress('A');
-	bool isPressedS = UEngineInput::GetInst().IsPress('S');
-	bool isPressedW = UEngineInput::GetInst().IsPress('W');
+	bool isPressedRight = UEngineInput::GetInst().IsPress(VK_RIGHT);
+	bool isPressedLeft = UEngineInput::GetInst().IsPress(VK_LEFT);
+	bool isPressedDown = UEngineInput::GetInst().IsPress(VK_DOWN);
+	bool isPressedUp = UEngineInput::GetInst().IsPress(VK_UP);
 
-	bool ret = isPressedD || isPressedA || isPressedS || isPressedW;
+	bool ret = isPressedRight || isPressedLeft || isPressedDown || isPressedUp;
 	return ret;
 }
 
@@ -240,11 +243,12 @@ std::string APlayer::GetDirectionStr()
 void APlayer::DropBomb()
 {
 	FVector2D loc = GetActorLocation();
-	FIntPoint idx = CurMap->GetGroundMap()->LocationToMatrixIdx(loc);
-	if (ABomb::CanSetBombThisIdx(idx))
+	FIntPoint idx = CurMapPtr->GetGroundMap()->LocationToMatrixIdx(loc);
+	int curBombCnt = ABomb::GetBombCnt();
+	if (ABomb::CanSetBombThisIdx(idx) && curBombCnt < Ability.BombCount)
 	{
 		ABomb* pBomb = GetWorld()->SpawnActor<ABomb>();
-		pBomb->Init(loc, Ability.BombType, Ability.Power, CurMap);
+		pBomb->Init(loc, Ability.BombType, Ability.Power, CurMapPtr);
 	}
 }
 
@@ -252,6 +256,13 @@ void APlayer::OnEnterCollision(AActor* _actor)
 {
 	_actor->SetActive(false);	// temp
 	FsmH.ChangeState(EPlayerState::DEAD);
+}
+
+void APlayer::OnEndPortalAnim()
+{
+	AFade::MainFade->SetFadeMinMax(0.f, .5f);
+	AFade::MainFade->SetFadeSpeed(.5f);
+	AFade::MainFade->FadeOut();
 }
 
 /* FSM start functions */
@@ -387,24 +398,21 @@ void APlayer::Moving(float _deltaTime)
 		isMove = true;
 	}
 
-	if (CurMap != nullptr)
+	if (CurMapPtr != nullptr)
 	{
-		ATileMap* wallMap = CurMap->GetWallMap();
-		bool isMovableWall = wallMap->GetIsMovable(nextPos);
+		bool canMoveMap = CurMapPtr->CanMove(nextPos);
+		isMove = isMove && canMoveMap;
 
-		ATileMap* boxMap = CurMap->GetBoxMap();
-		bool isMovableBox = boxMap->GetIsMovable(nextPos);
-
-		isMove = (isMove && isMovableWall && isMovableBox);
+		FIntPoint portalIdx = CurMapPtr->GetPortalIdx();
 
 		// Portal
-		if (CurMap->GetIsPortalOpened())
+		if (CurMapPtr->GetIsPortalOpened())
 		{
-			// Temp
-			if (!CurMap->GetIsMovablePortal(CurMap->GetWallMap()->LocationToMatrixIdx(GetActorLocation())))
+			FIntPoint curIdx = CurMapPtr->LocationToMatrixIdx(GetActorLocation());
+			if (curIdx == portalIdx)
 			{
-				// Temp
-				FVector2D organizedLoc = CurMap->GetGroundMap()->MatrixIdxToLocation({6, 10}) + GlobalVar::BOMBERMAN_SIZE.Half().Half();
+				// Move to orginized location
+				FVector2D organizedLoc = CurMapPtr->GetPortalLoc() + GlobalVar::BOMBERMAN_SIZE.Half().Half();
 				SetActorLocation(organizedLoc);
 
 				FsmH.ChangeState(EPlayerState::PORTAL);
@@ -414,8 +422,8 @@ void APlayer::Moving(float _deltaTime)
 		}
 		else
 		{
-			// Temp
-			if (!CurMap->GetIsMovablePortal(CurMap->GetWallMap()->LocationToMatrixIdx(nextPos)))
+			FIntPoint nextIdx = CurMapPtr->LocationToMatrixIdx(nextPos);
+			if (nextIdx == portalIdx)
 			{
 				isMove = false;
 			}
@@ -466,21 +474,6 @@ void APlayer::Dying(float _deltaTime)
 				SpriteRendererHead->SetActiveSwitch();
 				SpriteRendererBody->SetActiveSwitch();
 			}
-		}
-	}
-}
-
-void APlayer::Shifting(float _deltaTime)
-{
-	static bool onlyOnce = true;
-	if (SpriteRendererHead->IsCurAnimationEnd())
-	{
-		if (onlyOnce)
-		{
-			onlyOnce = false;
-			AFade::MainFade->SetFadeMinMax(0.f, .5f);
-			AFade::MainFade->SetFadeSpeed(.5f);
-			AFade::MainFade->FadeOut();
 		}
 	}
 }

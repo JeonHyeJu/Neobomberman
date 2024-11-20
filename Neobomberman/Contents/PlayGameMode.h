@@ -12,10 +12,18 @@ public:
 	APlayGameMode& operator=(const APlayGameMode& _Other) = delete;
 	APlayGameMode& operator=(APlayGameMode&& _Other) noexcept = delete;
 
-	void BeginPlay();
+	void BeginPlay() override;
+	void Tick(float _deltaTime) override;
+
+	void GoNextStage();
 
 protected:
 
 private:
+	class ABaseMap* CurMapPtr = nullptr;
+	std::vector<class AMonster*> MonsterList;
+	const int MONSTER_CNT_STAGE_1 = 4;
+
+	const FIntPoint PORTAL_IDX_STAGE_1 = { 6, 10 };
 };
 

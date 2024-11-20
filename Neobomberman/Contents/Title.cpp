@@ -2,6 +2,7 @@
 #include "Title.h"
 #include "ContentsEnum.h"
 #include "GlobalVar.h"
+#include "GameUI.h"
 #include "Fade.h"
 #include <EnginePlatform/EngineInput.h>
 #include <EngineCore/SpriteRenderer.h>
@@ -75,36 +76,6 @@ ATitle::ATitle()
 				SRTimeTitle->GetComponentLocation().X - 6 + (i * size.X - i * margin * 1.5f),
 				SRTimeTitle->GetComponentLocation().Y + SRTimeTitle->GetComponentScale().Y
 			});
-		}
-	}
-
-	{
-		FVector2D size = { 112, 16 };
-		SRLevel_4 = CreateDefaultSubObject<USpriteRenderer>();
-		SRLevel_4->SetSprite("Level-4_112x16.png");
-		SRLevel_4->SetComponentScale(size);
-		SRLevel_4->SetComponentLocation({ winSize.hX() + margin * 2.f, winSize.Y - size.hY()});
-		SRLevel_4->SetOrder(ERenderOrder::UI_OVER_FADE);
-	}
-
-	{
-		FVector2D size = { 112, 16 };
-		SRCredits = CreateDefaultSubObject<USpriteRenderer>();
-		SRCredits->SetSprite("Credits_112x16.png");
-		SRCredits->SetComponentScale(size);
-		SRCredits->SetComponentLocation({ 432 + size.hX(), winSize.Y - size.hY()});
-		SRCredits->SetOrder(ERenderOrder::UI_OVER_FADE);
-	}
-
-	{
-		for (int i = 0; i < 2; ++i)
-		{
-			FVector2D size = { 24, 24 };
-			SRCreditCount[i] = CreateDefaultSubObject<USpriteRenderer>();
-			SRCreditCount[i]->SetSprite(SPRITE_TIME_COUNT, 0);
-			SRCreditCount[i]->SetComponentScale(size);
-			SRCreditCount[i]->SetComponentLocation({ 555 + size.hX() + (i * size.X - i * margin * 1.5f), winSize.Y - size.hY() });
-			SRCreditCount[i]->SetOrder(ERenderOrder::UI_OVER_FADE);
 		}
 	}
 
@@ -285,28 +256,17 @@ void ATitle::Tick(float _deltaTime)
 {
 	Super::Tick(_deltaTime);
 
-	CoinAction();
-
-	if (isPainterMovingUp || isPainterMovingDown)
+	int curState = FSM.GetState();
+	if (curState < static_cast<int>(ETitleState::WAIT_START))
 	{
-		RunPaintSequence(_deltaTime);
-		return;
+		WaitKeyF3F4();
+	}
+	else if (curState == static_cast<int>(ETitleState::WAIT_SELECT))
+	{
+		WaitKeyA(_deltaTime);
 	}
 
 	FSM.Update(_deltaTime);
-}
-
-void ATitle::AddCoin(int _coinCnt)
-{
-	if (Coin >= 99) return;
-
-	Coin += _coinCnt;
-
-	int base10 = Coin / 10;
-	int base1 = Coin % 10;
-
-	SRCreditCount[0]->SetSprite(SPRITE_TIME_COUNT, base10);
-	SRCreditCount[1]->SetSprite(SPRITE_TIME_COUNT, base1);
 }
 
 void ATitle::ResetSeconds()
@@ -340,6 +300,33 @@ void ATitle::SwitchCutSceneUi(bool _isShow)
 	SRCutSceneBg->SetActive(_isShow);
 	SRCutScene->SetActive(_isShow);
 	SRSpaceship->SetActive(_isShow);
+}
+
+void ATitle::WaitKeyF3F4()
+{
+	if (GameUIPtr == nullptr) return;
+
+	unsigned __int8 curCoin = GameUIPtr->GetCoin();
+	if (curCoin > 0 && curCoin != PrevCoin)
+	{
+		PrevCoin = curCoin;
+
+		if (FSM.GetState() <= static_cast<int>(ETitleState::WAIT_START))
+		{
+			ResetSeconds();
+		}
+	}
+
+	OnEndAnimation();
+}
+
+void ATitle::WaitKeyA(float _deltaTime)
+{
+	if (isPainterMovingUp || isPainterMovingDown)
+	{
+		RunPaintSequence(_deltaTime);
+		return;
+	}
 }
 
 void ATitle::RunPaintSequence(float _deltaTime)
@@ -406,7 +393,11 @@ void ATitle::Countdown(const ESceneType& _type)
 		{
 			// TODO: Play video
 			// Temp
-			if (Coin == 0) Coin++;
+			if (GameUIPtr == nullptr) return;
+			if (GameUIPtr->GetCoin() == 0)
+			{
+				GameUIPtr->AddCoin(1);
+			}
 			ChangeToStartScene();
 		}
 		else
@@ -455,28 +446,13 @@ void ATitle::ChangeToCutScene()
 
 void ATitle::ChangeToStartScene()
 {
+	if (GameUIPtr == nullptr) return;
+
 	if (FSM.GetState() < static_cast<int>(ETitleState::WAIT_SELECT_IDLE))
 	{
-		AddCoin(-1);
+		GameUIPtr->AddCoin(-1);
 		AFade::MainFade->FadeOut();
 		FSM.ChangeState(ETitleState::WAIT_SELECT_IDLE);
-	}
-}
-
-void ATitle::CoinAction()
-{
-	bool isDownF3 = UEngineInput::GetInst().IsDown(VK_F3);
-	bool isDownF4 = UEngineInput::GetInst().IsDown(VK_F4);
-
-	if (isDownF3 || isDownF4)
-	{
-		int coin = (isDownF3 ? 1 : 2);
-		if (FSM.GetState() <= static_cast<int>(ETitleState::WAIT_START))
-		{
-			ResetSeconds();
-		}
-		AddCoin(coin);
-		OnEndAnimation();
 	}
 }
 

@@ -23,8 +23,8 @@ public:
 	AMonster& operator=(const AMonster& _other) = delete;
 	AMonster& operator=(AMonster&& _other) noexcept = delete;
 
-	virtual void BeginPlay();
-	virtual void Tick(float _deltaTime);
+	virtual void BeginPlay() override;
+	virtual void Tick(float _deltaTime) override;
 	virtual void Init() {};
 
 	void SetCurMap(class APlayMap* _map);

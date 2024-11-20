@@ -20,8 +20,8 @@ public:
 	struct SAnimKeepInfo
 	{
 		float Seconds = 0.f;
-		float AnimSeconds = 1.f;
-		float WaitSeconds = 3.f;
+		float AnimSeconds = 1.5f;
+		float WaitSeconds = 5.f;
 		bool IsRunning = false;
 	};
 
@@ -29,7 +29,7 @@ public:
 	{
 		int Power = 2;
 		float Speed = 100.f;
-		int BombCount = 1;
+		int BombCount = 5;	// Temp
 		bool HasGlove = false;
 		bool HasShoes = false;
 		bool HasMoveThrogh = false;
@@ -48,9 +48,13 @@ public:
 	void BeginPlay() override;
 	void Tick(float _DeltaTime) override;
 
-	inline void SetCurMap(class APlayMap* _map)
+	inline void SetCurMap(class ABaseMap* _map)
 	{
-		CurMap = _map;
+		CurMapPtr = _map;
+	}
+	void SetGameUI(class AGameUI* _ptr)
+	{
+		GameUIPtr = _ptr;
 	}
 
 	void InitFadeEvent(class AFade* _ptr);
@@ -67,6 +71,8 @@ private:
 	bool IsPressedAnyKey();
 
 	void OnEnterCollision(class AActor* _actor);
+	void OnEndPortalAnim();
+
 	void OnReborn();
 	void OnIdle();
 	void OnDead();
@@ -76,7 +82,6 @@ private:
 	void Idling(float _deltaTime);
 	void Moving(float _deltaTime);
 	void Dying(float _deltaTime);
-	void Shifting(float _deltaTime);
 
 	void OnEndFadeOut();
 
@@ -90,7 +95,7 @@ private:
 
 	class U2DCollision* Collision = nullptr;
 
-	class APlayMap* CurMap = nullptr;
+	ABaseMap* CurMapPtr = nullptr;
 	const int BLINK_SECONDS = 1;
 
 	SPlayerAbility Ability;
@@ -102,6 +107,7 @@ private:
 	SAnimKeepInfo DyingAnimInfo;
 
 	class AResult* ResultScene = nullptr;
+	AGameUI* GameUIPtr = nullptr;
 
 	int Score = 600;	// Temp
 };

@@ -10,6 +10,7 @@
 #include <EngineCore/ImageManager.h>
 
 ABossMap::ABossMap()
+: ABaseMap()
 {
 
 }
@@ -17,6 +18,16 @@ ABossMap::ABossMap()
 ABossMap::~ABossMap()
 {
 
+}
+
+void ABossMap::BeginPlay()
+{
+	ABaseMap::BeginPlay();
+}
+
+void ABossMap::Tick(float _deltaTime)
+{
+	ABaseMap::Tick(_deltaTime);
 }
 
 void ABossMap::InitMap()
@@ -44,25 +55,12 @@ void ABossMap::InitMap()
 	MapWall->Init(GlobalPath::TILE_STAGE_1, shape, tileSize, TileType::Wall);
 	MapWall->SetActorLocation(moveLoc);
 
+	MapBox = GetWorld()->SpawnActor<ATileMap>();
+	MapBox->Init(GlobalPath::TILE_STAGE_1, shape, tileSize, TileType::Box);
+	MapBox->SetActorLocation(moveLoc);
+
 	GlobalPath path;
 	std::string tileDatPath = path.GetTileDataPath();
 
 	Deserialize(MapWall, tileDatPath, "BossWallData.dat");	// Temp
-}
-
-bool ABossMap::Deserialize(ATileMap* _tileMap, std::string_view _savePath, std::string_view _saveName)
-{
-	if (_tileMap == nullptr) return false;
-
-	UEngineDirectory dir;
-	dir.MoveRelative(_savePath);
-
-	UEngineSerializer serializer;
-	UEngineFile file = dir.GetPathToString() + "\\" + _saveName.data();
-	file.FileOpen("rb");
-	file.Read(serializer);
-	_tileMap->DeSerialize(serializer);
-	file.Close();
-
-	return true;
 }

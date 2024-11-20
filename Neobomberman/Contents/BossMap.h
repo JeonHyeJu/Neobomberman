@@ -1,10 +1,10 @@
 #pragma once
-#include <EngineCore/Actor.h>
+#include "BaseMap.h"
 #include <EngineCore/PathFindAStar.h>
 #include "ContentsStruct.h"
 
 class ATileMap;
-class ABossMap : public AActor
+class ABossMap : public ABaseMap
 {
 public:
 	ABossMap();
@@ -17,18 +17,9 @@ public:
 
 	void InitMap();
 
-	inline ATileMap* GetGroundMap() const
-	{
-		return MapGround;
-	}
-	inline ATileMap* GetWallMap() const
-	{
-		return MapWall;
-	}
-
-	ATileMap* MapGround = nullptr;
-	ATileMap* MapWall = nullptr;
+protected:
+	void BeginPlay() override;
+	void Tick(float _deltaTime) override;
 
 private:
-	bool Deserialize(ATileMap* _tileMap, std::string_view _savePath, std::string_view _saveName);
 };

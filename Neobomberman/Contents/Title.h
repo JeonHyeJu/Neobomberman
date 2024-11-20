@@ -32,6 +32,11 @@ public:
 	ATitle& operator=(const ATitle& _Other) = delete;
 	ATitle& operator=(ATitle&& _Other) noexcept = delete;
 
+	void SetGameUI(class AGameUI* _ptr)
+	{
+		GameUIPtr = _ptr;
+	}
+
 protected:
 	void BeginPlay() override;
 	void Tick(float _deltaTime) override;
@@ -39,10 +44,12 @@ protected:
 
 private:
 	void ResetSeconds();
-	void AddCoin(int _coinCnt);
 	void SwitchStartUi(bool _isShow);
 	void SwitchSelectUi(bool _isShow);
 	void SwitchCutSceneUi(bool _isShow);
+	
+	void WaitKeyF3F4();
+	void WaitKeyA(float _deltaTime);
 
 	void RunWaitSequence(float _deltaTime, const ESceneType& _type);
 	void RunPaintSequence(float _deltaTime);
@@ -66,8 +73,6 @@ private:
 	void WaitingToStart(float _deltaTime);
 	void RunningCutScene(float _deltaTime);
 
-	void CoinAction();
-
 	const char* ANIM_IDLE_NAME = "Opening_Idle";
 	const char* ANIM_RUN_NAME = "Opening_Run";
 
@@ -79,9 +84,6 @@ private:
 	USpriteRenderer* SROpening = nullptr;
 	USpriteRenderer* SRTimeTitle = nullptr;
 	USpriteRenderer* SRTimeCount[2] = { nullptr, nullptr };
-	USpriteRenderer* SRLevel_4 = nullptr;
-	USpriteRenderer* SRCredits = nullptr;
-	USpriteRenderer* SRCreditCount[2] = { nullptr, nullptr };
 	USpriteRenderer* SRPushP1P2 = nullptr;
 
 	USpriteRenderer* SRSelectGameMode = nullptr;
@@ -98,7 +100,7 @@ private:
 	USpriteRenderer* SRLetterBoxLower = nullptr;
 
 	int Seconds = 0;
-	unsigned __int8 Coin = 0;
+	unsigned __int8 PrevCoin = 0;
 
 	const int START_SECONDS = 29;
 
@@ -109,4 +111,5 @@ private:
 	bool isPainterMovingDown = false;
 
 	UFSMStateManager FSM;
+	AGameUI* GameUIPtr = nullptr;
 };

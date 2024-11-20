@@ -21,7 +21,7 @@ void ATileMap::Init(std::string_view _Sprite, const FIntPoint& _Count, const FVe
 
 	for (size_t y = 0; y < AllTiles.size(); y++)
 	{
-		AllTiles[y].resize(_Count.X);;
+		AllTiles[y].resize(_Count.X);
 	}
 }
 

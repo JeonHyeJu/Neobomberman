@@ -1,7 +1,7 @@
 #include "PreCompile.h"
 #include "Bomb.h"
 #include "TileMap.h"
-#include "PlayMap.h"
+#include "BaseMap.h"
 #include "GlobalVar.h"
 #include "ContentsEnum.h"
 //#include "DebugLog.h"	// TODO: delete
@@ -62,12 +62,12 @@ void ABomb::Tick(float _deltaTime)
 }
 
 /* Initialize */
-void ABomb::Init(const FVector2D& _loc, EBombType _bombType, int _power, APlayMap* _curMap)
+void ABomb::Init(const FVector2D& _loc, EBombType _bombType, int _power, ABaseMap* _curMap)
 {
 	if (ABomb::BombList.size() >= GlobalVar::MAX_BOMB_CNT) return;
 
 	SetCurMap(_curMap);
-	ATileMap* pMap = CurMap->GetGroundMap();
+	ATileMap* pMap = CurMapPtr->GetGroundMap();
 	FIntPoint matIdx = pMap->LocationToMatrixIdx(_loc);
 
 	if (!CanSetBombThisIdx(matIdx)) return;
@@ -199,8 +199,8 @@ SBombTailTypes ABomb::GetBombTailTypes(const FIntPoint& _matIdx, EBombType _bomb
 	bool isLeftEnd = false;
 	bool isRightEnd = false;
 
-	ATileMap* pMapWall = CurMap->GetWallMap();
-	ATileMap* pBoxWall = CurMap->GetBoxMap();
+	ATileMap* pMapWall = CurMapPtr->GetWallMap();
+	ATileMap* pBoxWall = CurMapPtr->GetBoxMap();
 
 	for (int i = 1; i <= _power; i++)
 	{
@@ -226,7 +226,7 @@ SBombTailTypes ABomb::GetBombTailTypes(const FIntPoint& _matIdx, EBombType _bomb
 
 EBombTailType ABomb::GetBombTailType(ATileMap* _pWallMap, ATileMap* _pBoxMap, const FIntPoint& _nextIdx, bool* _isEnd, bool _isLast)
 {
-	if (CurMap == nullptr)
+	if (CurMapPtr == nullptr)
 	{
 		MSGASSERT("맵이 세팅되지 않은채 폭탄을 설치했습니다.");
 	}

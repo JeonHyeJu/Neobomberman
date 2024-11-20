@@ -13,11 +13,11 @@ enum class EBombState
 };
 
 class ATileMap;
-class APlayMap;
+class ABaseMap;
 class USpriteRenderer;
 class ABomb : public AActor
 {
-	friend class APlayMap;
+	friend class ABaseMap;
 
 public:
 	ABomb();
@@ -31,12 +31,12 @@ public:
 	void BeginPlay() override;
 	void Tick(float _DeltaTime) override;
 
-	void Init(const FVector2D& _loc, EBombType _bombType, int _power, APlayMap* _curMap);
+	void Init(const FVector2D& _loc, EBombType _bombType, int _power, ABaseMap* _curMap);
 	void InitSpriteAndAnim(const SBombTailTypes& _tailInfo);
 	void ExplodeBySplash();
-	void SetCurMap(APlayMap* _map)
+	void SetCurMap(ABaseMap* _map)
 	{
-		CurMap = _map;
+		CurMapPtr = _map;
 	}
 	inline EBombType GetBombType() const
 	{
@@ -75,6 +75,10 @@ public:
 
 		return true;
 	}
+	static int GetBombCnt()
+	{
+		return static_cast<int>(BombList.size());
+	}
 
 private:
 	void CreateTail(const char* _img, const char* _imgMid, const char* _animName, const FVector2D& loc, const std::vector<EBombTailType>& _tails, std::vector<USpriteRenderer*>* _pAnimVec);
@@ -98,7 +102,7 @@ private:
 	static std::list<ABomb*> BombList;
 
 	UFSMStateManager Fsm;
-	APlayMap* CurMap = nullptr;
+	ABaseMap* CurMapPtr = nullptr;
 
 	EBombType BombType = EBombType::PLAIN;
 
