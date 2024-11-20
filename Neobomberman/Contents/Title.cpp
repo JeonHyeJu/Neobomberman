@@ -1,5 +1,6 @@
 #include "PreCompile.h"
 #include "Title.h"
+#include "ContentsEnum.h"
 #include "GlobalVar.h"
 #include "Fade.h"
 #include <EnginePlatform/EngineInput.h>
@@ -83,6 +84,7 @@ ATitle::ATitle()
 		SRLevel_4->SetSprite("Level-4_112x16.png");
 		SRLevel_4->SetComponentScale(size);
 		SRLevel_4->SetComponentLocation({ winSize.hX() + margin * 2.f, winSize.Y - size.hY()});
+		SRLevel_4->SetOrder(ERenderOrder::UI_OVER_FADE);
 	}
 
 	{
@@ -91,6 +93,7 @@ ATitle::ATitle()
 		SRCredits->SetSprite("Credits_112x16.png");
 		SRCredits->SetComponentScale(size);
 		SRCredits->SetComponentLocation({ 432 + size.hX(), winSize.Y - size.hY()});
+		SRCredits->SetOrder(ERenderOrder::UI_OVER_FADE);
 	}
 
 	{
@@ -101,6 +104,7 @@ ATitle::ATitle()
 			SRCreditCount[i]->SetSprite(SPRITE_TIME_COUNT, 0);
 			SRCreditCount[i]->SetComponentScale(size);
 			SRCreditCount[i]->SetComponentLocation({ 555 + size.hX() + (i * size.X - i * margin * 1.5f), winSize.Y - size.hY() });
+			SRCreditCount[i]->SetOrder(ERenderOrder::UI_OVER_FADE);
 		}
 	}
 
@@ -181,16 +185,41 @@ ATitle::ATitle()
 	}
 
 	{
-		FVector2D size = { 608, 304 };
+		FVector2D size = { 608, 256 };
+		SRCutSceneBg = CreateDefaultSubObject<USpriteRenderer>();
+		SRCutSceneBg->SetSprite("CutSceneStage1");
+		SRCutSceneBg->SetComponentLocation({ size.hX(), 132.f });
+		SRCutSceneBg->SetComponentScale(size);
+
+		const int FRAME_CNT = 9;
+		std::vector<int> idxs;
+		std::vector<float> frames(FRAME_CNT , .3f);
+		idxs.reserve(FRAME_CNT);
+		frames.reserve(FRAME_CNT);
+
+		for (int i = 0; i < FRAME_CNT; ++i)
+		{
+			idxs.push_back(i);
+		}
+		frames[1] = .01f;
+		frames[FRAME_CNT-1] = 3.f;
+
+		SRCutSceneBg->CreateAnimation("Wait", "CutSceneStage1", 0, 0, 1.f);
+		SRCutSceneBg->CreateAnimation("Dark", "CutSceneStage1", idxs, frames, false);
+		SRCutSceneBg->SetAnimationEvent("Dark", FRAME_CNT-1, std::bind(&ATitle::OnEndCutScene, this));
+
+		SRCutSceneBg->ChangeAnimation("Wait");
+		SRCutSceneBg->SetOrder(ERenderOrder::CUT_SCENE_BG);
+	}
+
+	{
+		FVector2D size = { 608, 306 };
 		SRCutScene = CreateDefaultSubObject<USpriteRenderer>();
-		SRCutScene->SetSprite("CutSceneStage1");
+		SRCutScene->SetSprite("CutSceneFront.png");
 		SRCutScene->SetComponentLocation({ size.hX(), 220.f });
 		SRCutScene->SetComponentScale(size);
 
-		SRCutScene->CreateAnimation("Wait", "CutSceneStage1", 0, 0, 1.f);
-		SRCutScene->CreateAnimation("Run", "CutSceneStage1", 0, 9, .5f, false);
-
-		SRCutScene->ChangeAnimation("Wait");
+		SRCutScene->SetOrder(ERenderOrder::CUT_SCENE);
 	}
 
 	{
@@ -199,6 +228,25 @@ ATitle::ATitle()
 		SRSpaceship->SetSprite("Spaceship.png");
 		SRSpaceship->SetComponentLocation({ winSize.hX(), winSize.hY() * 1.5f });
 		SRSpaceship->SetComponentScale(size);
+
+		SRSpaceship->SetOrder(ERenderOrder::CUT_SPACESHIP);
+	}
+
+	{
+		FVector2D size = { 608, 224 };
+		SRLetterBoxUpper = CreateDefaultSubObject<USpriteRenderer>();
+		SRLetterBoxUpper->SetSprite("Letterbox.png");
+		SRLetterBoxUpper->SetComponentLocation({ winSize.hX(), size.hY() });
+		SRLetterBoxUpper->SetComponentScale(size);
+		SRLetterBoxUpper->SetOrder(ERenderOrder::CUT_LETTER_BOX);
+		SRLetterBoxUpper->SetActive(false);
+
+		SRLetterBoxLower = CreateDefaultSubObject<USpriteRenderer>();
+		SRLetterBoxLower->SetSprite("Letterbox.png");
+		SRLetterBoxLower->SetComponentLocation({ winSize.hX(), size.Y + size.hY() });
+		SRLetterBoxLower->SetComponentScale(size);
+		SRLetterBoxLower->SetOrder(ERenderOrder::CUT_LETTER_BOX);
+		SRLetterBoxLower->SetActive(false);
 	}
 
 	SwitchStartUi(false);
@@ -212,6 +260,7 @@ ATitle::ATitle()
 	FSM.CreateState(ETitleState::RUN_CUT_SCENE_IDLE, nullptr);
 	FSM.CreateState(ETitleState::RUN_CUT_SCENE, std::bind(&ATitle::RunningCutScene, this, std::placeholders::_1), std::bind(&ATitle::OnRunCutScene, this));
 	FSM.CreateState(ETitleState::PREPARE_PLAY, nullptr);
+	FSM.CreateState(ETitleState::PREPARE_DISAPPEAR, nullptr);
 }
 
 ATitle::~ATitle()
@@ -288,6 +337,7 @@ void ATitle::SwitchSelectUi(bool _isShow)
 
 void ATitle::SwitchCutSceneUi(bool _isShow)
 {
+	SRCutSceneBg->SetActive(_isShow);
 	SRCutScene->SetActive(_isShow);
 	SRSpaceship->SetActive(_isShow);
 }
@@ -354,11 +404,14 @@ void ATitle::Countdown(const ESceneType& _type)
 	{
 		if (_type == ESceneType::START)
 		{
-			// TODO: go to Select
+			// TODO: Play video
+			// Temp
+			if (Coin == 0) Coin++;
+			ChangeToStartScene();
 		}
 		else
 		{
-			// TODO: Start
+			ChangeToCutScene();
 		}
 		return;
 	}
@@ -389,6 +442,27 @@ void ATitle::Countdown(const ESceneType& _type)
 	Seconds--;
 }
 
+void ATitle::ChangeToCutScene()
+{
+	if (FSM.GetState() < static_cast<int>(ETitleState::RUN_CUT_SCENE_IDLE))
+	{
+		FSM.ChangeState(ETitleState::RUN_CUT_SCENE_IDLE);
+		SRSelectPainter->ChangeAnimation("DrawCircle", true);
+		// The following actions are executed in an animated end event.
+		return;
+	}
+}
+
+void ATitle::ChangeToStartScene()
+{
+	if (FSM.GetState() < static_cast<int>(ETitleState::WAIT_SELECT_IDLE))
+	{
+		AddCoin(-1);
+		AFade::MainFade->FadeOut();
+		FSM.ChangeState(ETitleState::WAIT_SELECT_IDLE);
+	}
+}
+
 void ATitle::CoinAction()
 {
 	bool isDownF3 = UEngineInput::GetInst().IsDown(VK_F3);
@@ -397,7 +471,10 @@ void ATitle::CoinAction()
 	if (isDownF3 || isDownF4)
 	{
 		int coin = (isDownF3 ? 1 : 2);
-		ResetSeconds();
+		if (FSM.GetState() <= static_cast<int>(ETitleState::WAIT_START))
+		{
+			ResetSeconds();
+		}
 		AddCoin(coin);
 		OnEndAnimation();
 	}
@@ -449,6 +526,15 @@ void ATitle::OnRunOpening()
 	SROpening->ChangeAnimation(ANIM_RUN_NAME);
 }
 
+void ATitle::OnEndCutScene()
+{
+	if (FSM.GetState() < static_cast<int>(ETitleState::PREPARE_PLAY))
+	{
+		AFade::MainFade->FadeOut();
+		FSM.ChangeState(ETitleState::PREPARE_PLAY);
+	}
+}
+
 /* FSM */
 void ATitle::OnWaitToStart()
 {
@@ -468,6 +554,10 @@ void ATitle::OnSelectMode()
 
 void ATitle::OnRunCutScene()
 {
+	SRSelectCircle->SetActive(false);
+	SRLetterBoxUpper->SetActive(true);
+	SRLetterBoxLower->SetActive(true);
+
 	SwitchStartUi(false);
 	SwitchSelectUi(false);
 	SwitchCutSceneUi(true);
@@ -480,12 +570,7 @@ void ATitle::WaitingToStart(float _deltaTime)
 	bool isDownF1 = UEngineInput::GetInst().IsDown(VK_F1);
 	if (isDownF1)
 	{
-		if (FSM.GetState() < static_cast<int>(ETitleState::WAIT_SELECT_IDLE))
-		{
-			AddCoin(-1);
-			AFade::MainFade->FadeOut();
-			FSM.ChangeState(ETitleState::WAIT_SELECT_IDLE);
-		}
+		ChangeToStartScene();
 	}
 }
 
@@ -498,9 +583,7 @@ void ATitle::SelectingMode(float _deltaTime)
 	{
 		if (FSM.GetState() < static_cast<int>(ETitleState::RUN_CUT_SCENE_IDLE))
 		{
-			FSM.ChangeState(ETitleState::RUN_CUT_SCENE_IDLE);
-			SRSelectPainter->ChangeAnimation("DrawCircle", true);
-			return;
+			ChangeToCutScene();
 		}
 	}
 
@@ -532,35 +615,39 @@ void ATitle::RunningCutScene(float _deltaTime)
 	static float elapsedTime = 0.f;
 	elapsedTime += _deltaTime;
 
-	if (elapsedTime > 5.f)
+	// TODO: Don't use time
+	if (elapsedTime > 1.f && elapsedTime <= 3.f)
 	{
-		float spaceshipSpeed = 200.f;
+		float speed = 200.f;
+		FVector2D loc = SRLetterBoxUpper->GetComponentLocation();
+
+		if (loc.Y > -20)	// 112(size.hY) - 96
+		{
+			SRLetterBoxUpper->SetComponentLocation(loc - FVector2D{ 0.f, 1.f * speed * _deltaTime });
+			SRLetterBoxLower->SetComponentLocation(SRLetterBoxLower->GetComponentLocation() + FVector2D{0.f, 1.f * speed * _deltaTime});
+		}
+	}
+	else if (elapsedTime > 4.f)
+	{
+		if (SRCutSceneBg->GetCurAnimName() != "Dark")
+		{
+			SRCutSceneBg->ChangeAnimation("Dark");
+		}
+	}
+	else if (elapsedTime > 3.f)
+	{
+		float speed = 200.f;
 		FVector2D loc = SRSpaceship->GetComponentLocation();
 
 		// Temp
-		if (loc.Y > 100)
+		if (loc.Y > 170)
 		{
-			SRSpaceship->SetComponentLocation(loc - FVector2D{ -1.f * spaceshipSpeed * _deltaTime, 0.f });
+			SRSpaceship->SetComponentLocation(loc - FVector2D{ 0.f, 1.f * speed * _deltaTime });
 		}
-	}
-	else if (elapsedTime > 10.f)
-	{
-		if (SRCutScene->GetCurAnimName() != "Run")
-		{
-			SRCutScene->ChangeAnimation("Run");
-		}
-	}
-	else if (elapsedTime > 15.f)
-	{
-		elapsedTime = 0.f;
 	}
 
 	if (UEngineInput::GetInst().IsDown('A'))
 	{
-		if (FSM.GetState() < static_cast<int>(ETitleState::PREPARE_PLAY))
-		{
-			AFade::MainFade->FadeOut();
-			FSM.ChangeState(ETitleState::PREPARE_PLAY);
-		}
+		OnEndCutScene();
 	}
 }

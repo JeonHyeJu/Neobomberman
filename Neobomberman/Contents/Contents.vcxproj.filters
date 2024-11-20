@@ -81,9 +81,6 @@
     <ClInclude Include="Ending.h">
       <Filter>Actor\NotGame</Filter>
     </ClInclude>
-    <ClInclude Include="GameTimer.h">
-      <Filter>Actor</Filter>
-    </ClInclude>
     <ClInclude Include="Fade.h">
       <Filter>Actor\NotGame</Filter>
     </ClInclude>
@@ -94,6 +91,9 @@
       <Filter>Map</Filter>
     </ClInclude>
     <ClInclude Include="Result.h">
+      <Filter>Actor</Filter>
+    </ClInclude>
+    <ClInclude Include="GameTimer.h">
       <Filter>Actor</Filter>
     </ClInclude>
   </ItemGroup>
@@ -143,9 +143,6 @@
     <ClCompile Include="Ending.cpp">
       <Filter>Actor\NotGame</Filter>
     </ClCompile>
-    <ClCompile Include="GameTimer.cpp">
-      <Filter>Actor</Filter>
-    </ClCompile>
     <ClCompile Include="Fade.cpp">
       <Filter>Actor\NotGame</Filter>
     </ClCompile>
@@ -156,6 +153,9 @@
       <Filter>Map</Filter>
     </ClCompile>
     <ClCompile Include="Result.cpp">
+      <Filter>Actor</Filter>
+    </ClCompile>
+    <ClCompile Include="GameTimer.cpp">
       <Filter>Actor</Filter>
     </ClCompile>
   </ItemGroup>

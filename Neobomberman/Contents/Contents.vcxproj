@@ -163,6 +163,7 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="GameTimer.h" />
     <ClInclude Include="Mushroom.h">
       <SubType>
       </SubType>
@@ -172,10 +173,6 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="Result.h">
-      <SubType>
-      </SubType>
-    </ClInclude>
-    <ClInclude Include="GameTimer.h">
       <SubType>
       </SubType>
     </ClInclude>
@@ -214,6 +211,7 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="GameTimer.cpp" />
     <ClCompile Include="Mushroom.cpp">
       <SubType>
       </SubType>
@@ -223,10 +221,6 @@
       </SubType>
     </ClCompile>
     <ClCompile Include="Result.cpp">
-      <SubType>
-      </SubType>
-    </ClCompile>
-    <ClCompile Include="GameTimer.cpp">
       <SubType>
       </SubType>
     </ClCompile>

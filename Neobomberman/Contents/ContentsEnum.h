@@ -4,6 +4,10 @@ enum class ERenderOrder
 {
 	COLMAP = -1000,
 	BACKGROUND = -999,
+	CUT_SCENE_BG = 1,
+	CUT_SPACESHIP = 2,
+	CUT_SCENE = 3,
+	CUT_LETTER_BOX = 4,
 	PORTAL = 9990,
 	BOMB = 9997,
 	CRUMBLING_BOX = 9998,
@@ -11,8 +15,9 @@ enum class ERenderOrder
 	PLAYER = 10000,
 	UI = 19000,
 	FADE = 20000,
-	RESULT = 20001,
-	RESULT_STAMP = 20002,
+	UI_OVER_FADE = 20001,
+	RESULT = 20002,
+	RESULT_STAMP = 20003,
 };
 
 enum class EBombType

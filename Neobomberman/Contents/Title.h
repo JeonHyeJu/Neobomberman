@@ -47,6 +47,8 @@ private:
 	void RunWaitSequence(float _deltaTime, const ESceneType& _type);
 	void RunPaintSequence(float _deltaTime);
 	void Countdown(const ESceneType& _type);
+	void ChangeToCutScene();
+	void ChangeToStartScene();
 
 	void OnEndAnimation();
 	void OnEndPainterDraw();
@@ -54,6 +56,8 @@ private:
 	void OnEndFadeOut();
 
 	void OnRunOpening();
+	void OnEndCutScene();
+
 	void OnWaitToStart();
 	void OnSelectMode();
 	void OnRunCutScene();
@@ -87,8 +91,11 @@ private:
 	USpriteRenderer* SRSelectPainter = nullptr;
 	USpriteRenderer* SRSelectCircle = nullptr;
 
+	USpriteRenderer* SRCutSceneBg = nullptr;
 	USpriteRenderer* SRCutScene = nullptr;
 	USpriteRenderer* SRSpaceship = nullptr;
+	USpriteRenderer* SRLetterBoxUpper = nullptr;
+	USpriteRenderer* SRLetterBoxLower = nullptr;
 
 	int Seconds = 0;
 	unsigned __int8 Coin = 0;
