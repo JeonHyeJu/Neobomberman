@@ -111,7 +111,7 @@
     <ClInclude Include="Result.h">
       <Filter>Actor\UI</Filter>
     </ClInclude>
-    <ClInclude Include="BossStage1.h">
+    <ClInclude Include="BossHoopGhost.h">
       <Filter>Actor</Filter>
     </ClInclude>
   </ItemGroup>
@@ -185,7 +185,7 @@
     <ClCompile Include="Result.cpp">
       <Filter>Actor\UI</Filter>
     </ClCompile>
-    <ClCompile Include="BossStage1.cpp">
+    <ClCompile Include="BossHoopGhost.cpp">
       <Filter>Actor</Filter>
     </ClCompile>
   </ItemGroup>

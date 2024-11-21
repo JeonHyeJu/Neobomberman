@@ -16,8 +16,14 @@ protected:
 	void BeginPlay() override;
 	void Tick(float _deltaTime) override;
 
-	void Init() override;
+	void InitSprite() override;
+	void ChangeMoveAnim(const FVector2D& _direction) override;
 
 private:
 	const char* SPRITE_NAME = "Balloon_long.png";
+
+	const char* ANIM_RUN_UP = "Run_Up";
+	const char* ANIM_RUN_DOWN = "Run_Down";
+	const char* ANIM_RUN_LEFT = "Run_Left";
+	const char* ANIM_RUN_RIGHT = "Run_Right";
 };

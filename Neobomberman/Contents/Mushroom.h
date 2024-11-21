@@ -13,12 +13,12 @@ public:
 	AMushroom& operator=(const AMushroom& _other) = delete;
 	AMushroom& operator=(AMushroom&& _other) noexcept = delete;
 
-	void Init() override;
+	void InitSprite() override;
+	void ChangeMoveAnim(const FVector2D& direction);
 
 protected:
 	void BeginPlay() override;
 	void Tick(float _deltaTime) override;
-
 	void Thinking(float _deltaTime) override;
 
 private:
@@ -26,8 +26,18 @@ private:
 	void Jumping(float _deltaTime);
 
 	const char* SPRITE_NAME = "Mushroom.png";
-	const int IDX_ANIM_START = 44;
-	const int IDX_ANIM_END = 54;
+
+	const char* ANIM_IDLE_UP = "Idle_Up";
+	const char* ANIM_IDLE_DOWN = "Idle_Down";
+	const char* ANIM_IDLE_LEFT = "Idle_Left";
+	const char* ANIM_IDLE_RIGHT = "Idle_Right";
+
+	const char* ANIM_RUN_UP = "Run_Up";
+	const char* ANIM_RUN_DOWN = "Run_Down";
+	const char* ANIM_RUN_LEFT = "Run_Left";
+	const char* ANIM_RUN_RIGHT = "Run_Right";
+
+	const char* ANIM_JUMP = "Jump";
 
 	UEngineRandom Random;
 };

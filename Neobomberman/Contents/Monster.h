@@ -19,6 +19,7 @@ enum class EMonsterScore
 	S100 = 100,
 	S200 = 200,
 	S400 = 400,
+	S800 = 800,
 };
 
 class USpriteRenderer;
@@ -26,7 +27,7 @@ class AMonster : public AActor
 {
 public:
 	AMonster();
-	~AMonster();
+	virtual ~AMonster() {}
 
 	AMonster(const AMonster& _other) = delete;
 	AMonster(AMonster&& _other) noexcept = delete;
@@ -35,17 +36,25 @@ public:
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float _deltaTime) override;
-	virtual void Init() = 0;
+	virtual void InitSprite() = 0;
+	virtual void ChangeMoveAnim(const FVector2D& _direction) = 0;
 
 	virtual void OnPause() override;
 	virtual void OnResume() override;
 
+	FVector2D GetDirection(const FIntPoint& _vec);
+	void Move(const FVector2D& direction, float _deltaTime);
+	void Kill();
+
+	/* Setter */
 	void SetCurMap(class APlayMap* _map);
 	void SetFirstDestination(const FIntPoint& _idx);
 	void SetStartDelay(float _seconds)
 	{
 		StartDelayMs = _seconds;
 	}
+
+	/* Getter */
 	inline float GetStartDelay() const
 	{
 		return StartDelayMs;
@@ -58,17 +67,16 @@ public:
 	{
 		return IsDestroiable;
 	}
-	bool IsArrivedAtOneBlock();
-	FVector2D GetDirection(const FIntPoint& _vec);
-	void Move(const FVector2D& direction, float _deltaTime);
-	void Kill();
 
 	static int MonsterCount;
 
 protected:
 	void FindPath();
+	bool IsArrivedAtOneBlock();
+	bool IsRouteEmpty();
+	void SetScore(EMonsterScore _score);
 
-	/* FSM callbacks */
+	/* FSM update callbacks */
 	/* You don't need to call Super::function()! */
 	virtual void Blinking(float _deltaTime);
 	virtual void WalkingForStart(float _deltaTime);
@@ -77,36 +85,40 @@ protected:
 	virtual void Dying(float _deltaTime);
 	virtual void PassAwaing(float _deltaTime);
 
+	/* FSM start callbacks */
 	virtual void OnPassaway();
-	void SetScore(EMonsterScore _score);
 
 	const char* MONSTER_SCORE_PATH = "MonsterScore.png";
 
 	USpriteRenderer* SRBody = nullptr;
-	USpriteRenderer* SRScore = nullptr;
 	class APlayMap* CurMap = nullptr;
 
 	float Speed = 1.f;
-	const float BLINK_SECONDS = 2.f;
 	const int MonsterIdx;
-	int PathFinderIdx = 0;
+	
+	UFSMStateManager Fsm;
+
+private:
+	const int SCORE_ANIM_CNT = 7;
+	const float BLINK_SECONDS = 2.f;
+	const char* CLOUD_SPRITE_PATH = "MonsterCloud.png";
+
+	EMonsterScore Score = EMonsterScore::S100;
+
+	bool IsInited = false;
+	bool IsDestroiable = false;
 
 	float StartDelayMs = 0.f;
-	bool IsInited = false;
-
-	static UPathFindAStar PathFinder;
-	std::list<FIntPoint> Route;
-	FIntPoint Destination = FIntPoint::NEGATIVE_ONE;
-
-	UFSMStateManager Fsm;
 	FIntPoint FirstIdx;
+
+	USpriteRenderer* SRCloud = nullptr;
+	USpriteRenderer* SRScore = nullptr;
 
 	class U2DCollision* Collision = nullptr;
 
-private:
-	const char* CLOUD_SPRITE_PATH = "MonsterCloud.png";
-	bool IsDestroiable = false;
-
-	USpriteRenderer* SRCloud = nullptr;
-	EMonsterScore Score = EMonsterScore::S100;
+	/* Path finder */
+	int PathFinderIdx = 0;
+	static UPathFindAStar PathFinder;
+	std::list<FIntPoint> Route;
+	FIntPoint Destination = FIntPoint::NEGATIVE_ONE;
 };

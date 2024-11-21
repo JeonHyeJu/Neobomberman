@@ -1,29 +1,29 @@
 #include "PreCompile.h"
-#include "BossStage1.h"
+#include "BossHoopGhost.h"
 #include <EngineCore/SpriteRenderer.h>
 
-BossStage1::BossStage1()
+ABossHoopGhost::ABossHoopGhost()
 : AMonster()
 {
 	SetName("BossStage1");
 }
 
-BossStage1::~BossStage1()
+ABossHoopGhost::~ABossHoopGhost()
 {
 
 }
 
-void BossStage1::BeginPlay()
+void ABossHoopGhost::BeginPlay()
 {
 	Super::BeginPlay();
 }
 
-void BossStage1::Tick(float _deltaTime)
+void ABossHoopGhost::Tick(float _deltaTime)
 {
 	Super::Tick(_deltaTime);
 }
 
-void BossStage1::Init()
+void ABossHoopGhost::InitSprite()
 {
 	//SRBody = CreateDefaultSubObject<USpriteRenderer>();
 	//SRBody->SetSprite(SPRITE_NAME);

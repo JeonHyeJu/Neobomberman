@@ -14,19 +14,14 @@ UPathFindAStar AMonster::PathFinder;
 AMonster::AMonster()
 : MonsterIdx(++AMonster::MonsterCount)
 {
-	Fsm.CreateState(EMonsterState::INIT_BLINK, std::bind(&AMonster::Blinking, this, std::placeholders::_1));
-	Fsm.CreateState(EMonsterState::INIT_WALKING, std::bind(&AMonster::WalkingForStart, this, std::placeholders::_1));
-	Fsm.CreateState(EMonsterState::THINKING, std::bind(&AMonster::Thinking, this, std::placeholders::_1));
-	Fsm.CreateState(EMonsterState::WALKING, std::bind(&AMonster::Walking, this, std::placeholders::_1));
-	Fsm.CreateState(EMonsterState::DYING, std::bind(&AMonster::Dying, this, std::placeholders::_1));
-	Fsm.CreateState(EMonsterState::PASS_AWAY, std::bind(&AMonster::PassAwaing, this, std::placeholders::_1), std::bind(&AMonster::OnPassaway, this));
-
-	FVector2D collSize = GlobalVar::BOMB_SIZE;
-	Collision = CreateDefaultSubObject<U2DCollision>();
-	Collision->SetComponentLocation({ collSize.hX(), 0.f });
-	Collision->SetComponentScale(collSize);		// Temp
-	Collision->SetCollisionGroup(ECollisionGroup::MonsterBody);
-	Collision->SetCollisionType(ECollisionType::CirCle);
+	{
+		FVector2D collSize = GlobalVar::BOMB_SIZE;
+		Collision = CreateDefaultSubObject<U2DCollision>();
+		Collision->SetComponentLocation({ collSize.hX(), 0.f });
+		Collision->SetComponentScale(collSize);
+		Collision->SetCollisionGroup(ECollisionGroup::MonsterBody);
+		Collision->SetCollisionType(ECollisionType::CirCle);
+	}
 
 	{
 		FVector2D size = GlobalVar::BOMBERMAN_SIZE;
@@ -40,40 +35,43 @@ AMonster::AMonster()
 
 	{
 		FVector2D size = GlobalVar::BOMB_SIZE;
-
 		SRScore = CreateDefaultSubObject<USpriteRenderer>();
 		SRScore->SetSprite(MONSTER_SCORE_PATH);
 		SRScore->SetComponentLocation(size.Half().Half());
 		SRScore->SetComponentScale(size);
 
-		const int FRAME_CNT = 7;
 		std::vector<int> idxs;
-		std::vector<float> times(FRAME_CNT, .2f);
-		idxs.reserve(FRAME_CNT);
-		times.resize(FRAME_CNT);
-		for (int i = 0; i < FRAME_CNT; ++i)
+		std::vector<float> times(SCORE_ANIM_CNT, .2f);
+		idxs.reserve(SCORE_ANIM_CNT);
+		times.resize(SCORE_ANIM_CNT);
+		for (int i = 0; i < SCORE_ANIM_CNT; ++i)
 		{
 			idxs.push_back(i);
 		}
-		times[FRAME_CNT - 2] = 1.f;
+		times[SCORE_ANIM_CNT - 2] = 1.f;
 
 		SRScore->CreateAnimation("Disappear", MONSTER_SCORE_PATH, idxs, times, false);
 		SRScore->SetActive(false);
 	}
 
+	Fsm.CreateState(EMonsterState::INIT_BLINK, std::bind(&AMonster::Blinking, this, std::placeholders::_1));
+	Fsm.CreateState(EMonsterState::INIT_WALKING, std::bind(&AMonster::WalkingForStart, this, std::placeholders::_1));
+	Fsm.CreateState(EMonsterState::THINKING, std::bind(&AMonster::Thinking, this, std::placeholders::_1));
+	Fsm.CreateState(EMonsterState::WALKING, std::bind(&AMonster::Walking, this, std::placeholders::_1));
+	Fsm.CreateState(EMonsterState::DYING, std::bind(&AMonster::Dying, this, std::placeholders::_1));
+	Fsm.CreateState(EMonsterState::PASS_AWAY, std::bind(&AMonster::PassAwaing, this, std::placeholders::_1), std::bind(&AMonster::OnPassaway, this));
+
 	//DebugOn();
-}
-
-AMonster::~AMonster()
-{
-
 }
 
 void AMonster::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Init();
+	// Init child's sprite
+	InitSprite();
+
+	assert(SRBody != nullptr && "You didn't initialize SRBody");
 	SRBody->SetActive(false);
 }
 
@@ -134,6 +132,11 @@ void AMonster::SetScore(EMonsterScore _score)
 	//SRScore->SetSprite(MONSTER_SCORE_PATH);	// TODO
 }
 
+bool AMonster::IsRouteEmpty()
+{
+	return Route.empty();
+}
+
 bool AMonster::IsArrivedAtOneBlock()
 {
 	return Destination.X == -1 && Destination.Y == -1;
@@ -163,27 +166,10 @@ FVector2D AMonster::GetDirection(const FIntPoint& _vec)
 	return direction;
 }
 
-// TODO
-void AMonster::Move(const FVector2D& direction, float _deltaTime)
+void AMonster::Move(const FVector2D& _direction, float _deltaTime)
 {
-	if (direction == FVector2D::UP)
-	{
-		SRBody->ChangeAnimation("Run_Up");
-	}
-	else if (direction == FVector2D::DOWN)
-	{
-		SRBody->ChangeAnimation("Run_Down");
-	}
-	else if (direction == FVector2D::LEFT)
-	{
-		SRBody->ChangeAnimation("Run_Left");
-	}
-	else if (direction == FVector2D::RIGHT)
-	{
-		SRBody->ChangeAnimation("Run_Right");
-	}
-
-	AddActorLocation(direction * _deltaTime * Speed);
+	ChangeMoveAnim(_direction);
+	AddActorLocation(_direction * _deltaTime * Speed);
 }
 
 void AMonster::FindPath()
@@ -276,7 +262,7 @@ void AMonster::WalkingForStart(float _deltaTime)
 
 void AMonster::Thinking(float _deltaTime)
 {
-	if (Route.empty())
+	if (IsRouteEmpty())
 	{
 		FindPath();
 	}
@@ -288,7 +274,7 @@ void AMonster::Thinking(float _deltaTime)
 
 void AMonster::Walking(float _deltaTime)
 {
-	if (Route.empty())
+	if (IsRouteEmpty())
 	{
 		Fsm.ChangeState(EMonsterState::THINKING);
 		return;
