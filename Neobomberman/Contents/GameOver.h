@@ -26,13 +26,20 @@ protected:
 
 private:
 	void Countdown(float _deltaTime);
+	void GameOverStrAnim();
 	void GameOver();
 
 	USpriteRenderer* SRContinueStr = nullptr;
 	USpriteRenderer* SRContinueNum = nullptr;
+	USpriteRenderer* SRGameOverStrs[8] = { nullptr, };
+
+	const char* GAMEOVER_PATH = "GameOver.png";
 
 	const int WAIT_SECONDS = 10;	// 10 secs
 	float ElapsedSecs = 0.f;
 	int CurSeconds = 0;
+	int GameoverSeconds = 0;
 	bool IsOver = false;
+
+	float TIME_CNT = 1.f;
 };

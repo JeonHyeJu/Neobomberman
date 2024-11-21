@@ -123,6 +123,7 @@ void ContentsCore::InitResources()
 
 	imgManager.CuttingSprite("Continue.png", { 534, 64 });
 	imgManager.CuttingSprite("ContinueNumber.png", GlobalVar::BOMBERMAN_SIZE);
+	imgManager.CuttingSprite("GameOver.png", GlobalVar::BOMBERMAN_SIZE);
 }
 
 void ContentsCore::LoadImages(std::string_view _path)
