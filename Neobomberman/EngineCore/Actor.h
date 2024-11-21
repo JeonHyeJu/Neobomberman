@@ -51,6 +51,26 @@ public:
 		return Transform.Location;
 	}
 
+	void Resume() override
+	{
+		if (IsPauseValue)
+		{
+			OnResume();
+			IsPauseValue = false;
+		}
+	}
+	void Pause() override
+	{
+		if (!IsPauseValue)
+		{
+			IsPauseValue = true;
+			OnPause();
+		}
+	}
+
+	virtual void OnPause() {}
+	virtual void OnResume() {}
+
 	template<typename ComponentType>
 	ComponentType* CreateDefaultSubObject()
 	{

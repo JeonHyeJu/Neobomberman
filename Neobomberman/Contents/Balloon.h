@@ -17,7 +17,6 @@ protected:
 	void Tick(float _deltaTime) override;
 
 	void Init() override;
-	void ShowScore() override;
 
 private:
 	const char* SPRITE_NAME = "Balloon_long.png";

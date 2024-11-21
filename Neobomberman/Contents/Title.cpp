@@ -21,6 +21,7 @@ ATitle::ATitle()
 		SROpening->SetSprite(GlobalPath::OPENING);
 		SROpening->SetComponentLocation(winSize.Half());
 		SROpening->SetComponentScale(winSize);
+		SROpening->SetOrder(ERenderOrder::OPENING);
 
 		std::vector<int> indexes;
 		std::vector<float> frames(ALL_FRAME_CNT, SHORT_ANIM_SEC);
@@ -48,6 +49,7 @@ ATitle::ATitle()
 		SRPushP1P2->SetSprite("Push_p1p2_304x16.png");
 		SRPushP1P2->SetComponentScale(size);
 		SRPushP1P2->SetComponentLocation({ winSize.hX() + margin * 6.8f, 289.f });
+		SRPushP1P2->SetOrder(ERenderOrder::OPENING_STRING);
 	}
 
 	{
@@ -56,6 +58,7 @@ ATitle::ATitle()
 		SRTimeTitle->SetSprite("Time_64x16.png");
 		SRTimeTitle->SetComponentScale(size);
 		SRTimeTitle->SetComponentLocation({ 288 + size.hX(), 354.f });
+		SRTimeTitle->SetOrder(ERenderOrder::OPENING_STRING);
 	}
 
 	{
@@ -63,6 +66,7 @@ ATitle::ATitle()
 		{
 			FVector2D size = { 24, 24 };
 			SRTimeCount[i] = CreateDefaultSubObject<USpriteRenderer>();
+			SRTimeCount[i]->SetOrder(ERenderOrder::OPENING_STRING);
 			if (i == 0)
 			{
 				SRTimeCount[i]->SetSprite(SPRITE_TIME_COUNT, 3);
@@ -84,6 +88,7 @@ ATitle::ATitle()
 		SRSelectGameMode->SetSprite("SelectGameMode.png");
 		SRSelectGameMode->SetComponentLocation(winSize.Half());
 		SRSelectGameMode->SetComponentScale(winSize);
+		SRSelectGameMode->SetOrder(ERenderOrder::OPENING);
 	}
 
 	{
@@ -91,6 +96,7 @@ ATitle::ATitle()
 		{
 			FVector2D size = { 24, 48 };
 			SRSelectTimeCount[i] = CreateDefaultSubObject<USpriteRenderer>();
+			SRSelectTimeCount[i]->SetOrder(ERenderOrder::OPENING_STRING);
 			if (i == 0)
 			{
 				SRSelectTimeCount[i]->SetSprite(SPRITE_SELECT_TIME_COUNT_B, 3);
@@ -129,6 +135,7 @@ ATitle::ATitle()
 		SRSelectSayHi->SetComponentLocation({ 354.f + size.hX(), 16.f + size.hY() });
 		SRSelectSayHi->SetComponentScale(size);
 		SRSelectSayHi->CreateAnimation("SayHi", "SayHi", indexes, times);
+		SRSelectSayHi->SetOrder(ERenderOrder::OPENING_STRING);
 	}
 
 	{
@@ -141,6 +148,7 @@ ATitle::ATitle()
 		SRSelectPainter->CreateAnimation("GoingUpDown", "SelectPainterUpDown.png", 0, 6, .3f, false);
 		SRSelectPainter->CreateAnimation("DrawCircle", "SelectPainterCircle.png", 0, 8, .1f, false);
 		SRSelectPainter->SetAnimationEvent("DrawCircle", 8, std::bind(&ATitle::OnEndPainterDraw, this));
+		SRSelectPainter->SetOrder(ERenderOrder::OPENING_STRING);
 	}
 
 	{
@@ -153,6 +161,7 @@ ATitle::ATitle()
 		SRSelectCircle->CreateAnimation("DrawCircle", "BrushCircle.png", 0, 6, .1f, false);
 		SRSelectCircle->SetAnimationEvent("DrawCircle", 6, std::bind(&ATitle::OnEndCircleDraw, this));
 		SRSelectCircle->SetActive(false);
+		SRSelectCircle->SetOrder(ERenderOrder::OPENING_STRING);
 	}
 
 	{
@@ -238,18 +247,9 @@ ATitle::~ATitle()
 {
 }
 
-// Temp
-void ATitle::LevelChangeStart()
-{
-	// Temp
-	AFade::MainFade->BindEndEvent(std::bind(&ATitle::OnEndFadeOut, this));
-}
-
 void ATitle::BeginPlay()
 {
 	Super::BeginPlay();
-
-	FSM.ChangeState(ETitleState::OPENING);
 }
 
 void ATitle::Tick(float _deltaTime)
@@ -257,7 +257,7 @@ void ATitle::Tick(float _deltaTime)
 	Super::Tick(_deltaTime);
 
 	int curState = FSM.GetState();
-	if (curState < static_cast<int>(ETitleState::WAIT_START))
+	if (curState <= static_cast<int>(ETitleState::WAIT_START))
 	{
 		WaitKeyF3F4();
 	}
@@ -267,6 +267,12 @@ void ATitle::Tick(float _deltaTime)
 	}
 
 	FSM.Update(_deltaTime);
+}
+
+void ATitle::LevelChangeStart()
+{
+	FSM.ChangeState(ETitleState::OPENING);
+	PrevCoin = 0;
 }
 
 void ATitle::ResetSeconds()
@@ -310,14 +316,9 @@ void ATitle::WaitKeyF3F4()
 	if (curCoin > 0 && curCoin != PrevCoin)
 	{
 		PrevCoin = curCoin;
-
-		if (FSM.GetState() <= static_cast<int>(ETitleState::WAIT_START))
-		{
-			ResetSeconds();
-		}
+		ResetSeconds();
+		OnEndAnimation();
 	}
-
-	OnEndAnimation();
 }
 
 void ATitle::WaitKeyA(float _deltaTime)
@@ -451,6 +452,7 @@ void ATitle::ChangeToStartScene()
 	if (FSM.GetState() < static_cast<int>(ETitleState::WAIT_SELECT_IDLE))
 	{
 		GameUIPtr->AddCoin(-1);
+		AFade::MainFade->BindEndEvent(std::bind(&ATitle::OnEndFadeOut, this));
 		AFade::MainFade->FadeOut();
 		FSM.ChangeState(ETitleState::WAIT_SELECT_IDLE);
 	}
@@ -472,6 +474,7 @@ void ATitle::OnEndPainterDraw()
 
 void ATitle::OnEndCircleDraw()
 {
+	AFade::MainFade->BindEndEvent(std::bind(&ATitle::OnEndFadeOut, this));
 	AFade::MainFade->FadeOut();
 }
 
@@ -500,12 +503,14 @@ void ATitle::OnEndFadeOut()
 void ATitle::OnRunOpening()
 {
 	SROpening->ChangeAnimation(ANIM_RUN_NAME);
+	SROpening->SetActive(true);
 }
 
 void ATitle::OnEndCutScene()
 {
 	if (FSM.GetState() < static_cast<int>(ETitleState::PREPARE_PLAY))
 	{
+		AFade::MainFade->BindEndEvent(std::bind(&ATitle::OnEndFadeOut, this));
 		AFade::MainFade->FadeOut();
 		FSM.ChangeState(ETitleState::PREPARE_PLAY);
 	}

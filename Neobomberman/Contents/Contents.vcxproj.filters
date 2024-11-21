@@ -93,9 +93,6 @@
     <ClInclude Include="Result.h">
       <Filter>Actor</Filter>
     </ClInclude>
-    <ClInclude Include="GameTimer.h">
-      <Filter>Actor</Filter>
-    </ClInclude>
     <ClInclude Include="GameData.h">
       <Filter>Actor\NotGame</Filter>
     </ClInclude>
@@ -107,6 +104,9 @@
     </ClInclude>
     <ClInclude Include="UtilFn.h">
       <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="GameOver.h">
+      <Filter>Actor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -167,9 +167,6 @@
     <ClCompile Include="Result.cpp">
       <Filter>Actor</Filter>
     </ClCompile>
-    <ClCompile Include="GameTimer.cpp">
-      <Filter>Actor</Filter>
-    </ClCompile>
     <ClCompile Include="GameUI.cpp">
       <Filter>Actor</Filter>
     </ClCompile>
@@ -178,6 +175,9 @@
     </ClCompile>
     <ClCompile Include="UtilFn.cpp">
       <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="GameOver.cpp">
+      <Filter>Actor</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

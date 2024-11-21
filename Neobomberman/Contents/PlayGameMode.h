@@ -14,18 +14,29 @@ public:
 
 	void BeginPlay() override;
 	void Tick(float _deltaTime) override;
-
-	void GoNextStage();
+	void LevelChangeStart() override;
 
 protected:
 
 private:
+	void CheckGameOver();
+	void CheckDeadMonster();
+	bool IsAllMonstersDead() const;
 	void OnExplodeBomb();
+	void GameOver();
+
+	void OnEndGameOverFadeOut();
 
 	class ABaseMap* CurMapPtr = nullptr;
-	std::vector<class AMonster*> MonsterList;
+	class AGameOver* GameOverScenePtr = nullptr;
+	class AGameUI* GameUiPtr = nullptr;
+
+	std::list<class AMonster*> MonsterList;
 	const int MONSTER_CNT_STAGE_1 = 4;
 
 	const FIntPoint PORTAL_IDX_STAGE_1 = { 6, 10 };
+	bool isShowContinueScene = false;
+
+	float ElapsedSecs = 0.f;
 };
 

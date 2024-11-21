@@ -14,7 +14,6 @@ public:
 	AMushroom& operator=(AMushroom&& _other) noexcept = delete;
 
 	void Init() override;
-	void ShowScore() override;
 
 protected:
 	void BeginPlay() override;

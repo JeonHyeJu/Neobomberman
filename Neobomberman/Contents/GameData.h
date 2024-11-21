@@ -31,11 +31,11 @@ public:
 		return Coin;
 	}
 
-	inline unsigned __int8 GetPlayer1Life() const
+	inline int GetPlayer1Life() const
 	{
 		return Player1Life;
 	}
-	unsigned __int8 AddPlayer1Life(__int8 _val)
+	int AddPlayer1Life(__int8 _val)
 	{
 		Player1Life += _val;
 		if (Player1Life > MAX_PLAYER_LIFE)
@@ -55,11 +55,16 @@ public:
 		return Player1Score;
 	}
 
+	void ResetScore()
+	{
+		Player1Score = 0;
+	}
+
 	const unsigned __int8 MAX_PLAYER_LIFE = 2;
 	const unsigned __int8 MAX_COIN = 99;
 
 private:
 	unsigned __int8 Coin = 0;
-	unsigned __int8 Player1Life = 2;
+	int Player1Life = 0;
 	int Player1Score = 0;
 };

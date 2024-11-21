@@ -73,26 +73,9 @@ void AMushroom::Init()
 		}
 		
 	}
+
 	SRBody->CreateAnimation("Jump", SPRITE_NAME, indexes, times, false);
-
-	{
-		FVector2D size = GlobalVar::BOMB_SIZE;
-
-		SRScore = CreateDefaultSubObject<USpriteRenderer>();
-		SRScore->SetSprite(MONSTER_SCORE_PATH);
-		SRScore->SetComponentLocation(size.Half().Half());
-		SRScore->SetComponentScale(size);
-		SRScore->CreateAnimation("Disappear", MONSTER_SCORE_PATH, 0, 6, .25f, false);
-		SRScore->SetActive(false);
-	}
-
-	Score = EMonsterScore::S100;
-}
-
-void AMushroom::ShowScore()
-{
-	SRScore->ChangeAnimation("Disappear");
-	SRScore->SetActive(true);
+	SetScore(EMonsterScore::S100);
 }
 
 bool AMushroom::IsJump()

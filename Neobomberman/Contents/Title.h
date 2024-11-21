@@ -40,7 +40,7 @@ public:
 protected:
 	void BeginPlay() override;
 	void Tick(float _deltaTime) override;
-	void LevelChangeStart();
+	void LevelChangeStart() override;
 
 private:
 	void ResetSeconds();
@@ -102,7 +102,7 @@ private:
 	int Seconds = 0;
 	unsigned __int8 PrevCoin = 0;
 
-	const int START_SECONDS = 29;
+	const int START_SECONDS = 30;
 
 	const FVector2D PAINTER_START_LOC = { 64, 224 };
 	const FVector2D PAINTER_END_LOC = { 64, 384 };

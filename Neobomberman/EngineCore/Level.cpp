@@ -141,7 +141,7 @@ void ULevel::Tick(float _DeltaTime)
 		{
 			AActor* CurActor = *StartIter;
 
-			if (false == CurActor->IsActive())
+			if (false == CurActor->IsActive() || CurActor->IsPaused())
 			{
 				continue;
 			}
@@ -209,7 +209,7 @@ void ULevel::Collision(float _DeltaTime)
 		{
 		 	U2DCollision* LeftCollision = *StartLeftIter;
 
-			if (false == LeftCollision->IsActive())
+			if (false == LeftCollision->IsActive() || LeftCollision->IsPaused())
 			{
 				continue;
 			}
@@ -224,7 +224,7 @@ void ULevel::Collision(float _DeltaTime)
 					continue;
 				}
 
-				if (false == RightCollision->IsActive())
+				if (false == RightCollision->IsActive() || RightCollision->IsPaused())
 				{
 					continue;
 				}

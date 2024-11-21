@@ -53,10 +53,6 @@ void ABalloon::Init()
 		SRScore->SetActive(false);
 	}
 
-	Score = EMonsterScore::S200;
+	SetScore(EMonsterScore::S200);
 }
 
-void ABalloon::ShowScore()
-{
-	SRScore->ChangeAnimation("Disappear");
-}

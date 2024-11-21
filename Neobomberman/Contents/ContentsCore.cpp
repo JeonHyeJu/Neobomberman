@@ -41,8 +41,8 @@ void ContentsCore::BeginPlay()
 	pCore->CreateLevel<APlayGameMode, APlayer>("Play");
 	pCore->CreateLevel<APlayBossMode, APlayer>("Boss_Stage1");
 
-	//pCore->OpenLevel("Title");
-	pCore->OpenLevel("Play");
+	pCore->OpenLevel("Title");
+	//pCore->OpenLevel("Play");
 	//pCore->OpenLevel("Boss_Stage1");
 }
 
@@ -120,6 +120,9 @@ void ContentsCore::InitResources()
 	imgManager.CuttingSprite("BarScoreNumber.png", GlobalVar::BAR_SCORE_NUMBER);
 	imgManager.CuttingSprite("MonsterCloud.png", GlobalVar::BOMBERMAN_SIZE);
 	imgManager.CuttingSprite("MonsterScore.png", GlobalVar::BOMB_SIZE);
+
+	imgManager.CuttingSprite("Continue.png", { 534, 64 });
+	imgManager.CuttingSprite("ContinueNumber.png", GlobalVar::BOMBERMAN_SIZE);
 }
 
 void ContentsCore::LoadImages(std::string_view _path)

@@ -16,8 +16,8 @@ public:
 	AFade& operator=(const AFade& _Other) = delete;
 	AFade& operator=(AFade&& _Other) noexcept = delete;
 
-	void FadeIn();
-	void FadeOut();
+	void FadeIn(float _startVal = -99);
+	void FadeOut(float _startVal = -99);
 	void BindEndEvent(std::function<void()> _fn);
 
 	void SetFadeSpeed(float _val)
@@ -44,7 +44,7 @@ private:
 	float FadeValue = 0.0f;
 	float FadeDir = 1.0f;
 
-	std::list<std::function<void()>> EndEvents;
+	std::function<void()> EndEvent = nullptr;
 	bool IsFadeEnd = false;
 
 	float MaxFadeVal = 1.f;

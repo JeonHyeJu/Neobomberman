@@ -62,7 +62,7 @@ void USpriteRenderer::ComponentTick(float _DeltaTime)
 
 	if (nullptr != CurAnimation)
 	{
-		if (CurAnimation->IsEnd) return;
+		if (CurAnimation->IsEnd || CurAnimation->IsPaused) return;
 
 		std::vector<int>& Indexs = CurAnimation->FrameIndex;
 		std::vector<float>& Times = CurAnimation->FrameTime;

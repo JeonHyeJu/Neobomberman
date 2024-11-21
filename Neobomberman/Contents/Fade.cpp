@@ -22,18 +22,18 @@ AFade::~AFade()
 {
 }
 
-void AFade::FadeIn()
+void AFade::FadeIn(float _startVal)
 {
 	IsFadeEnd = false;
-	FadeValue = 1.0f;
+	FadeValue = (_startVal < -1 ? 1.0f : _startVal);
 	FadeDir = -1.0f;
 	TimeEventer.PushEvent(2.f, std::bind(&AFade::FadeChange, this), true, false);
 }
 
-void AFade::FadeOut()
+void AFade::FadeOut(float _startVal)
 {
 	IsFadeEnd = false;
-	FadeValue = 0.0f;
+	FadeValue = (_startVal < -1 ? 0.0f : _startVal);
 	FadeDir = 1.0f;
 	TimeEventer.PushEvent(2.f, std::bind(&AFade::FadeChange, this), true, false);
 }
@@ -53,9 +53,10 @@ void AFade::FadeChange()
 		{
 			IsFadeEnd = true;
 
-			for (std::function<void()>& fn : EndEvents)
+			if (EndEvent)
 			{
-				fn();
+				EndEvent();
+				EndEvent = nullptr;
 			}
 		}
 	}
@@ -69,7 +70,8 @@ void AFade::FadeChange()
 	}
 }
 
+// TODO
 void AFade::BindEndEvent(std::function<void()> _fn)
 {
-	EndEvents.push_back(_fn);
+	EndEvent = _fn;
 }

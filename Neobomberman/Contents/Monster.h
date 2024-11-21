@@ -36,7 +36,9 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float _deltaTime) override;
 	virtual void Init() = 0;
-	virtual void ShowScore() = 0;
+
+	virtual void OnPause() override;
+	virtual void OnResume() override;
 
 	void SetCurMap(class APlayMap* _map);
 	void SetFirstDestination(const FIntPoint& _idx);
@@ -48,8 +50,15 @@ public:
 	{
 		return StartDelayMs;
 	}
+	inline int GetScore() const
+	{
+		return static_cast<int>(Score);
+	}
+	inline bool GetIsDetroiable() const
+	{
+		return IsDestroiable;
+	}
 	bool IsArrivedAtOneBlock();
-
 	FVector2D GetDirection(const FIntPoint& _vec);
 	void Move(const FVector2D& direction, float _deltaTime);
 	void Kill();
@@ -66,6 +75,7 @@ protected:
 	virtual void Thinking(float _deltaTime);
 	virtual void Walking(float _deltaTime);
 	virtual void Dying(float _deltaTime);
+	virtual void PassAwaing(float _deltaTime);
 
 	virtual void OnPassaway();
 	void SetScore(EMonsterScore _score);
@@ -77,7 +87,7 @@ protected:
 	class APlayMap* CurMap = nullptr;
 
 	float Speed = 1.f;
-	const float BLINK_SECONDS = 1.f;
+	const float BLINK_SECONDS = 2.f;
 	const int MonsterIdx;
 	int PathFinderIdx = 0;
 
@@ -92,10 +102,11 @@ protected:
 	FIntPoint FirstIdx;
 
 	class U2DCollision* Collision = nullptr;
-	EMonsterScore Score = EMonsterScore::S100;
 
 private:
 	const char* CLOUD_SPRITE_PATH = "MonsterCloud.png";
+	bool IsDestroiable = false;
 
 	USpriteRenderer* SRCloud = nullptr;
+	EMonsterScore Score = EMonsterScore::S100;
 };

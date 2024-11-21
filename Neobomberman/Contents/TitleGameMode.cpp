@@ -23,6 +23,6 @@ void ATitleGameMode::BeginPlay()
 	ATitle* title = pLevel->SpawnActor<ATitle>();
 
 	title->SetGameUI(gameUI);
-
 	fade->FadeIn();
+	gameUI->StartTimer();
 }

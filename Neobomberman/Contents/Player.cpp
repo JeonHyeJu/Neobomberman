@@ -1,7 +1,8 @@
 #include "PreCompile.h"
 #include "ContentsEnum.h"
 #include "GlobalVar.h"
-#include "GameTimer.h"
+#include "GameData.h"
+#include "GameUI.h"
 #include "TileMap.h"
 #include "BaseMap.h"
 #include "Player.h"
@@ -171,6 +172,11 @@ void APlayer::Tick(float _deltaTime)
 	//OutputDebugString((nowPosStr + " -> " + additionalPosStr).c_str());
 }
 
+void APlayer::LevelChangeStart()
+{
+	IsDead = false;
+}
+
 void APlayer::InitSounds()
 {
 	// TODO: Do I need to change string to enum?
@@ -252,14 +258,20 @@ void APlayer::DropBomb()
 	}
 }
 
+void APlayer::Kill()
+{
+	FsmH.ChangeState(EPlayerState::DEAD);
+}
+
 void APlayer::OnEnterCollision(AActor* _actor)
 {
 	//_actor->SetActive(false);	// temp
-	//FsmH.ChangeState(EPlayerState::DEAD);
+	Kill();
 }
 
 void APlayer::OnEndPortalAnim()
 {
+	AFade::MainFade->BindEndEvent(std::bind(&APlayer::OnEndFadeOut, this));
 	AFade::MainFade->SetFadeMinMax(0.f, .5f);
 	AFade::MainFade->SetFadeSpeed(.5f);
 	AFade::MainFade->FadeOut();
@@ -272,6 +284,7 @@ void APlayer::OnReborn()
 	SpriteRendererBody->SetActive(true);
 
 	Direction = FVector2D::ZERO;
+	IsDead = false;
 
 	// Temp
 	SpriteRendererHead->ChangeAnimation("Idle_Down");
@@ -296,6 +309,8 @@ void APlayer::OnIdle()
 
 void APlayer::OnDead()
 {
+	GameData::GetInstance().AddPlayer1Life(-1);
+	GameData::GetInstance().ResetScore();
 	SpriteRendererHead->ChangeAnimation("Dead");
 	SpriteRendererBody->ChangeAnimation("Dead");
 }
@@ -416,7 +431,7 @@ void APlayer::Moving(float _deltaTime)
 				SetActorLocation(organizedLoc);
 
 				FsmH.ChangeState(EPlayerState::PORTAL);
-				AGameTimer::Stop();
+				AGameUI::StopTimer();
 				return;
 			}
 		}
@@ -447,6 +462,8 @@ void APlayer::Dying(float _deltaTime)
 
 		if (DyingAnimInfo.Seconds >= DyingAnimInfo.AnimSeconds)
 		{
+			IsDead = true;
+
 			// only once
 			if (!isOff)
 			{
@@ -455,14 +472,17 @@ void APlayer::Dying(float _deltaTime)
 				SpriteRendererBody->SetActive(false);
 			}
 
-			if (DyingAnimInfo.Seconds >= DyingAnimInfo.WaitSeconds)
+			if (GameData::GetInstance().GetPlayer1Life() > 0)
 			{
-				isOff = false;
-				elapsedSecs = 0.f;
-				DyingAnimInfo.Seconds = 0.f;
+				if (DyingAnimInfo.Seconds >= DyingAnimInfo.WaitSeconds)
+				{
+					isOff = false;
+					elapsedSecs = 0.f;
+					DyingAnimInfo.Seconds = 0.f;
 
-				FsmH.ChangeState(EPlayerState::REBORN);
-				return;
+					FsmH.ChangeState(EPlayerState::REBORN);
+					return;
+				}
 			}
 		}
 		else
@@ -483,13 +503,7 @@ void APlayer::OnEndFadeOut()
 	// TODO: Move to map or gamemode?
 	ResultScene = GetWorld()->SpawnActor<AResult>();
 
-	int lastTime = AGameTimer::GetLastTime();
+	int lastTime = AGameUI::GetLastTime();
 	ResultScene->SetLastSecs(lastTime);
 	ResultScene->SetTotal(Score);
-}
-
-// Temp
-void APlayer::InitFadeEvent(AFade* _ptr)
-{
-	_ptr->BindEndEvent(std::bind(&APlayer::OnEndFadeOut, this));
 }

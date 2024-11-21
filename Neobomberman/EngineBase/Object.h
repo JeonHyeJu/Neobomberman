@@ -28,6 +28,12 @@ public:
 		Name = _Name.data();
 	}
 
+	// Render: O, Animation: X, Tick: X
+	virtual bool IsPaused()
+	{
+		return IsPauseValue;
+	}
+
 	virtual bool IsActive()
 	{
 		return IsActiveValue && false == IsDestroyValue;
@@ -36,6 +42,15 @@ public:
 	virtual bool IsDestroy()
 	{
 		return IsDestroyValue;
+	}
+
+	virtual void Resume()
+	{
+		IsPauseValue = false;
+	}
+	virtual void Pause()
+	{
+		IsPauseValue = true;
 	}
 
 	void Destroy(float _Time = 0.0f)
@@ -102,6 +117,7 @@ public:
 	}
 
 protected:
+	bool IsPauseValue = false;
 
 private:
 	bool IsDestroyValue = false;

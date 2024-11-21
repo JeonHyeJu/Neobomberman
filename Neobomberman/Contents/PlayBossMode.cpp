@@ -1,7 +1,6 @@
 #include "PreCompile.h"
 #include "PlayBossMode.h"
 #include "GameUI.h"
-#include "GameTimer.h"
 #include "BossMap.h"
 #include "Player.h"
 #include "Fade.h"
@@ -23,7 +22,6 @@ void APlayBossMode::BeginPlay()
 	ULevel* pLevel = GetWorld();
 
 	AGameUI* gameUI = pLevel->SpawnActor<AGameUI>();
-	AGameTimer* gameTimer = pLevel->SpawnActor<AGameTimer>();
 
 	APlayer* Player = pLevel->GetPawn<APlayer>();
 	Player->SetGameUI(gameUI);
@@ -40,6 +38,6 @@ void APlayBossMode::BeginPlay()
 
 	AFade* fade = GetWorld()->SpawnActor<AFade>();
 	fade->FadeIn();
-	gameTimer->Start();
+	gameUI->StartTimer();
 }
 

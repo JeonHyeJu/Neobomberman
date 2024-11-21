@@ -47,6 +47,7 @@ public:
 
 	void BeginPlay() override;
 	void Tick(float _DeltaTime) override;
+	void LevelChangeStart() override;
 
 	inline void SetCurMap(class ABaseMap* _map)
 	{
@@ -56,8 +57,12 @@ public:
 	{
 		GameUIPtr = _ptr;
 	}
+	inline bool GetIsDead() const
+	{
+		return IsDead;
+	}
 
-	void InitFadeEvent(class AFade* _ptr);
+	void Kill();
 
 protected:
 
@@ -110,4 +115,5 @@ private:
 	AGameUI* GameUIPtr = nullptr;
 
 	int Score = 600;	// Temp
+	bool IsDead = false;
 };

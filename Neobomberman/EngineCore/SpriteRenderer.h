@@ -12,7 +12,6 @@ enum class PivotType
 	Top,
 };
 
-// Ό³Έν :
 class USpriteRenderer : public USceneComponent
 {
 public:
@@ -30,12 +29,23 @@ public:
 		bool Loop = true;
 		std::string Name = "";
 		bool IsEnd = false;
+		bool IsPaused = false;
 
+		void Pause()
+		{
+			IsPaused = true;
+		}
+		void Resume()
+		{
+			IsPaused = false;
+		}
 		void Reset()
 		{
 			CurIndex = 0;
 			CurTime = 0;
 			ResultIndex = 0;
+			IsEnd = false;
+			IsPaused = false;
 		}
 	};
 
@@ -103,9 +113,42 @@ public:
 	void SetCameraEffectScale(float _Effect);
 	void SetSprite(std::string_view _Name, int _CurIndex = 0);
 
+	void ResumeCurAnimation()
+	{
+		if (CurAnimation)
+		{
+			CurAnimation->Resume();
+		}
+	}
+	void PauseCurAnimation()
+	{
+		if (CurAnimation)
+		{
+			CurAnimation->Pause();
+		}
+	}
+	bool IsCurAnimationPaused()
+	{
+		if (CurAnimation)
+		{
+			return CurAnimation->IsPaused;
+		}
+		else
+		{
+			return true;
+		}
+	}
+
 	bool IsCurAnimationEnd()
 	{
-		return CurAnimation->IsEnd;
+		if (CurAnimation)
+		{
+			return CurAnimation->IsEnd;
+		}
+		else
+		{
+			return true;
+		}
 	}
 
 	void SetAlphaChar(unsigned char _Value)

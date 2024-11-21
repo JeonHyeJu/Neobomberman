@@ -1,6 +1,7 @@
 #include "PreCompile.h"
 #include "GlobalVar.h"
 #include "ContentsEnum.h"
+#include "GameData.h"
 #include "Monster.h"
 #include "PlayMap.h"
 #include "TileMap.h"
@@ -18,7 +19,7 @@ AMonster::AMonster()
 	Fsm.CreateState(EMonsterState::THINKING, std::bind(&AMonster::Thinking, this, std::placeholders::_1));
 	Fsm.CreateState(EMonsterState::WALKING, std::bind(&AMonster::Walking, this, std::placeholders::_1));
 	Fsm.CreateState(EMonsterState::DYING, std::bind(&AMonster::Dying, this, std::placeholders::_1));
-	Fsm.CreateState(EMonsterState::PASS_AWAY, nullptr, std::bind(&AMonster::OnPassaway, this));
+	Fsm.CreateState(EMonsterState::PASS_AWAY, std::bind(&AMonster::PassAwaing, this, std::placeholders::_1), std::bind(&AMonster::OnPassaway, this));
 
 	FVector2D collSize = GlobalVar::BOMB_SIZE;
 	Collision = CreateDefaultSubObject<U2DCollision>();
@@ -33,18 +34,34 @@ AMonster::AMonster()
 		SRCloud->SetSprite(CLOUD_SPRITE_PATH);
 		SRCloud->SetComponentLocation(size.Half().Half().Half() + FVector2D{ 0, 16 });	// Temp
 		SRCloud->SetComponentScale(size);
-		SRCloud->CreateAnimation("Disappear", CLOUD_SPRITE_PATH, 0, 7, .25f, false);
+		SRCloud->CreateAnimation("Disappear", CLOUD_SPRITE_PATH, 0, 7, .2f, false);
 		SRCloud->SetActive(false);
 	}
 
+	{
+		FVector2D size = GlobalVar::BOMB_SIZE;
+
+		SRScore = CreateDefaultSubObject<USpriteRenderer>();
+		SRScore->SetSprite(MONSTER_SCORE_PATH);
+		SRScore->SetComponentLocation(size.Half().Half());
+		SRScore->SetComponentScale(size);
+
+		const int FRAME_CNT = 7;
+		std::vector<int> idxs;
+		std::vector<float> times(FRAME_CNT, .2f);
+		idxs.reserve(FRAME_CNT);
+		times.resize(FRAME_CNT);
+		for (int i = 0; i < FRAME_CNT; ++i)
+		{
+			idxs.push_back(i);
+		}
+		times[FRAME_CNT - 2] = 1.f;
+
+		SRScore->CreateAnimation("Disappear", MONSTER_SCORE_PATH, idxs, times, false);
+		SRScore->SetActive(false);
+	}
+
 	//DebugOn();
-}
-
-void AMonster::SetScore(EMonsterScore _score)
-{
-	Score = _score;
-
-	
 }
 
 AMonster::~AMonster()
@@ -84,6 +101,22 @@ void AMonster::Tick(float _deltaTime)
 	Fsm.Update(_deltaTime);
 }
 
+void AMonster::OnPause()
+{
+	if (SRBody)
+	{
+		SRBody->PauseCurAnimation();
+	}
+}
+
+void AMonster::OnResume()
+{
+	if (SRBody)
+	{
+		SRBody->ResumeCurAnimation();
+	}
+}
+
 void AMonster::SetCurMap(APlayMap* _map)
 {
 	CurMap = _map;
@@ -93,6 +126,12 @@ void AMonster::SetCurMap(APlayMap* _map)
 void AMonster::SetFirstDestination(const FIntPoint& _idx)
 {
 	FirstIdx = _idx;
+}
+
+void AMonster::SetScore(EMonsterScore _score)
+{
+	Score = _score;
+	//SRScore->SetSprite(MONSTER_SCORE_PATH);	// TODO
 }
 
 bool AMonster::IsArrivedAtOneBlock()
@@ -163,6 +202,27 @@ void AMonster::FindPath()
 	}
 
 	//DebugPrintFIntVector(Route, "Route");
+}
+
+void AMonster::Kill()
+{
+	if (static_cast<EMonsterState>(Fsm.GetState()) != EMonsterState::DYING)
+	{
+		Collision->SetActive(false);
+		Fsm.ChangeState(EMonsterState::DYING);
+	}
+}
+
+/* FSM start callbacks */
+void AMonster::OnPassaway()
+{
+	SRCloud->ChangeAnimation("Disappear", true);
+	SRCloud->SetActive(true);
+
+	SRScore->ChangeAnimation("Disappear");
+	SRScore->SetActive(true);
+
+	GameData::GetInstance().AddPlayer1Score(GetScore());
 }
 
 /* FSM callbacks */
@@ -290,15 +350,12 @@ void AMonster::Dying(float _deltaTime)
 	}
 }
 
-void AMonster::Kill()
+void AMonster::PassAwaing(float _deltaTime)
 {
-	Fsm.ChangeState(EMonsterState::DYING);
-}
+	if (IsDestroiable) return;
 
-void AMonster::OnPassaway()
-{
-	SRCloud->SetActive(true);
-	SRCloud->ChangeAnimation("Disappear", true);
-
-	ShowScore();
+	if (SRCloud->IsCurAnimationEnd() && SRScore->IsCurAnimationEnd())
+	{
+		IsDestroiable = true;
+	}
 }
