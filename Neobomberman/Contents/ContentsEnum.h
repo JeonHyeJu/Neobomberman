@@ -4,6 +4,7 @@ enum class ERenderOrder
 {
 	COLMAP = -1000,
 	BACKGROUND = -999,
+	BACKGROUND_OVER = -998,
 	CUT_SCENE_BG = 1,
 	CUT_SPACESHIP = 2,
 	CUT_SCENE = 3,

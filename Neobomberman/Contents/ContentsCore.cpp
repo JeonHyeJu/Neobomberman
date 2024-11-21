@@ -41,8 +41,8 @@ void ContentsCore::BeginPlay()
 	pCore->CreateLevel<APlayGameMode, APlayer>("Play");
 	pCore->CreateLevel<APlayBossMode, APlayer>("Boss_Stage1");
 
-	pCore->OpenLevel("Title");
-	//pCore->OpenLevel("Play");
+	//pCore->OpenLevel("Title");
+	pCore->OpenLevel("Play");
 	//pCore->OpenLevel("Boss_Stage1");
 }
 
@@ -76,7 +76,8 @@ void ContentsCore::InitResources()
 	LoadImageFolders(path.GetAppendedRootPath(GlobalPath::ANIM_CRUMBLING_BOX));
 	LoadImageFolders("Resources\\SayHi");
 	LoadImageFolders("Resources\\Result\\StageClear");
-	LoadImageFolders("Resources\\CutScene\\CutSceneStage1");	
+	LoadImageFolders("Resources\\CutScene\\CutSceneStage1");
+	LoadImageFolders("Resources\\PlayBackground");
 
 	/* Load sounds */
 	UEngineSound::InitFMOD();
@@ -124,6 +125,9 @@ void ContentsCore::InitResources()
 	imgManager.CuttingSprite("Continue.png", { 534, 64 });
 	imgManager.CuttingSprite("ContinueNumber.png", GlobalVar::BOMBERMAN_SIZE);
 	imgManager.CuttingSprite("GameOver.png", GlobalVar::BOMBERMAN_SIZE);
+
+	imgManager.CuttingSprite("LeftBears.png", { 96, 196 });
+	imgManager.CuttingSprite("RightBears.png", { 96, 196 });
 }
 
 void ContentsCore::LoadImages(std::string_view _path)

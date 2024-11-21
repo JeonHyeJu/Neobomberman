@@ -22,6 +22,9 @@
     <Filter Include="Actor\NotGame">
       <UniqueIdentifier>{a9b5dbbc-ae7e-4502-a88d-15cd70f5f4fe}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Actor\UI">
+      <UniqueIdentifier>{990708c2-e3d5-489c-8c7f-725d55926e6e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Player.h">
@@ -90,14 +93,8 @@
     <ClInclude Include="BossMap.h">
       <Filter>Map</Filter>
     </ClInclude>
-    <ClInclude Include="Result.h">
-      <Filter>Actor</Filter>
-    </ClInclude>
     <ClInclude Include="GameData.h">
       <Filter>Actor\NotGame</Filter>
-    </ClInclude>
-    <ClInclude Include="GameUI.h">
-      <Filter>Actor</Filter>
     </ClInclude>
     <ClInclude Include="BaseMap.h">
       <Filter>Map</Filter>
@@ -105,7 +102,16 @@
     <ClInclude Include="UtilFn.h">
       <Filter>Util</Filter>
     </ClInclude>
+    <ClInclude Include="GameUI.h">
+      <Filter>Actor\UI</Filter>
+    </ClInclude>
     <ClInclude Include="GameOver.h">
+      <Filter>Actor\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Result.h">
+      <Filter>Actor\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="BossStage1.h">
       <Filter>Actor</Filter>
     </ClInclude>
   </ItemGroup>
@@ -164,19 +170,22 @@
     <ClCompile Include="BossMap.cpp">
       <Filter>Map</Filter>
     </ClCompile>
-    <ClCompile Include="Result.cpp">
-      <Filter>Actor</Filter>
-    </ClCompile>
-    <ClCompile Include="GameUI.cpp">
-      <Filter>Actor</Filter>
-    </ClCompile>
     <ClCompile Include="BaseMap.cpp">
       <Filter>Map</Filter>
     </ClCompile>
     <ClCompile Include="UtilFn.cpp">
       <Filter>Util</Filter>
     </ClCompile>
+    <ClCompile Include="GameUI.cpp">
+      <Filter>Actor\UI</Filter>
+    </ClCompile>
     <ClCompile Include="GameOver.cpp">
+      <Filter>Actor\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Result.cpp">
+      <Filter>Actor\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="BossStage1.cpp">
       <Filter>Actor</Filter>
     </ClCompile>
   </ItemGroup>

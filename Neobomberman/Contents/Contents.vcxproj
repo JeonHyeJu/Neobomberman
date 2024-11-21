@@ -153,6 +153,10 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="BossStage1.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="Fade.h">
       <SubType>
       </SubType>
@@ -216,6 +220,10 @@
       </SubType>
     </ClCompile>
     <ClCompile Include="BossMap.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="BossStage1.cpp">
       <SubType>
       </SubType>
     </ClCompile>
