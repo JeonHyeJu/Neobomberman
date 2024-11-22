@@ -174,18 +174,18 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="..\ThirdParty\FMOD\lib\x64\fmodL_vc.lib">
+    <CopyFileToFolders Include="..\ThirdParty\FMOD\lib\FMOD_x64\fmodL_vc.lib">
       <FileType>Document</FileType>
     </CopyFileToFolders>
-    <CopyFileToFolders Include="..\ThirdParty\FMOD\lib\x64\fmod_vc.lib">
+    <CopyFileToFolders Include="..\ThirdParty\FMOD\lib\FMOD_x64\fmod_vc.lib">
       <FileType>Document</FileType>
     </CopyFileToFolders>
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="..\ThirdParty\FMOD\lib\x64\fmod.dll">
+    <CopyFileToFolders Include="..\ThirdParty\FMOD\lib\FMOD_x64\fmod.dll">
       <FileType>Document</FileType>
     </CopyFileToFolders>
-    <CopyFileToFolders Include="..\ThirdParty\FMOD\lib\x64\fmodL.dll">
+    <CopyFileToFolders Include="..\ThirdParty\FMOD\lib\FMOD_x64\fmodL.dll">
       <FileType>Document</FileType>
     </CopyFileToFolders>
   </ItemGroup>

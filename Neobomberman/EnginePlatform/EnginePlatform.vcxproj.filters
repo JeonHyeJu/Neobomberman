@@ -28,6 +28,9 @@
     <Filter Include="Resource">
       <UniqueIdentifier>{f216bacd-d502-4b46-b66d-37f72a912903}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ThirdParty\FMOD\lib\FMOD_x64">
+      <UniqueIdentifier>{17c9efa9-adcb-4314-bdec-0ef9c05d90f1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EngineWindow.cpp">
@@ -94,17 +97,17 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="..\ThirdParty\FMOD\lib\x64\fmodL_vc.lib">
-      <Filter>ThirdParty\FMOD\lib</Filter>
+    <CopyFileToFolders Include="..\ThirdParty\FMOD\lib\FMOD_x64\fmodL_vc.lib">
+      <Filter>ThirdParty\FMOD\lib\FMOD_x64</Filter>
     </CopyFileToFolders>
-    <CopyFileToFolders Include="..\ThirdParty\FMOD\lib\x64\fmod.dll">
-      <Filter>ThirdParty\FMOD\lib</Filter>
+    <CopyFileToFolders Include="..\ThirdParty\FMOD\lib\FMOD_x64\fmod.dll">
+      <Filter>ThirdParty\FMOD\lib\FMOD_x64</Filter>
     </CopyFileToFolders>
-    <CopyFileToFolders Include="..\ThirdParty\FMOD\lib\x64\fmod_vc.lib">
-      <Filter>ThirdParty\FMOD\lib</Filter>
+    <CopyFileToFolders Include="..\ThirdParty\FMOD\lib\FMOD_x64\fmod_vc.lib">
+      <Filter>ThirdParty\FMOD\lib\FMOD_x64</Filter>
     </CopyFileToFolders>
-    <CopyFileToFolders Include="..\ThirdParty\FMOD\lib\x64\fmodL.dll">
-      <Filter>ThirdParty\FMOD\lib</Filter>
+    <CopyFileToFolders Include="..\ThirdParty\FMOD\lib\FMOD_x64\fmodL.dll">
+      <Filter>ThirdParty\FMOD\lib\FMOD_x64</Filter>
     </CopyFileToFolders>
   </ItemGroup>
 </Project>
