@@ -41,8 +41,8 @@ void ContentsCore::BeginPlay()
 	pCore->CreateLevel<APlayGameMode, APlayer>("Play");
 	pCore->CreateLevel<APlayBossMode, APlayer>("Boss_Stage1");
 
-	//pCore->OpenLevel("Title");
-	pCore->OpenLevel("Play");
+	pCore->OpenLevel("Title");
+	//pCore->OpenLevel("Play");
 	//pCore->OpenLevel("Boss_Stage1");
 }
 
@@ -128,6 +128,7 @@ void ContentsCore::InitResources()
 
 	imgManager.CuttingSprite("LeftBears.png", { 96, 196 });
 	imgManager.CuttingSprite("RightBears.png", { 96, 196 });
+	imgManager.CuttingSprite("HoopGhost.png", { 256, 256 });
 }
 
 void ContentsCore::LoadImages(std::string_view _path)

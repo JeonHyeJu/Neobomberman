@@ -1,9 +1,8 @@
 #pragma once
 #include "BaseMap.h"
-#include <EngineCore/PathFindAStar.h>
 #include "ContentsStruct.h"
 
-class APlayMap : public ABaseMap, public IPathFindData
+class APlayMap : public ABaseMap
 {
 public:
 	APlayMap();
@@ -15,7 +14,6 @@ public:
 	APlayMap& operator=(APlayMap&& _Other) noexcept = delete;
 
 	void InitMap();
-	bool IsMove(const FIntPoint& _Point) override;
 	
 protected:
 	 void BeginPlay() override;

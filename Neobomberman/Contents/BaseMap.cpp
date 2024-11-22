@@ -216,3 +216,29 @@ void ABaseMap::AppendSplash(const std::vector<FIntPoint>& _appendIdxs)
 		SplashTileIdxs.push_back(_appendIdxs[i]);
 	}
 }
+
+bool ABaseMap::IsMove(const FIntPoint& _Point)
+{
+	bool hasWall = false;
+	bool hasBox = false;
+
+	// Temp
+	bool isPortal = _Point == FIntPoint({ 6, 10 });
+
+	if (MapWall)
+	{
+		hasWall = MapWall->IsBlocked(_Point);
+	}
+	if (MapBox)
+	{
+		hasBox = MapBox->IsBlocked(_Point);
+	}
+
+	/*bool hasWall = MapWall->GetIsMovable(_Point);
+	bool hasBox = MapBox->GetIsMovable(_Point);*/
+
+	// TODO!!: hasBomb
+
+	bool isBlocked = hasWall || hasBox || isPortal;
+	return !isBlocked;
+}

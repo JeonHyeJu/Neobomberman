@@ -115,7 +115,7 @@ void AMonster::OnResume()
 	}
 }
 
-void AMonster::SetCurMap(APlayMap* _map)
+void AMonster::SetCurMap(ABaseMap* _map)
 {
 	CurMap = _map;
 	PathFinder.SetData(CurMap);

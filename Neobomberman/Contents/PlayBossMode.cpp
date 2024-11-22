@@ -2,6 +2,8 @@
 #include "PlayBossMode.h"
 #include "GameUI.h"
 #include "BossMap.h"
+#include "HoopGhost.h"
+#include "Monster.h"
 #include "Player.h"
 #include "Fade.h"
 
@@ -33,11 +35,19 @@ void APlayBossMode::BeginPlay()
 
 	Player->SetCurMap(pBossMap);
 
-	// Temp. To test portal
-	//Player->SetActorLocation(monsterStartingLoc + FVector2D({ 16.f, -16.f }));	// temp
+	AHoopGhost* boss = pLevel->SpawnActor<AHoopGhost>();
+	boss->SetCurMap(pBossMap);
+	boss->SetFirstDestination({ 0, 0 });
+	boss->SetActorLocation({ 256, 256 });	// Temp
+	MonsterList.push_back(boss);
 
 	AFade* fade = GetWorld()->SpawnActor<AFade>();
 	fade->FadeIn();
+
 	gameUI->StartTimer();
 }
 
+void APlayBossMode::Tick(float _deltaTime)
+{
+	Super::Tick(_deltaTime);
+}

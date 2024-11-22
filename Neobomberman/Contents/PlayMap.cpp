@@ -100,19 +100,3 @@ void APlayMap::InitMap()
 	MapGround->SetPortal(PortalIdx, { 0, 0 }, GlobalVar::BOMB_SIZE, "ClosedPortal.png");	// Temp
 }
 
-bool APlayMap::IsMove(const FIntPoint& _Point)
-{
-	// Temp
-	bool isPortal = _Point == FIntPoint({ 6, 10 });
-	bool hasWall = MapWall->IsBlocked(_Point);
-	bool hasBox = MapBox->IsBlocked(_Point);
-
-	/*bool hasWall = MapWall->GetIsMovable(_Point);
-	bool hasBox = MapBox->GetIsMovable(_Point);*/
-
-	// TODO!!: hasBomb
-
-	bool isBlocked = hasWall || hasBox || isPortal;
-	return !isBlocked;
-}
-

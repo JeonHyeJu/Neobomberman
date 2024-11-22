@@ -12,5 +12,9 @@ public:
 	APlayBossMode& operator=(const APlayBossMode& _other) = delete;
 	APlayBossMode& operator=(APlayBossMode&& _other) noexcept = delete;
 
-	void BeginPlay();
+	void BeginPlay() override;
+	void Tick(float _deltaTime) override;
+
+private:
+	std::list<class AMonster*> MonsterList;
 };

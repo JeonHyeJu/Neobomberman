@@ -1,8 +1,9 @@
 #pragma once
 #include <EngineCore/Actor.h>
+#include <EngineCore/PathFindAStar.h>
 
 class ATileMap;
-class ABaseMap : public AActor
+class ABaseMap : public AActor, public IPathFindData
 {
 public:
 	ABaseMap();
@@ -16,6 +17,7 @@ public:
 	bool Deserialize(ATileMap* _tileMap, std::string_view _savePath, std::string_view _saveName);
 	bool CanMove(const FVector2D& _loc);
 	bool CanMove(const FIntPoint& _idx);
+	bool IsMove(const FIntPoint& _Point) override;
 
 	inline ATileMap* GetGroundMap() const
 	{

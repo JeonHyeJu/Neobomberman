@@ -47,7 +47,7 @@ public:
 	void Kill();
 
 	/* Setter */
-	void SetCurMap(class APlayMap* _map);
+	void SetCurMap(class ABaseMap* _map);
 	void SetFirstDestination(const FIntPoint& _idx);
 	void SetStartDelay(float _seconds)
 	{
@@ -91,7 +91,7 @@ protected:
 	const char* MONSTER_SCORE_PATH = "MonsterScore.png";
 
 	USpriteRenderer* SRBody = nullptr;
-	class APlayMap* CurMap = nullptr;
+	ABaseMap* CurMap = nullptr;
 
 	float Speed = 1.f;
 	const int MonsterIdx;
