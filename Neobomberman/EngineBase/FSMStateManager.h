@@ -40,6 +40,24 @@ public:
 		States[_Key].StartFunction = _Start;
 	}
 
+	template <typename EnumType>
+	void ChangeStateFunction(EnumType _Key, std::function<void(float)> _UpdateFunction, std::function<void()> _Start = nullptr)
+	{
+		ChangeStateFunction(static_cast<int>(_Key), _UpdateFunction, _Start);
+	}
+
+	void ChangeStateFunction(int _Key, std::function<void(float)> _UpdateFunction, std::function<void()> _Start = nullptr)
+	{
+		if (States.contains(_Key) == false)
+		{
+			MSGASSERT("존재하지 않는 스테이트의 함수를 바꾸려고 했습니다.");
+			return;
+		}
+
+		States[_Key].UpdateFunction = _UpdateFunction;
+		States[_Key].StartFunction = _Start;
+	}
+
 	void Update(float _DeltaTime)
 	{
 		if (nullptr == CurStateFn)

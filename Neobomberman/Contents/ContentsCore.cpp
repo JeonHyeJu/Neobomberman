@@ -41,9 +41,9 @@ void ContentsCore::BeginPlay()
 	pCore->CreateLevel<APlayGameMode, APlayer>("Play");
 	pCore->CreateLevel<APlayBossMode, APlayer>("Boss_Stage1");
 
-	pCore->OpenLevel("Title");
+	//pCore->OpenLevel("Title");
 	//pCore->OpenLevel("Play");
-	//pCore->OpenLevel("Boss_Stage1");
+	pCore->OpenLevel("Boss_Stage1");
 }
 
 void ContentsCore::Tick()

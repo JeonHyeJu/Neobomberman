@@ -34,11 +34,13 @@ void APlayBossMode::BeginPlay()
 	pBossMap->InitMap();
 
 	Player->SetCurMap(pBossMap);
+	FVector2D playerStartLoc = pBossMap->MatrixIdxToLocation(StartPoint);	// Temp
+	Player->SetActorLocation(playerStartLoc + GlobalVar::BOMBERMAN_SIZE.Half().Half());
 
 	AHoopGhost* boss = pLevel->SpawnActor<AHoopGhost>();
 	boss->SetCurMap(pBossMap);
 	boss->SetFirstDestination({ 0, 0 });
-	boss->SetActorLocation({ 256, 256 });	// Temp
+	boss->SetActorLocation({ 256, 156 });	// Temp
 	MonsterList.push_back(boss);
 
 	AFade* fade = GetWorld()->SpawnActor<AFade>();

@@ -7,6 +7,8 @@ AHoopGhost::AHoopGhost()
 : AMonster()
 {
 	SetName("HoopGhost");
+
+	Fsm.ChangeStateFunction(EMonsterState::INIT_BLINK, nullptr);
 }
 
 AHoopGhost::~AHoopGhost()
@@ -32,7 +34,7 @@ void AHoopGhost::InitSprite()
 	SRBody->SetComponentLocation({ size.X * .25f, size.Y * .5f });
 	SRBody->SetComponentScale(size);
 	SRBody->SetPivotType(PivotType::Bot);
-	SRBody->SetOrder(ERenderOrder::MONSTER);
+	SRBody->SetOrder(ERenderOrder::BOSS);
 
 	const float animSpeed = .25;
 	SRBody->CreateAnimation(ANIM_START_HOOP, SPRITE_NAME, 0, 4, animSpeed);

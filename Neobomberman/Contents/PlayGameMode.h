@@ -27,6 +27,8 @@ private:
 
 	void OnEndGameOverFadeOut();
 
+	FIntPoint StartPoint = { 0, 0 };
+
 	class ABaseMap* CurMapPtr = nullptr;
 	class AGameOver* GameOverScenePtr = nullptr;
 	class AGameUI* GameUiPtr = nullptr;

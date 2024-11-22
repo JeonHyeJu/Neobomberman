@@ -124,7 +124,7 @@ FIntPoint ABaseMap::LocationToMatrixIdx(const FVector2D& _loc)
 FVector2D ABaseMap::MatrixIdxToLocation(const FIntPoint& _idx)
 {
 	if (!MapGround) return FIntPoint::NEGATIVE_ONE;
-	return MapGround->LocationToMatrixIdx(_idx);
+	return MapGround->MatrixIdxToLocation(_idx);
 }
 
 void ABaseMap::CheckLaunchedBomb()

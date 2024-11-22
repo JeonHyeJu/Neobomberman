@@ -17,4 +17,6 @@ public:
 
 private:
 	std::list<class AMonster*> MonsterList;
+
+	FIntPoint StartPoint = { 6, 8 };
 };

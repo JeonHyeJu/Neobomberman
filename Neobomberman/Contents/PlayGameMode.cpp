@@ -33,8 +33,8 @@ void APlayGameMode::BeginPlay()
 	GameOverScenePtr = pLevel->SpawnActor<AGameOver>();
 	GameOverScenePtr->SetActive(false);
 
-	APlayer* Player = pLevel->GetPawn<APlayer>();
-	Player->SetGameUI(GameUiPtr);
+	APlayer* player = pLevel->GetPawn<APlayer>();
+	player->SetGameUI(GameUiPtr);
 	//Player->SetCollisionImage("Bg_1-Col.png");
 
 	/* Stage 1-1 */
@@ -44,7 +44,9 @@ void APlayGameMode::BeginPlay()
 	CurMapPtr = pStage1;
 
 	pStage1->InitMap();
-	Player->SetCurMap(pStage1);
+
+	player->SetCurMap(pStage1);
+	player->SetActorLocation(pStage1->MatrixIdxToLocation(StartPoint) + GlobalVar::BOMBERMAN_SIZE.Half().Half());
 
 	FVector2D monsterStartingLoc = pStage1->GetPortalLoc();
 
@@ -55,7 +57,7 @@ void APlayGameMode::BeginPlay()
 	AMushroom* monster = pLevel->SpawnActor<AMushroom>();
 	monster->SetCurMap(pStage1);
 	monster->SetFirstDestination({ 0, 0 });
-	monster->SetActorLocation(Player->GetActorLocation() + FVector2D({ 64, 0 }) - FVector2D({ 16, 16 }));
+	monster->SetActorLocation(player->GetActorLocation() + FVector2D({ 64, 0 }) - FVector2D({ 16, 16 }));
 	MonsterList.push_back(monster);
 	
 	// TODO: spawn delay

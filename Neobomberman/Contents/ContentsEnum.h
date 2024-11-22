@@ -16,6 +16,7 @@ enum class ERenderOrder
 	CRUMBLING_BOX = 9998,
 	MONSTER = 9999,
 	PLAYER = 10000,
+	BOSS = 10001,
 	UI = 19000,
 	UI_PLUS = 19001,
 	FADE = 20000,

@@ -177,9 +177,9 @@ void AMonster::FindPath()
 	if (PathFinderIdx != MonsterIdx) return;
 
 	FVector2D playerLoc = GetWorld()->GetPawn()->GetActorLocation();
-	FIntPoint playerIdx = CurMap->GetGroundMap()->LocationToMatrixIdx(playerLoc);
+	FIntPoint playerIdx = CurMap->LocationToMatrixIdx(playerLoc);
 	FVector2D monsterLoc = GetActorLocation();
-	FIntPoint monsterIdx = CurMap->GetGroundMap()->LocationToMatrixIdx(monsterLoc);
+	FIntPoint monsterIdx = CurMap->LocationToMatrixIdx(monsterLoc);
 
 	Route = PathFinder.PathFind(monsterIdx, playerIdx);
 	if (Route.empty())
@@ -236,7 +236,7 @@ void AMonster::Blinking(float _deltaTime)
 
 void AMonster::WalkingForStart(float _deltaTime)
 {
-	FVector2D firstLoc = CurMap->GetGroundMap()->MatrixIdxToLocation(FirstIdx);
+	FVector2D firstLoc = CurMap->MatrixIdxToLocation(FirstIdx);
 	FVector2D monsterRealLoc = GetActorLocation();
 
 	FIntPoint firstLocInt = firstLoc.ConvertToPoint();
@@ -288,9 +288,9 @@ void AMonster::Walking(float _deltaTime)
 
 	FVector2D monsterRealLoc = GetActorLocation();
 	FIntPoint monsterRealLocInt = monsterRealLoc.ConvertToPoint();
-	FIntPoint monsterMatrixIdx = CurMap->GetGroundMap()->LocationToMatrixIdx(monsterRealLoc);
+	FIntPoint monsterMatrixIdx = CurMap->LocationToMatrixIdx(monsterRealLoc);
 
-	FVector2D destRealLoc = CurMap->GetGroundMap()->MatrixIdxToLocation(Destination);
+	FVector2D destRealLoc = CurMap->MatrixIdxToLocation(Destination);
 	FIntPoint destRealLocInt = destRealLoc.ConvertToPoint();
 	FIntPoint destMatrixIdx = Destination;
 
