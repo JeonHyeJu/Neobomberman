@@ -138,7 +138,7 @@ void ATileMapGameMode::InitMap()
 				data.Type = TileType::Wall;
 				data.Container = WallTileMap;
 			}
-			else
+			else // i == 0 || i == 5
 			{
 				data.Type = TileType::Ground;
 				data.Container = GroundTileMap;

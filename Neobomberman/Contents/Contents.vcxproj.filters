@@ -114,6 +114,9 @@
     <ClInclude Include="HoopGhost.h">
       <Filter>Actor</Filter>
     </ClInclude>
+    <ClInclude Include="EndingGameMode.h">
+      <Filter>GameMode</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Player.cpp">
@@ -187,6 +190,9 @@
     </ClCompile>
     <ClCompile Include="HoopGhost.cpp">
       <Filter>Actor</Filter>
+    </ClCompile>
+    <ClCompile Include="EndingGameMode.cpp">
+      <Filter>GameMode</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

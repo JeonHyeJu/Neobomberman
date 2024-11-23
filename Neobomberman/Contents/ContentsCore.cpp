@@ -9,6 +9,7 @@
 
 #include "ContentsCore.h"
 #include "TitleGameMode.h"
+#include "EndingGameMode.h"
 #include "TileMapGameMode.h"
 #include "PlayGameMode.h"
 #include "PlayBossMode.h"
@@ -33,17 +34,19 @@ void ContentsCore::BeginPlay()
 	InitResources();
 
 	/** For creating tilemap. **/
-	//pCore->CreateLevel<ATileMapGameMode, AActor>("TileMap");
-	//pCore->OpenLevel("TileMap");
-	//return;
+	/*pCore->CreateLevel<ATileMapGameMode, AActor>("TileMap");
+	pCore->OpenLevel("TileMap");
+	return;*/
 
 	pCore->CreateLevel<ATitleGameMode, AActor>("Title");
+	pCore->CreateLevel<AEndingGameMode, AActor>("Ending");
 	pCore->CreateLevel<APlayGameMode, APlayer>("Play");
 	pCore->CreateLevel<APlayBossMode, APlayer>("Boss_Stage1");
 
 	//pCore->OpenLevel("Title");
 	//pCore->OpenLevel("Play");
-	pCore->OpenLevel("Boss_Stage1");
+	//pCore->OpenLevel("Boss_Stage1");
+	pCore->OpenLevel("Ending");
 }
 
 void ContentsCore::Tick()
@@ -67,6 +70,7 @@ void ContentsCore::InitResources()
 	LoadImages("Resources\\UI\\SelectCount");	// temp
 	LoadImages("Resources\\Result");	// temp
 	LoadImages("Resources\\CutScene");	// temp
+	LoadImages("Resources\\Closing");	// temp
 
 	LoadImageFolders(path.GetAppendedRootPath(GlobalPath::BOMB_ORG));
 	LoadImageFolders(path.GetAppendedRootPath(GlobalPath::BOMB_RED));

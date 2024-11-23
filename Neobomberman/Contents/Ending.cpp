@@ -1,40 +1,22 @@
 #include "PreCompile.h"
 #include "Ending.h"
 #include "GlobalVar.h"
+#include "Fade.h"
 #include <EnginePlatform/EngineInput.h>
 #include <EngineCore/SpriteRenderer.h>
 #include <EngineCore/EngineAPICore.h>
-#include <EngineBase/EngineString.h>
 
-// TODO opening -> closing
 AEnding::AEnding()
 {
-	FVector2D winSize = GlobalVar::WINDOW_SIZE;
+	FVector2D size{ 511, 256 };
 	const int ALL_FRAME_CNT = 156;
 	const float SHORT_ANIM_SEC = .125f;
 	const float LONG_ANIM_SEC = 2.f;
 
 	SpriteRenderer = CreateDefaultSubObject<USpriteRenderer>();
-	SpriteRenderer->SetSprite(GlobalPath::OPENING);
-	SpriteRenderer->SetComponentLocation(winSize * .5);
-	SpriteRenderer->SetComponentScale(winSize);
-
-	std::vector<int> indexes;
-	std::vector<float> frames(ALL_FRAME_CNT, SHORT_ANIM_SEC);
-
-	indexes.reserve(ALL_FRAME_CNT);
-	frames.reserve(ALL_FRAME_CNT);
-
-	for (int i = 0; i < ALL_FRAME_CNT; ++i)
-	{
-		indexes.push_back(i);
-	}
-	frames[0] = LONG_ANIM_SEC;
-
-	SpriteRenderer->CreateAnimation(ANIM_IDLE_NAME, GlobalPath::OPENING, ALL_FRAME_CNT, ALL_FRAME_CNT, 0.1f);
-	SpriteRenderer->CreateAnimation(ANIM_RUN_NAME, GlobalPath::OPENING, indexes, frames, false);
-
-	SpriteRenderer->SetAnimationEvent(ANIM_RUN_NAME, ALL_FRAME_CNT - 1, std::bind(&AEnding::OnEndAnimation, this));
+	SpriteRenderer->SetSprite(ENDING_SPRITE_PATH);
+	SpriteRenderer->SetComponentLocation(GlobalVar::WINDOW_SIZE.Half());
+	SpriteRenderer->SetComponentScale(size);
 }
 
 AEnding::~AEnding()
@@ -43,28 +25,20 @@ AEnding::~AEnding()
 
 void AEnding::BeginPlay()
 {
-	SpriteRenderer->ChangeAnimation(ANIM_RUN_NAME);
 }
 
-void AEnding::Tick(float _DeltaTime)
+void AEnding::Tick(float _deltaTime)
 {
-	Super::Tick(_DeltaTime);
+	Super::Tick(_deltaTime);
 
-	if (true == UEngineInput::GetInst().IsDown('R'))
+	if (UEngineInput::GetInst().IsDown(VK_SPACE))
 	{
-		std::string nowAnimName = UEngineString::ToUpper(SpriteRenderer->GetCurAnimName());
-		if (nowAnimName == UEngineString::ToUpper(ANIM_RUN_NAME))
-		{
-			OnEndAnimation();
-		}
-		else
-		{
-			UEngineAPICore::GetCore()->OpenLevel("Play");
-		}
+		AFade::MainFade->BindEndEvent(std::bind(&AEnding::OnEndFadeOut, this));
+		AFade::MainFade->FadeOut();
 	}
 }
 
-void AEnding::OnEndAnimation()
+void AEnding::OnEndFadeOut()
 {
-	SpriteRenderer->ChangeAnimation(ANIM_IDLE_NAME);
+	UEngineAPICore::GetCore()->OpenLevel("Title");
 }

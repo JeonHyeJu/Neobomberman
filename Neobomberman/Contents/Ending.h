@@ -14,11 +14,12 @@ public:
 
 protected:
 	void BeginPlay() override;
-	void Tick(float _DeltaTime) override;
+	void Tick(float _deltaTime) override;
 
 private:
-	void OnEndAnimation();
+	void OnEndFadeOut();
 
+	const char* ENDING_SPRITE_PATH = "Ending.png";
 	const char* ANIM_IDLE_NAME = "Closing_Idle";
 	const char* ANIM_RUN_NAME = "Closing_Run";
 
