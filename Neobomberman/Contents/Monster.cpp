@@ -57,7 +57,7 @@ AMonster::AMonster()
 	Fsm.CreateState(EMonsterState::INIT_BLINK, std::bind(&AMonster::Blinking, this, std::placeholders::_1));
 	Fsm.CreateState(EMonsterState::INIT_WALKING, std::bind(&AMonster::WalkingForStart, this, std::placeholders::_1));
 	Fsm.CreateState(EMonsterState::THINKING, std::bind(&AMonster::Thinking, this, std::placeholders::_1));
-	Fsm.CreateState(EMonsterState::WALKING, std::bind(&AMonster::Walking, this, std::placeholders::_1));
+	Fsm.CreateState(EMonsterState::WALKING, std::bind(&AMonster::Walking, this, std::placeholders::_1), std::bind(&AMonster::OnWalk, this));
 	Fsm.CreateState(EMonsterState::DYING, std::bind(&AMonster::Dying, this, std::placeholders::_1));
 	Fsm.CreateState(EMonsterState::PASS_AWAY, std::bind(&AMonster::PassAwaing, this, std::placeholders::_1), std::bind(&AMonster::OnPassaway, this));
 
@@ -71,8 +71,10 @@ void AMonster::BeginPlay()
 	// Init child's sprite
 	InitSprite();
 
-	assert(SRBody != nullptr && "You didn't initialize SRBody");
-	SRBody->SetActive(false);
+	if (SRBody == nullptr)
+	{
+		MSGASSERT("You didn't initialize SRBody");
+	}
 }
 
 void AMonster::Tick(float _deltaTime)
@@ -93,6 +95,7 @@ void AMonster::Tick(float _deltaTime)
 		return;	// TODO
 	}
 
+	// Is this my turn to find my way?
 	PathFinderIdx = PathFinderIdx % AMonster::MonsterCount;
 	PathFinderIdx++;
 

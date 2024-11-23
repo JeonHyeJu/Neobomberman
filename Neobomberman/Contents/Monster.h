@@ -10,6 +10,7 @@ enum class EMonsterState
 	THINKING,
 	WALKING,
 	JUMPING,
+	PRESS_DOWN,
 	DYING,
 	PASS_AWAY,
 };
@@ -85,6 +86,8 @@ protected:
 	virtual void Dying(float _deltaTime);
 	virtual void PassAwaing(float _deltaTime);
 
+	virtual void OnWalk() {}
+
 	/* FSM start callbacks */
 	virtual void OnPassaway();
 
@@ -97,6 +100,7 @@ protected:
 	const int MonsterIdx;
 	
 	UFSMStateManager Fsm;
+	bool IsInited = false;
 
 private:
 	const int SCORE_ANIM_CNT = 7;
@@ -105,7 +109,6 @@ private:
 
 	EMonsterScore Score = EMonsterScore::S100;
 
-	bool IsInited = false;
 	bool IsDestroiable = false;
 
 	float StartDelayMs = 0.f;

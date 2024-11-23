@@ -72,6 +72,11 @@ public:
 		Read(&_Data, sizeof(bool));
 	}
 
+	void operator>>(char& _Data)
+	{
+		Read(&_Data, sizeof(char));
+	}
+
 	void operator>>(FVector2D& _Data)
 	{
 		Read(&_Data, sizeof(FVector2D));
@@ -120,6 +125,18 @@ public:
 	void DataResize(int _Value)
 	{
 		Data.resize(_Value);
+	}
+
+	bool IsEndOfData()
+	{
+		if (ReadOffset >= Data.size() - 1)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 protected:

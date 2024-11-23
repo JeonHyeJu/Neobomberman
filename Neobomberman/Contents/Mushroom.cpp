@@ -78,6 +78,8 @@ void AMushroom::InitSprite()
 
 	SRBody->CreateAnimation(ANIM_JUMP, SPRITE_NAME, idxs, times, false);
 	SetScore(EMonsterScore::S100);
+
+	SRBody->SetActive(false);
 }
 
 void AMushroom::ChangeMoveAnim(const FVector2D& _direction)

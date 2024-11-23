@@ -42,6 +42,8 @@ void ABalloon::InitSprite()
 	SRBody->CreateAnimation(ANIM_RUN_RIGHT, SPRITE_NAME, 0, 8, 0.5f);
 
 	SetScore(EMonsterScore::S200);
+
+	SRBody->SetActive(false);
 }
 
 void ABalloon::ChangeMoveAnim(const FVector2D& _direction)
