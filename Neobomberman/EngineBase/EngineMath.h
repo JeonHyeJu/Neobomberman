@@ -413,3 +413,11 @@ public:
 
 	}
 };
+
+struct URect
+{
+	float Left = 0.f;
+	float Right = 0.f;
+	float Top = 0.f;
+	float Bottom = 0.f;
+};

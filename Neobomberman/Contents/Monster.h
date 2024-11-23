@@ -102,6 +102,8 @@ protected:
 	UFSMStateManager Fsm;
 	bool IsInited = false;
 
+	class U2DCollision* Collision = nullptr;
+
 private:
 	const int SCORE_ANIM_CNT = 7;
 	const float BLINK_SECONDS = 2.f;
@@ -116,8 +118,6 @@ private:
 
 	USpriteRenderer* SRCloud = nullptr;
 	USpriteRenderer* SRScore = nullptr;
-
-	class U2DCollision* Collision = nullptr;
 
 	/* Path finder */
 	int PathFinderIdx = 0;
