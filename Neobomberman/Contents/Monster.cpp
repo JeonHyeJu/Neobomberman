@@ -15,15 +15,6 @@ AMonster::AMonster()
 : MonsterIdx(++AMonster::MonsterCount)
 {
 	{
-		FVector2D collSize = GlobalVar::BOMB_SIZE;
-		Collision = CreateDefaultSubObject<U2DCollision>();
-		Collision->SetComponentLocation({ collSize.hX(), 0.f });
-		Collision->SetComponentScale(collSize);
-		Collision->SetCollisionGroup(ECollisionGroup::MonsterBody);
-		Collision->SetCollisionType(ECollisionType::CirCle);
-	}
-
-	{
 		FVector2D size = GlobalVar::BOMBERMAN_SIZE;
 		SRCloud = CreateDefaultSubObject<USpriteRenderer>();
 		SRCloud->SetSprite(CLOUD_SPRITE_PATH);
@@ -57,10 +48,10 @@ AMonster::AMonster()
 	Fsm.CreateState(EMonsterState::INIT_BLINK, std::bind(&AMonster::Blinking, this, std::placeholders::_1));
 	Fsm.CreateState(EMonsterState::INIT_WALKING, std::bind(&AMonster::WalkingForStart, this, std::placeholders::_1));
 	Fsm.CreateState(EMonsterState::THINKING, std::bind(&AMonster::Thinking, this, std::placeholders::_1));
-	Fsm.CreateState(EMonsterState::WALKING, std::bind(&AMonster::Walking, this, std::placeholders::_1), std::bind(&AMonster::OnWalk, this));
+	Fsm.CreateState(EMonsterState::WALKING, std::bind(&AMonster::Walking, this, std::placeholders::_1));
 	Fsm.CreateState(EMonsterState::DYING, std::bind(&AMonster::Dying, this, std::placeholders::_1));
 	Fsm.CreateState(EMonsterState::PASS_AWAY, std::bind(&AMonster::PassAwaing, this, std::placeholders::_1), std::bind(&AMonster::OnPassaway, this));
-
+	
 	//DebugOn();
 }
 
@@ -70,10 +61,15 @@ void AMonster::BeginPlay()
 
 	// Init child's sprite
 	InitSprite();
+	InitCollision();
 
 	if (SRBody == nullptr)
 	{
-		MSGASSERT("You didn't initialize SRBody");
+		MSGASSERT("You didn't initialize child monster's sprite.");
+	}
+	if (Collision == nullptr)
+	{
+		MSGASSERT("You didn't initialize child monster's collision.");
 	}
 }
 
@@ -81,23 +77,26 @@ void AMonster::Tick(float _deltaTime)
 {
 	Super::Tick(_deltaTime);
 
-	if (!IsInited)
+	if (MonsterType == EMonsterType::NORMAL)
 	{
-		static float accSecs = 0.f;
-		accSecs += _deltaTime;
-		if (accSecs >= StartDelayMs)
+		if (!IsInited)
 		{
-			IsInited = true;
-			Fsm.ChangeState(EMonsterState::INIT_BLINK);
-			SRBody->SetActive(true);
+			static float accSecs = 0.f;
+			accSecs += _deltaTime;
+			if (accSecs >= StartDelayMs)
+			{
+				IsInited = true;
+				Fsm.ChangeState(EMonsterState::INIT_BLINK);
+				SRBody->SetActive(true);
+			}
+
+			return;	// TODO
 		}
 
-		return;	// TODO
+		// Is this my turn to find my way?
+		PathFinderIdx = PathFinderIdx % AMonster::MonsterCount;
+		PathFinderIdx++;
 	}
-
-	// Is this my turn to find my way?
-	PathFinderIdx = PathFinderIdx % AMonster::MonsterCount;
-	PathFinderIdx++;
 
 	Fsm.Update(_deltaTime);
 }
@@ -197,7 +196,10 @@ void AMonster::Kill()
 {
 	if (static_cast<EMonsterState>(Fsm.GetState()) != EMonsterState::DYING)
 	{
-		Collision->SetActive(false);
+		if (Collision != nullptr)
+		{
+			Collision->SetActive(false);
+		}
 		Fsm.ChangeState(EMonsterState::DYING);
 	}
 }

@@ -54,6 +54,11 @@ public:
 		Player1Score += _val;
 		return Player1Score;
 	}
+	int SetPlayer1Score(int _val)
+	{
+		Player1Score = _val;
+		return Player1Score;
+	}
 
 	void ResetScore()
 	{

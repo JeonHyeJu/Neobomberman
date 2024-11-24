@@ -29,6 +29,7 @@ public:
 
 	void BeginPlay() override;
 	void Tick(float _deltaTime) override;
+	void ChangeRImage(std::string_view _path, int _spriteIdx);
 
 	inline void SetLastSecs(int _lastSecs)
 	{

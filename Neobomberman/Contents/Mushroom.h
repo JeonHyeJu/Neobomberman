@@ -13,13 +13,14 @@ public:
 	AMushroom& operator=(const AMushroom& _other) = delete;
 	AMushroom& operator=(AMushroom&& _other) noexcept = delete;
 
-	void InitSprite() override;
-	void ChangeMoveAnim(const FVector2D& direction);
-
 protected:
 	void BeginPlay() override;
 	void Tick(float _deltaTime) override;
 	void Thinking(float _deltaTime) override;
+
+	void InitSprite() override;
+	void InitCollision() override;
+	void ChangeMoveAnim(const FVector2D& direction) override;
 
 private:
 	bool IsJump();

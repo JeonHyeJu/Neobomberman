@@ -8,6 +8,7 @@
 #include "Monster.h"
 #include "Mushroom.h"
 #include "Balloon.h"
+#include "Result.h"
 #include "Fade.h"
 
 #include <EngineCore/Level.h>
@@ -33,8 +34,8 @@ void APlayGameMode::BeginPlay()
 	GameOverScenePtr = pLevel->SpawnActor<AGameOver>();
 	GameOverScenePtr->SetActive(false);
 
-	APlayer* player = pLevel->GetPawn<APlayer>();
-	player->SetGameUI(GameUiPtr);
+	Player = pLevel->GetPawn<APlayer>();
+	Player->SetGameUI(GameUiPtr);
 	//Player->SetCollisionImage("Bg_1-Col.png");
 
 	/* Stage 1-1 */
@@ -45,8 +46,8 @@ void APlayGameMode::BeginPlay()
 
 	pStage1->InitMap();
 
-	player->SetCurMap(pStage1);
-	player->SetActorLocation(pStage1->MatrixIdxToLocation(StartPoint) + GlobalVar::BOMBERMAN_SIZE.Half().Half());
+	Player->SetCurMap(pStage1);
+	Player->SetActorLocation(pStage1->MatrixIdxToLocation(StartPoint) + GlobalVar::BOMBERMAN_SIZE.Half().Half());
 
 	FVector2D monsterStartingLoc = pStage1->GetPortalLoc();
 
@@ -57,7 +58,7 @@ void APlayGameMode::BeginPlay()
 	AMushroom* monster = pLevel->SpawnActor<AMushroom>();
 	monster->SetCurMap(pStage1);
 	monster->SetFirstDestination({ 0, 0 });
-	monster->SetActorLocation(player->GetActorLocation() + FVector2D({ 64, 0 }) - FVector2D({ 16, 16 }));
+	monster->SetActorLocation(Player->GetActorLocation() + FVector2D({ 64, 0 }) - FVector2D({ 16, 16 }));
 	MonsterList.push_back(monster);
 	
 	// TODO: spawn delay
@@ -120,6 +121,11 @@ void APlayGameMode::Tick(float _deltaTime)
 				CurMapPtr->OpenPortal();
 				return;
 			}
+			if (!isShowingResult && Player->GetIsClear())
+			{
+				isShowingResult = true;
+				FadeOut();
+			}
 		}
 
 		CheckGameOver();
@@ -129,6 +135,7 @@ void APlayGameMode::Tick(float _deltaTime)
 void APlayGameMode::LevelChangeStart()
 {
 	isShowContinueScene = false;
+	isShowingResult = false;
 }
 
 void APlayGameMode::CheckDeadMonster()
@@ -250,4 +257,22 @@ void APlayGameMode::GameOver()
 void APlayGameMode::OnEndGameOverFadeOut()
 {
 	UEngineAPICore::GetCore()->OpenLevel("Title");
+}
+
+// Temp
+void APlayGameMode::FadeOut()
+{
+	AFade::MainFade->BindEndEvent(std::bind(&APlayGameMode::OnEndFadeOut, this));
+	AFade::MainFade->SetFadeMinMax(0.f, .5f);
+	AFade::MainFade->SetFadeSpeed(.5f);
+	AFade::MainFade->FadeOut();
+}
+
+void APlayGameMode::OnEndFadeOut()
+{
+	ResultScene = GetWorld()->SpawnActor<AResult>();
+
+	int lastTime = AGameUI::GetLastTime();
+	ResultScene->SetLastSecs(lastTime);
+	ResultScene->SetTotal(GameData::GetInstance().GetPlayer1Score());
 }

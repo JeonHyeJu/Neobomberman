@@ -11,6 +11,7 @@ AHoopGhost::AHoopGhost()
 : AMonster()
 {
 	SetName("HoopGhost");
+	MonsterType = EMonsterType::BOSS;
 
 	Fsm.ChangeStateFunction(EMonsterState::INIT_BLINK, nullptr);	// Off the initial blinking
 	Fsm.ChangeStateFunction(EMonsterState::INIT_WALKING, nullptr);	// Off the initial walking
@@ -103,16 +104,19 @@ void AHoopGhost::InitSprite()
 
 	PadToBottomSize = SRBody->GetComponentScale().hY();
 
-	// Temp. Must be fixed!
-	IsInited = true;	// Temp
+	DebugOn();
+}
 
+void AHoopGhost::InitCollision()
+{
 	// Move to shadow actor
 	FVector2D colSize{ DetectSizeHalf * 2.f, DetectSizeHalf * 2.f };
-	Collision->SetComponentLocation({ DetectSizeHalf, PadToBottomSize});
+	Collision = CreateDefaultSubObject<U2DCollision>();
+	Collision->SetComponentLocation({ DetectSizeHalf, PadToBottomSize });
 	Collision->SetComponentScale(colSize);
+	Collision->SetCollisionGroup(ECollisionGroup::MonsterBody);
+	Collision->SetCollisionType(ECollisionType::CirCle);
 	Collision->SetActive(false);
-
-	DebugOn();
 }
 
 void AHoopGhost::InitMoveEllipse()

@@ -174,6 +174,7 @@ void APlayer::Tick(float _deltaTime)
 
 void APlayer::LevelChangeStart()
 {
+	IsClear = false;
 	IsDead = false;
 }
 
@@ -271,10 +272,7 @@ void APlayer::OnEnterCollision(AActor* _actor)
 
 void APlayer::OnEndPortalAnim()
 {
-	AFade::MainFade->BindEndEvent(std::bind(&APlayer::OnEndFadeOut, this));
-	AFade::MainFade->SetFadeMinMax(0.f, .5f);
-	AFade::MainFade->SetFadeSpeed(.5f);
-	AFade::MainFade->FadeOut();
+	IsClear = true;
 }
 
 /* FSM start functions */
@@ -496,14 +494,4 @@ void APlayer::Dying(float _deltaTime)
 			}
 		}
 	}
-}
-
-void APlayer::OnEndFadeOut()
-{
-	// TODO: Move to map or gamemode?
-	ResultScene = GetWorld()->SpawnActor<AResult>();
-
-	int lastTime = AGameUI::GetLastTime();
-	ResultScene->SetLastSecs(lastTime);
-	ResultScene->SetTotal(Score);
 }

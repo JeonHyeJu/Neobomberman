@@ -5,6 +5,8 @@
 #include "HoopGhost.h"
 #include "Monster.h"
 #include "Player.h"
+#include "Result.h"
+#include "GameData.h"
 #include "Fade.h"
 
 #include <EngineCore/Level.h>
@@ -25,7 +27,7 @@ void APlayBossMode::BeginPlay()
 
 	AGameUI* gameUI = pLevel->SpawnActor<AGameUI>();
 
-	APlayer* Player = pLevel->GetPawn<APlayer>();
+	Player = pLevel->GetPawn<APlayer>();
 	Player->SetGameUI(gameUI);
 	//Player->SetCollisionImage("Bg_1-Col.png");
 
@@ -52,4 +54,35 @@ void APlayBossMode::BeginPlay()
 void APlayBossMode::Tick(float _deltaTime)
 {
 	Super::Tick(_deltaTime);
+
+	static float elpasedSecs = 0.f;	// Temp
+	elpasedSecs += _deltaTime;
+
+	if (elpasedSecs > .5f)
+	{
+		elpasedSecs = 0.f;
+
+		if (!isShowingResult && Player->GetIsClear())
+		{
+			isShowingResult = true;
+			FadeOut();
+		}
+	}
+}
+
+void APlayBossMode::FadeOut()
+{
+	AFade::MainFade->BindEndEvent(std::bind(&APlayBossMode::OnEndFadeOut, this));
+	AFade::MainFade->SetFadeMinMax(0.f, .5f);
+	AFade::MainFade->SetFadeSpeed(.5f);
+	AFade::MainFade->FadeOut();
+}
+
+void APlayBossMode::OnEndFadeOut()
+{
+	ResultScene = GetWorld()->SpawnActor<AResult>();
+
+	int lastTime = AGameUI::GetLastTime();
+	ResultScene->SetLastSecs(lastTime);
+	ResultScene->SetTotal(GameData::GetInstance().GetPlayer1Score());
 }

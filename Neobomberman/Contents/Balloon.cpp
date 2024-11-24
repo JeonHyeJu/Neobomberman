@@ -3,11 +3,13 @@
 #include "ContentsEnum.h"
 #include "Balloon.h"
 #include <EngineCore/SpriteRenderer.h>
+#include <EngineCore/2DCollision.h>
 
 ABalloon::ABalloon()
 {
 	Speed = 20.f;
 	SetName("Balloon");
+	MonsterType = EMonsterType::NORMAL;
 }
 
 ABalloon::~ABalloon()
@@ -44,6 +46,16 @@ void ABalloon::InitSprite()
 	SetScore(EMonsterScore::S200);
 
 	SRBody->SetActive(false);
+}
+
+void ABalloon::InitCollision()
+{
+	FVector2D collSize = GlobalVar::BOMB_SIZE;
+	Collision = CreateDefaultSubObject<U2DCollision>();
+	Collision->SetComponentLocation({ collSize.hX(), 0.f });
+	Collision->SetComponentScale(collSize);
+	Collision->SetCollisionGroup(ECollisionGroup::MonsterBody);
+	Collision->SetCollisionType(ECollisionType::CirCle);
 }
 
 void ABalloon::ChangeMoveAnim(const FVector2D& _direction)

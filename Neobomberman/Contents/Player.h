@@ -57,6 +57,10 @@ public:
 	{
 		GameUIPtr = _ptr;
 	}
+	inline bool GetIsClear() const
+	{
+		return IsClear;
+	}
 	inline bool GetIsDead() const
 	{
 		return IsDead;
@@ -111,9 +115,9 @@ private:
 	SAnimKeepInfo BlinkEyeAnimInfo;
 	SAnimKeepInfo DyingAnimInfo;
 
-	class AResult* ResultScene = nullptr;
 	AGameUI* GameUIPtr = nullptr;
 
 	int Score = 600;	// Temp
+	bool IsClear = false;
 	bool IsDead = false;
 };

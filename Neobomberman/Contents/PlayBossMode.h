@@ -16,7 +16,14 @@ public:
 	void Tick(float _deltaTime) override;
 
 private:
+	void FadeOut();
+	void OnEndFadeOut();
+
 	std::list<class AMonster*> MonsterList;
 
 	FIntPoint StartPoint = { 6, 8 };
+	class AResult* ResultScene = nullptr;
+	class APlayer* Player = nullptr;
+
+	bool isShowingResult = false;
 };

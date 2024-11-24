@@ -17,6 +17,7 @@ protected:
 	void Tick(float _deltaTime) override;
 
 	void InitSprite() override;
+	void InitCollision() override;
 	void ChangeMoveAnim(const FVector2D& _direction) override;
 
 private:

@@ -3,6 +3,7 @@
 #include "ContentsEnum.h"
 #include "GlobalVar.h"
 #include "UtilFn.h"
+#include "GameData.h"
 #include <EngineCore/Actor.h>
 #include <EngineCore/SpriteRenderer.h>
 #include <EngineCore/EngineAPICore.h>
@@ -119,6 +120,12 @@ void AResult::Tick(float _deltaTime)
 	Super::Tick(_deltaTime);
 
 	FSM.Update(_deltaTime);
+}
+
+void AResult::ChangeRImage(std::string_view _path, int _spriteIdx)
+{
+	// All right images will have same size.
+	SRResultRImage->SetSprite(_path, _spriteIdx);
 }
 
 void AResult::SetLastTimeUI(int _lastSecs)
@@ -254,6 +261,7 @@ void AResult::CalculatingTotal(float _deltaTime)
 		}
 		else
 		{
+			GameData::GetInstance().SetPlayer1Score(Total);
 			FSM.ChangeState(EResultState::STAMP);
 		}
 	}

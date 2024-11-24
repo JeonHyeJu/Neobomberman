@@ -19,6 +19,9 @@ public:
 protected:
 
 private:
+	void FadeOut();
+	void OnEndFadeOut();
+
 	void CheckGameOver();
 	void CheckDeadMonster();
 	bool IsAllMonstersDead() const;
@@ -32,12 +35,15 @@ private:
 	class ABaseMap* CurMapPtr = nullptr;
 	class AGameOver* GameOverScenePtr = nullptr;
 	class AGameUI* GameUiPtr = nullptr;
+	class AResult* ResultScene = nullptr;
+	class APlayer* Player = nullptr;
 
 	std::list<class AMonster*> MonsterList;
 	const int MONSTER_CNT_STAGE_1 = 4;
 
 	const FIntPoint PORTAL_IDX_STAGE_1 = { 6, 10 };
 	bool isShowContinueScene = false;
+	bool isShowingResult = false;
 
 	float ElapsedSecs = 0.f;
 };

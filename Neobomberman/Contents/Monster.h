@@ -15,6 +15,12 @@ enum class EMonsterState
 	PASS_AWAY,
 };
 
+enum class EMonsterType
+{
+	NORMAL = 0,
+	BOSS,
+};
+
 enum class EMonsterScore
 {
 	S100 = 100,
@@ -38,6 +44,7 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float _deltaTime) override;
 	virtual void InitSprite() = 0;
+	virtual void InitCollision() = 0;
 	virtual void ChangeMoveAnim(const FVector2D& _direction) = 0;
 
 	virtual void OnPause() override;
@@ -98,6 +105,7 @@ protected:
 
 	float Speed = 1.f;
 	const int MonsterIdx;
+	EMonsterType MonsterType = EMonsterType::NORMAL;
 	
 	UFSMStateManager Fsm;
 	bool IsInited = false;

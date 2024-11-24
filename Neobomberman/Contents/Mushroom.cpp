@@ -4,14 +4,17 @@
 #include "GlobalVar.h"
 #include <EngineCore/SpriteRenderer.h>
 #include <EngineCore/PathFindAStar.h>
+#include <EngineCore/2DCollision.h>
 
 AMushroom::AMushroom()
 {
 	Speed = 20.f;
 	Random.SetSeed(MonsterIdx);
 
-	Fsm.CreateState(EMonsterState::JUMPING, std::bind(&AMushroom::Jumping, this, std::placeholders::_1));
 	SetName("Mushroom");
+	MonsterType = EMonsterType::NORMAL;
+
+	Fsm.CreateState(EMonsterState::JUMPING, std::bind(&AMushroom::Jumping, this, std::placeholders::_1));
 }
 
 AMushroom::~AMushroom()
@@ -80,6 +83,16 @@ void AMushroom::InitSprite()
 	SetScore(EMonsterScore::S100);
 
 	SRBody->SetActive(false);
+}
+
+void AMushroom::InitCollision()
+{
+	FVector2D collSize = GlobalVar::BOMB_SIZE;
+	Collision = CreateDefaultSubObject<U2DCollision>();
+	Collision->SetComponentLocation({ collSize.hX(), 0.f });
+	Collision->SetComponentScale(collSize);
+	Collision->SetCollisionGroup(ECollisionGroup::MonsterBody);
+	Collision->SetCollisionType(ECollisionType::CirCle);
 }
 
 void AMushroom::ChangeMoveAnim(const FVector2D& _direction)
