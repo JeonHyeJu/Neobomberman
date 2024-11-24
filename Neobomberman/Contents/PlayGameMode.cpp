@@ -47,7 +47,7 @@ void APlayGameMode::BeginPlay()
 	pStage1->InitMap();
 
 	Player->SetCurMap(pStage1);
-	Player->SetActorLocation(pStage1->MatrixIdxToLocation(StartPoint) + GlobalVar::BOMBERMAN_SIZE.Half().Half());
+	Player->SetActorLocation(pStage1->MatrixIdxToLocation(StartPoint));
 
 	FVector2D monsterStartingLoc = pStage1->GetPortalLoc();
 
@@ -58,7 +58,7 @@ void APlayGameMode::BeginPlay()
 	AMushroom* monster = pLevel->SpawnActor<AMushroom>();
 	monster->SetCurMap(pStage1);
 	monster->SetFirstDestination({ 0, 0 });
-	monster->SetActorLocation(Player->GetActorLocation() + FVector2D({ 64, 0 }) - FVector2D({ 16, 16 }));
+	monster->SetActorLocation(Player->GetActorLocation() + FVector2D({ 64, 0 }));
 	MonsterList.push_back(monster);
 	
 	// TODO: spawn delay
@@ -145,7 +145,7 @@ void APlayGameMode::CheckDeadMonster()
 	for (; it != itEnd; ++it)
 	{
 		AMonster* monster = *it;
-		if (monster->GetIsDetroiable())
+		if (monster->GetIsDestroiable())
 		{
 			monster->Destroy();
 			it = MonsterList.erase(it);

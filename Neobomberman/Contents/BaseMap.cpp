@@ -127,6 +127,16 @@ FVector2D ABaseMap::MatrixIdxToLocation(const FIntPoint& _idx)
 	return MapGround->MatrixIdxToLocation(_idx);
 }
 
+FVector2D ABaseMap::GetOrganizedLoc(const FVector2D& _loc)
+{
+	FVector2D ret;
+	if (!MapGround) return ret;
+
+	FIntPoint idx = MapGround->LocationToMatrixIdx(_loc);
+	ret = MapGround->MatrixIdxToLocation(idx);
+	return ret;
+}
+
 void ABaseMap::CheckLaunchedBomb()
 {
 	std::list<ABomb*>::iterator it = ABomb::BombList.begin();

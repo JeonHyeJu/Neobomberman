@@ -1,6 +1,7 @@
 #pragma once
 #include "Monster.h"
 #include <EngineBase/EngineRandom.h>
+#include <EngineBase/FSMStateManager.h>
 
 class AMushroom : public AMonster
 {
@@ -16,13 +17,30 @@ public:
 protected:
 	void BeginPlay() override;
 	void Tick(float _deltaTime) override;
-	void Thinking(float _deltaTime) override;
 
-	void InitSprite() override;
-	void InitCollision() override;
-	void ChangeMoveAnim(const FVector2D& direction) override;
+	void Kill() override;
+	void InitSprite();
+	void InitCollision();
+	void ChangeMoveAnim(const FVector2D& direction);
 
 private:
+	void Move(const FVector2D& direction, float _deltaTime);
+
+	/* FSM update callbacks */
+	/* You don't need to call Super::function()! */
+	void Blinking(float _deltaTime);
+	void WalkingForStart(float _deltaTime);
+	void Thinking(float _deltaTime);
+	void Walking(float _deltaTime);
+	void Dying(float _deltaTime);
+	void PassAwaing(float _deltaTime);
+
+	void OnPause() override;
+	void OnResume() override;
+
+	/* FSM start callbacks */
+	void OnPassaway();
+
 	bool IsJump();
 	void Jumping(float _deltaTime);
 
@@ -41,4 +59,14 @@ private:
 	const char* ANIM_JUMP = "Jump";
 
 	UEngineRandom Random;
+
+	USpriteRenderer* SRBody = nullptr;
+	USpriteRenderer* SRCloud = nullptr;
+	USpriteRenderer* SRScore = nullptr;
+
+	class U2DCollision* Collision = nullptr;
+
+	UFSMStateManager Fsm;
+
+	bool IsInited = false;
 };

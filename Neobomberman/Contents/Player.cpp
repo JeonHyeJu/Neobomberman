@@ -21,17 +21,10 @@ APlayer::APlayer()
 {
 	FVector2D playerSize = GlobalVar::BOMBERMAN_SIZE;
 
-	// Head: (32, 32), Center: (16, 16)
-	// Real head size: 16 x 16
-	// marginW (48) + character face picture space left (8) = 56
-	// character face picture space up (8) + marginH (32) - size of head that pops out (16: whold head, 12: manual size) = 28
-	// origianl : { 56, 16+32 } 
-	SetActorLocation({ 112, 64 + 32 - 12 });	// temp
-
 	{
 		SpriteRendererHead = CreateDefaultSubObject<USpriteRenderer>();
 		SpriteRendererHead->SetSprite(PLAYER_SPRITE_PATH);
-		SpriteRendererHead->SetComponentLocation({ 0, 0 });
+		SpriteRendererHead->SetComponentLocation(playerSize.Half().Half() + FVector2D{ -1.f, 6.f });
 		SpriteRendererHead->SetComponentScale(playerSize);
 		SpriteRendererHead->SetPivotType(PivotType::Bot);
 
@@ -58,7 +51,7 @@ APlayer::APlayer()
 	{
 		SpriteRendererBody = CreateDefaultSubObject<USpriteRenderer>();
 		SpriteRendererBody->SetSprite(PLAYER_SPRITE_PATH);
-		SpriteRendererBody->SetComponentLocation({ 0, static_cast<int>(playerSize.Y *.5f)});
+		SpriteRendererBody->SetComponentLocation(SpriteRendererHead->GetComponentLocation() + FVector2D{ 0.f, playerSize.hY() });
 		SpriteRendererBody->SetComponentScale(playerSize);
 		SpriteRendererBody->SetPivotType(PivotType::Bot);
 
@@ -82,7 +75,7 @@ APlayer::APlayer()
 	{
 		FVector2D collSize = GlobalVar::BOMB_SIZE;
 
-		Collision = CreateDefaultSubObject<U2DCollision>();
+		/*Collision = CreateDefaultSubObject<U2DCollision>();
 		Collision->SetComponentLocation({ 0.f, -collSize.hY()});
 		Collision->SetComponentScale(collSize);
 		Collision->SetCollisionGroup(ECollisionGroup::PlayerBody);
@@ -90,12 +83,10 @@ APlayer::APlayer()
 
 		Collision->SetCollisionEnter(std::bind(&APlayer::OnEnterCollision, this, std::placeholders::_1));
 
-		GetWorld()->CollisionGroupLink(ECollisionGroup::PlayerBody, ECollisionGroup::MonsterBody);
+		GetWorld()->CollisionGroupLink(ECollisionGroup::PlayerBody, ECollisionGroup::MonsterBody);*/
 
 		/*Collision->SetCollisionStay(std::bind(&ANewPlayer::CollisionStay, this, std::placeholders::_1));
 		Collision->SetCollisionEnd(std::bind(&ANewPlayer::CollisionEnd, this, std::placeholders::_1));*/
-
-		//DebugOn();
 	}
 
 	DyingAnimInfo.AnimSeconds = 1.5f;
@@ -109,6 +100,8 @@ APlayer::APlayer()
 	FsmH.CreateState(EPlayerState::MOVE, std::bind(&APlayer::Moving, this, std::placeholders::_1));
 	FsmH.CreateState(EPlayerState::DEAD, std::bind(&APlayer::Dying, this, std::placeholders::_1), std::bind(&APlayer::OnDead, this));
 	FsmH.CreateState(EPlayerState::PORTAL, nullptr, std::bind(&APlayer::OnShift, this));
+
+	DebugOn();
 }
 
 APlayer::~APlayer()
@@ -249,8 +242,8 @@ std::string APlayer::GetDirectionStr()
 
 void APlayer::DropBomb()
 {
-	FVector2D loc = GetActorLocation();
-	FIntPoint idx = CurMapPtr->GetGroundMap()->LocationToMatrixIdx(loc);
+	FVector2D loc = GetActorLocation() + FVector2D{ 16, 16 };
+	FIntPoint idx = CurMapPtr->LocationToMatrixIdx(loc);
 	int curBombCnt = ABomb::GetBombCnt();
 	if (ABomb::CanSetBombThisIdx(idx) && curBombCnt < Ability.BombCount)
 	{
@@ -379,49 +372,46 @@ void APlayer::Moving(float _deltaTime)
 	SpriteRendererHead->ChangeAnimation("Run_" + suffixStr);
 	SpriteRendererBody->ChangeAnimation("Run_" + suffixStr);
 
-	FVector2D additionalPos;
-	if (Direction == FVector2D::LEFT)
-	{
-		additionalPos = Direction * 16.f;
-	}
-	else if (Direction == FVector2D::RIGHT)
-	{
-		additionalPos = Direction * 16.f;
-	}
-	else if (Direction == FVector2D::UP)
-	{
-		additionalPos = Direction * 9.f;
-	}
-	else if (Direction == FVector2D::DOWN)
-	{
-		additionalPos = Direction * 10.f;
-	}
-
-	FVector2D nextPos = GetActorLocation() + (Direction * _deltaTime * Ability.Speed) + additionalPos;
+	FVector2D curLoc = GetActorLocation();
+	FVector2D nextPosLT = curLoc + (Direction * _deltaTime * Ability.Speed) + FVector2D{ 1, 1 };
+	FVector2D nextPosRT = curLoc + (Direction * _deltaTime * Ability.Speed) + FVector2D{ 31, 1 };
+	FVector2D nextPosLB = curLoc + (Direction * _deltaTime * Ability.Speed) + FVector2D{ 1, 31 };
+	FVector2D nextPosRB = curLoc + (Direction * _deltaTime * Ability.Speed) + FVector2D{ 31, 31 };
 
 	// Temp
-	const int POS_X_MIN = 96;	// 48
+	const int POS_X_MIN = 97;
 	const int POS_X_MAX = 512;	// 256
-	const int POS_Y_MIN = 64 + 12;	// 32 + 8
+	const int POS_Y_MIN = 94;
 	const int POS_Y_MAX = 416;	// 208 - 4;
 
 	bool isMove = false;
-	if (nextPos.X >= POS_X_MIN && nextPos.X < POS_X_MAX && nextPos.Y >= POS_Y_MIN && nextPos.Y < POS_Y_MAX)
+	bool isBlockedByPortal = false;
+	if (nextPosLT.X >= POS_X_MIN && nextPosRT.X < POS_X_MAX && nextPosLB.Y >= POS_Y_MIN && nextPosLB.Y < POS_Y_MAX)
 	{
 		isMove = true;
 	}
 
 	if (CurMapPtr != nullptr)
 	{
-		bool canMoveMap = CurMapPtr->CanMove(nextPos);
-		isMove = isMove && canMoveMap;
+		//bool canMoveMap = CurMapPtr->CanMove(nextPos);
+		//isMove = isMove && canMoveMap;
+		bool canMoveMapLT = CurMapPtr->CanMove(nextPosLT);
+		bool canMoveMapRT = CurMapPtr->CanMove(nextPosRT);
+		bool canMoveMapLB = CurMapPtr->CanMove(nextPosLB);
+		bool canMoveMapRB = CurMapPtr->CanMove(nextPosRB);
+		isMove = isMove && canMoveMapLB && canMoveMapRB && canMoveMapLT && canMoveMapRT;
+
+		/*OutputDebugString(std::string(canMoveMapLT ? "canMoveMapLT\n" : "NLT....").c_str());
+		OutputDebugString(std::string(canMoveMapRT ? "canMoveMapRT\n" : "NRT\n").c_str());
+		OutputDebugString(std::string(canMoveMapLB ? "canMoveMapLB\n" : "NLB...").c_str());
+		OutputDebugString(std::string(canMoveMapRB ? "canMoveMapRB\n" : "NRB\n").c_str());*/
 
 		FIntPoint portalIdx = CurMapPtr->GetPortalIdx();
 
 		// Portal
 		if (CurMapPtr->GetIsPortalOpened())
 		{
-			FIntPoint curIdx = CurMapPtr->LocationToMatrixIdx(GetActorLocation());
+			FIntPoint curIdx = CurMapPtr->LocationToMatrixIdx(GetActorLocation() - FVector2D{ 16, 16 });
 			if (curIdx == portalIdx)
 			{
 				// Move to orginized location
@@ -435,16 +425,68 @@ void APlayer::Moving(float _deltaTime)
 		}
 		else
 		{
-			FIntPoint nextIdx = CurMapPtr->LocationToMatrixIdx(nextPos);
-			if (nextIdx == portalIdx)
+			FIntPoint nextIdxLT = CurMapPtr->LocationToMatrixIdx(nextPosLT);
+			FIntPoint nextIdxRT = CurMapPtr->LocationToMatrixIdx(nextPosRT);
+			FIntPoint nextIdxLB = CurMapPtr->LocationToMatrixIdx(nextPosLB);
+			FIntPoint nextIdxRB = CurMapPtr->LocationToMatrixIdx(nextPosRB);
+
+			if (nextIdxLT == portalIdx || nextIdxRT == portalIdx || nextIdxLB == portalIdx || nextIdxRB == portalIdx)
 			{
+				isBlockedByPortal = true;
 				isMove = false;
+			}
+		}
+
+		if (!isBlockedByPortal)
+		{
+			// TODO: set basis
+			// Move with sliding
+			if (Direction == FVector2D::UP || Direction == FVector2D::DOWN)
+			{
+				if (canMoveMapLT && !canMoveMapRT || canMoveMapLB && !canMoveMapRB)
+				{
+					AddActorLocation(FVector2D::LEFT * _deltaTime * Ability.Speed);
+					return;
+				}
+				else if (!canMoveMapLT && canMoveMapRT || !canMoveMapLB && canMoveMapRB)
+				{
+					AddActorLocation(FVector2D::RIGHT * _deltaTime * Ability.Speed);
+					return;
+				}
+			}
+			else
+			{
+				if (canMoveMapRT && !canMoveMapRB || canMoveMapLT && !canMoveMapLB)
+				{
+					AddActorLocation(FVector2D::UP * _deltaTime * Ability.Speed);
+					return;
+				}
+				else if (!canMoveMapRT && canMoveMapRB || !canMoveMapLT && canMoveMapLB)
+				{
+					AddActorLocation(FVector2D::DOWN * _deltaTime * Ability.Speed);
+					return;
+				}
 			}
 		}
 	}
 
 	if (isMove)
 	{
+		/*FVector2D nextPos = curLoc + Direction * _deltaTime * Ability.Speed;
+		FVector2D orginizedLoc = CurMapPtr->GetOrganizedLoc(nextPos);
+		if (Direction == FVector2D::UP || Direction == FVector2D::DOWN)
+		{
+			nextPos.X = orginizedLoc.X;
+		}
+		else
+		{
+			nextPos.Y = orginizedLoc.Y;
+		}
+		
+		OutputDebugString(("nextPos: " + std::to_string(nextPos.X) + ", " + std::to_string(nextPos.Y) + "\n").c_str());
+		OutputDebugString(("orginizedLoc : " + std::to_string(orginizedLoc.X) + ", " + std::to_string(orginizedLoc.Y) + "\n").c_str());
+		SetActorLocation(nextPos);*/
+
 		AddActorLocation(Direction * _deltaTime * Ability.Speed);
 	}
 }

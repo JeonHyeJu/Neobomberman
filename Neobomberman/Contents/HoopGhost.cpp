@@ -11,28 +11,26 @@ AHoopGhost::AHoopGhost()
 : AMonster()
 {
 	SetName("HoopGhost");
-	MonsterType = EMonsterType::BOSS;
 
-	Fsm.ChangeStateFunction(EMonsterState::INIT_BLINK, nullptr);	// Off the initial blinking
-	Fsm.ChangeStateFunction(EMonsterState::INIT_WALKING, nullptr);	// Off the initial walking
-	Fsm.ChangeStateFunction(EMonsterState::THINKING, nullptr);
-	Fsm.ChangeStateFunction(EMonsterState::DYING, nullptr);
-	Fsm.ChangeStateFunction(EMonsterState::PASS_AWAY, nullptr);
-
+	Fsm.CreateState(EMonsterState::WALKING, std::bind(&AHoopGhost::Walking, this, std::placeholders::_1), std::bind(&AHoopGhost::OnWalk, this));
 	Fsm.CreateState(EMonsterState::PRESS_DOWN, std::bind(&AHoopGhost::PressingDown, this, std::placeholders::_1), std::bind(&AHoopGhost::OnPressDown, this));
+	Fsm.CreateState(EMonsterState::DYING, std::bind(&AHoopGhost::Dying, this, std::placeholders::_1));
+	Fsm.CreateState(EMonsterState::PASS_AWAY, std::bind(&AHoopGhost::PassAwaing, this, std::placeholders::_1));
 
 	InitMoveEllipse();
 }
 
 AHoopGhost::~AHoopGhost()
 {
-
 }
 
 void AHoopGhost::BeginPlay()
 {
 	AMonster::BeginPlay();
-	
+
+	InitSprite();
+	InitCollision();
+
 	CenterLoc = GetActorLocation();
 	Fsm.ChangeState(EMonsterState::WALKING);
 }
@@ -40,6 +38,8 @@ void AHoopGhost::BeginPlay()
 void AHoopGhost::Tick(float _deltaTime)
 {
 	AMonster::Tick(_deltaTime);
+
+	Fsm.Update(_deltaTime);
 }
 
 void AHoopGhost::InitSprite()
@@ -133,6 +133,18 @@ void AHoopGhost::InitMoveEllipse()
 
 	InitRoundingIdx = static_cast<int>(EllipsePtrSize * .25f);
 	RoundingIdx = InitRoundingIdx;
+}
+
+void AHoopGhost::Kill()
+{
+	if (static_cast<EMonsterState>(Fsm.GetState()) != EMonsterState::DYING)
+	{
+		if (Collision != nullptr)
+		{
+			Collision->SetActive(false);
+		}
+		Fsm.ChangeState(EMonsterState::DYING);
+	}
 }
 
 void AHoopGhost::ChangeMoveAnim(const FVector2D& _direction)
@@ -251,5 +263,37 @@ void AHoopGhost::PressingDown(float _deltaTime)
 				return;
 			}
 		}
+	}
+}
+
+void AHoopGhost::Dying(float _deltaTime)
+{
+	static float accumulatedSecs = 0.f;
+	static float blinkElapsedSecs = 0.f;
+
+	accumulatedSecs += _deltaTime;
+	if (accumulatedSecs >= BLINK_SECONDS)
+	{
+		accumulatedSecs = 0.f;
+		SRBody->SetActive(false);
+		Fsm.ChangeState(EMonsterState::PASS_AWAY);
+		return;
+	}
+
+	blinkElapsedSecs += _deltaTime;
+	if (blinkElapsedSecs > 0.1f)
+	{
+		blinkElapsedSecs = 0.f;
+		SRBody->SetActiveSwitch();
+	}
+}
+
+void AHoopGhost::PassAwaing(float _deltaTime)
+{
+	if (IsDestroiable) return;
+
+	//if (SRCloud->IsCurAnimationEnd() && SRScore->IsCurAnimationEnd())
+	{
+		IsDestroiable = true;
 	}
 }

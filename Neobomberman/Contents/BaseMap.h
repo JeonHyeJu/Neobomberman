@@ -45,6 +45,7 @@ public:
 	void OpenPortal();
 	FIntPoint LocationToMatrixIdx(const FVector2D& _loc);
 	FVector2D MatrixIdxToLocation(const FIntPoint& _idx);
+	FVector2D GetOrganizedLoc(const FVector2D& _loc);
 	void BindExplodeEvent(std::function<void()> _fn)
 	{
 		ExplodeEvent = _fn;

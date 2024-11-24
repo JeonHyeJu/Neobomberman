@@ -151,7 +151,6 @@ bool ATileMap::IsEdge(FIntPoint _Index)
 Tile* ATileMap::GetTileRef(FVector2D _loc)
 {
 	FIntPoint idx = LocationToMatrixIdx(_loc);
-
 	return GetTileRef(idx);
 }
 

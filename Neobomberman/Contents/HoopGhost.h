@@ -15,21 +15,22 @@ public:
 
 	void BeginPlay() override;
 	void Tick(float _deltaTime) override;
-
-protected:
-	void InitSprite() override;
-	void InitCollision() override;
-	void ChangeMoveAnim(const FVector2D& _direction) override;
+	void Kill() override;
 
 private:
 	void InitMoveEllipse();
+	void InitSprite();
+	void InitCollision();
+	void ChangeMoveAnim(const FVector2D& _direction);
 
 	/* Fsm update functions */
-	void Walking(float _deltaTime) override;
+	void Walking(float _deltaTime);
 	void PressingDown(float _deltaTime);
+	void Dying(float _deltaTime);
+	void PassAwaing(float _deltaTime);
 
 	/* Fsm start functions */
-	void OnWalk() override;
+	void OnWalk();
 	void OnPressDown();
 
 	// for debug start
@@ -60,4 +61,9 @@ private:
 	const float WALKING_DELAY = .05f;
 	const float WAIT_DELAY = WALKING_DELAY * 200;
 	float DelaySecs = WAIT_DELAY;
+
+	USpriteRenderer* SRBody = nullptr;
+	class U2DCollision* Collision = nullptr;
+
+	UFSMStateManager Fsm;
 };

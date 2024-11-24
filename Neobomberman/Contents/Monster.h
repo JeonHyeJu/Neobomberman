@@ -15,12 +15,6 @@ enum class EMonsterState
 	PASS_AWAY,
 };
 
-enum class EMonsterType
-{
-	NORMAL = 0,
-	BOSS,
-};
-
 enum class EMonsterScore
 {
 	S100 = 100,
@@ -29,7 +23,6 @@ enum class EMonsterScore
 	S800 = 800,
 };
 
-class USpriteRenderer;
 class AMonster : public AActor
 {
 public:
@@ -43,93 +36,70 @@ public:
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float _deltaTime) override;
-	virtual void InitSprite() = 0;
-	virtual void InitCollision() = 0;
-	virtual void ChangeMoveAnim(const FVector2D& _direction) = 0;
+
+	virtual void Kill() = 0;
 
 	virtual void OnPause() override;
 	virtual void OnResume() override;
 
-	FVector2D GetDirection(const FIntPoint& _vec);
-	void Move(const FVector2D& direction, float _deltaTime);
-	void Kill();
-
 	/* Setter */
 	void SetCurMap(class ABaseMap* _map);
-	void SetFirstDestination(const FIntPoint& _idx);
+	void SetFirstDestination(const FIntPoint& _idx)
+	{
+		FirstIdx = _idx;
+	}
 	void SetStartDelay(float _seconds)
 	{
 		StartDelayMs = _seconds;
 	}
 
 	/* Getter */
-	inline float GetStartDelay() const
-	{
-		return StartDelayMs;
-	}
 	inline int GetScore() const
 	{
 		return static_cast<int>(Score);
 	}
-	inline bool GetIsDetroiable() const
+	inline bool GetIsDestroiable() const
 	{
 		return IsDestroiable;
+	}
+	inline float GetStartDelay() const
+	{
+		return StartDelayMs;
 	}
 
 	static int MonsterCount;
 
 protected:
-	void FindPath();
-	bool IsArrivedAtOneBlock();
-	bool IsRouteEmpty();
+	FVector2D GetDirection(const FIntPoint& _vec);
 	void SetScore(EMonsterScore _score);
+	bool IsRouteEmpty();
+	bool IsArrivedAtOneBlock();
+	void FindPath();
 
-	/* FSM update callbacks */
-	/* You don't need to call Super::function()! */
-	virtual void Blinking(float _deltaTime);
-	virtual void WalkingForStart(float _deltaTime);
-	virtual void Thinking(float _deltaTime);
-	virtual void Walking(float _deltaTime);
-	virtual void Dying(float _deltaTime);
-	virtual void PassAwaing(float _deltaTime);
-
-	virtual void OnWalk() {}
-
-	/* FSM start callbacks */
-	virtual void OnPassaway();
-
-	const char* MONSTER_SCORE_PATH = "MonsterScore.png";
-
-	USpriteRenderer* SRBody = nullptr;
 	ABaseMap* CurMap = nullptr;
 
-	float Speed = 1.f;
-	const int MonsterIdx;
-	EMonsterType MonsterType = EMonsterType::NORMAL;
-	
-	UFSMStateManager Fsm;
-	bool IsInited = false;
-
-	class U2DCollision* Collision = nullptr;
-
-private:
-	const int SCORE_ANIM_CNT = 7;
-	const float BLINK_SECONDS = 2.f;
-	const char* CLOUD_SPRITE_PATH = "MonsterCloud.png";
-
 	EMonsterScore Score = EMonsterScore::S100;
+	float Speed = 1.f;
 
+	const int MonsterIdx;
 	bool IsDestroiable = false;
 
-	float StartDelayMs = 0.f;
-	FIntPoint FirstIdx;
+	const int SCORE_ANIM_CNT = 7;
+	const float BLINK_SECONDS = 2.f;
 
-	USpriteRenderer* SRCloud = nullptr;
-	USpriteRenderer* SRScore = nullptr;
+	const char* CLOUD_SPRITE_PATH = "MonsterCloud.png";
+	const char* MONSTER_SCORE_PATH = "MonsterScore.png";
+
+	float StartDelayMs = 0.f;
+
+	FIntPoint FirstIdx;
 
 	/* Path finder */
 	int PathFinderIdx = 0;
-	static UPathFindAStar PathFinder;
 	std::list<FIntPoint> Route;
 	FIntPoint Destination = FIntPoint::NEGATIVE_ONE;
+	
+private:
+	/* Path finder */
+	static UPathFindAStar PathFinder;
 };

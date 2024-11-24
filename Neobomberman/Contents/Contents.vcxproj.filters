@@ -25,6 +25,9 @@
     <Filter Include="Actor\UI">
       <UniqueIdentifier>{990708c2-e3d5-489c-8c7f-725d55926e6e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Actor\Monsters">
+      <UniqueIdentifier>{e42adb92-6426-4e22-a7a5-ab9e9db61aa3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Player.h">
@@ -41,9 +44,6 @@
     </ClInclude>
     <ClInclude Include="PlayGameMode.h">
       <Filter>GameMode</Filter>
-    </ClInclude>
-    <ClInclude Include="Monster.h">
-      <Filter>Actor</Filter>
     </ClInclude>
     <ClInclude Include="PlayMap.h">
       <Filter>Map</Filter>
@@ -68,12 +68,6 @@
     </ClInclude>
     <ClInclude Include="ContentsStruct.h">
       <Filter>Util</Filter>
-    </ClInclude>
-    <ClInclude Include="Mushroom.h">
-      <Filter>Actor</Filter>
-    </ClInclude>
-    <ClInclude Include="Balloon.h">
-      <Filter>Actor</Filter>
     </ClInclude>
     <ClInclude Include="DebugLog.h">
       <Filter>Util</Filter>
@@ -111,11 +105,20 @@
     <ClInclude Include="Result.h">
       <Filter>Actor\UI</Filter>
     </ClInclude>
-    <ClInclude Include="HoopGhost.h">
-      <Filter>Actor</Filter>
-    </ClInclude>
     <ClInclude Include="EndingGameMode.h">
       <Filter>GameMode</Filter>
+    </ClInclude>
+    <ClInclude Include="Balloon.h">
+      <Filter>Actor\Monsters</Filter>
+    </ClInclude>
+    <ClInclude Include="HoopGhost.h">
+      <Filter>Actor\Monsters</Filter>
+    </ClInclude>
+    <ClInclude Include="Monster.h">
+      <Filter>Actor\Monsters</Filter>
+    </ClInclude>
+    <ClInclude Include="Mushroom.h">
+      <Filter>Actor\Monsters</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -130,9 +133,6 @@
     </ClCompile>
     <ClCompile Include="PlayGameMode.cpp">
       <Filter>GameMode</Filter>
-    </ClCompile>
-    <ClCompile Include="Monster.cpp">
-      <Filter>Actor</Filter>
     </ClCompile>
     <ClCompile Include="PlayMap.cpp">
       <Filter>Map</Filter>
@@ -151,12 +151,6 @@
     </ClCompile>
     <ClCompile Include="TileMapGameMode.cpp">
       <Filter>GameMode</Filter>
-    </ClCompile>
-    <ClCompile Include="Mushroom.cpp">
-      <Filter>Actor</Filter>
-    </ClCompile>
-    <ClCompile Include="Balloon.cpp">
-      <Filter>Actor</Filter>
     </ClCompile>
     <ClCompile Include="Title.cpp">
       <Filter>Actor\NotGame</Filter>
@@ -188,11 +182,20 @@
     <ClCompile Include="Result.cpp">
       <Filter>Actor\UI</Filter>
     </ClCompile>
-    <ClCompile Include="HoopGhost.cpp">
-      <Filter>Actor</Filter>
-    </ClCompile>
     <ClCompile Include="EndingGameMode.cpp">
       <Filter>GameMode</Filter>
+    </ClCompile>
+    <ClCompile Include="Balloon.cpp">
+      <Filter>Actor\Monsters</Filter>
+    </ClCompile>
+    <ClCompile Include="HoopGhost.cpp">
+      <Filter>Actor\Monsters</Filter>
+    </ClCompile>
+    <ClCompile Include="Monster.cpp">
+      <Filter>Actor\Monsters</Filter>
+    </ClCompile>
+    <ClCompile Include="Mushroom.cpp">
+      <Filter>Actor\Monsters</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
