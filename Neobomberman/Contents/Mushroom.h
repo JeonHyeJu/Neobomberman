@@ -19,6 +19,10 @@ protected:
 	void Tick(float _deltaTime) override;
 
 	void Kill() override;
+	void Damaged(unsigned __int8 _power) override;
+	FVector2D GetMonsterSize() override;
+	FIntPoint GetDamageRange() override;
+
 	void InitSprite();
 	void InitCollision();
 	void ChangeMoveAnim(const FVector2D& direction);
@@ -32,6 +36,7 @@ private:
 	void WalkingForStart(float _deltaTime);
 	void Thinking(float _deltaTime);
 	void Walking(float _deltaTime);
+	void Damaging(float _deltaTime);
 	void Dying(float _deltaTime);
 	void PassAwaing(float _deltaTime);
 

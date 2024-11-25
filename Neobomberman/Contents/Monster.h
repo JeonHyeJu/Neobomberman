@@ -5,11 +5,12 @@
 
 enum class EMonsterState
 {
-	INIT_BLINK = 0,
+	BLINKING = 0,
 	INIT_WALKING,
 	THINKING,
 	WALKING,
 	JUMPING,
+	DAMAGED,
 	PRESS_DOWN,
 	DYING,
 	PASS_AWAY,
@@ -21,6 +22,7 @@ enum class EMonsterScore
 	S200 = 200,
 	S400 = 400,
 	S800 = 800,
+	S1600 = 1600,
 };
 
 class AMonster : public AActor
@@ -37,7 +39,10 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float _deltaTime) override;
 
+	virtual void Damaged(unsigned __int8 _power=1) = 0;
 	virtual void Kill() = 0;
+	virtual FVector2D GetMonsterSize() = 0;
+	virtual FIntPoint GetDamageRange() = 0;
 
 	virtual void OnPause() override;
 	virtual void OnResume() override;
@@ -65,6 +70,10 @@ public:
 	inline float GetStartDelay() const
 	{
 		return StartDelayMs;
+	}
+	bool GetCanHit()	// for boss.. TODO: adjust to all monsters.
+	{
+		return CanHit;
 	}
 
 	static int MonsterCount;
@@ -98,6 +107,9 @@ protected:
 	int PathFinderIdx = 0;
 	std::list<FIntPoint> Route;
 	FIntPoint Destination = FIntPoint::NEGATIVE_ONE;
+
+	bool CanHit = false;
+	int Health = 1;
 	
 private:
 	/* Path finder */

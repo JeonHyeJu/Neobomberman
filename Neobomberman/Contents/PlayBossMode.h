@@ -16,8 +16,13 @@ public:
 	void Tick(float _deltaTime) override;
 
 private:
+	void CheckDeadMonster();
+	void OnExplodeBomb();
+
 	void FadeOut();
 	void OnEndFadeOut();
+
+	bool IsAllMonstersDead() const;
 
 	std::list<class AMonster*> MonsterList;
 
@@ -26,4 +31,6 @@ private:
 	class APlayer* Player = nullptr;
 
 	bool isShowingResult = false;
+
+	class ABaseMap* CurMapPtr = nullptr;
 };

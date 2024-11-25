@@ -70,38 +70,41 @@ void USpriteRenderer::ComponentTick(float _DeltaTime)
 		CurAnimation->CurTime += _DeltaTime * CurAnimationSpeed;
 
 		float timePerFrame = Times[CurAnimation->CurIndex];
-
-		//                           0.1 0.1 0.1
 		if (CurAnimation->CurTime > timePerFrame)
 		{
 			CurAnimation->CurTime -= timePerFrame;
-			if (CurAnimation->CurIndex >= Indexs.size() - 1)
-			{
-				if (CurAnimation->CurIndex == Indexs.size() - 1)
-				{
-					if (CurAnimation->Events.contains(CurIndex))
-					{
-						CurAnimation->Events[CurIndex]();
-					}
-				}
 
-				if (true == CurAnimation->Loop)
-				{
-					CurAnimation->CurIndex = 0;
-				}
-				else
-				{
-					CurAnimation->IsEnd = true;
-				}
+			if (CurAnimation->Events.contains(CurIndex))
+			{
+				CurAnimation->Events[CurIndex]();
+			}
+
+			int nextIdx = CurAnimation->CurIndex + 1;
+			if (nextIdx < Indexs.size())
+			{
+				CurAnimation->CurIndex = nextIdx;
+				CurIndex = Indexs[CurAnimation->CurIndex];
 			}
 			else
 			{
-				if (CurAnimation->Events.contains(CurIndex))
+				if (true == CurAnimation->Loop)
 				{
-					CurAnimation->Events[CurIndex]();
+					CurAnimation->CurIndex = 0;
+					CurIndex = Indexs[CurAnimation->CurIndex];
 				}
-
-				CurIndex = Indexs[++CurAnimation->CurIndex];
+				else
+				{
+					if (CurAnimation->CurRound < CurAnimation->Round)
+					{
+						CurAnimation->CurRound++;
+						CurAnimation->CurIndex = 0;
+						CurIndex = Indexs[CurAnimation->CurIndex];
+					}
+					else
+					{
+						CurAnimation->IsEnd = true;
+					}
+				}
 			}
 		}
 	}
@@ -159,7 +162,7 @@ FVector2D USpriteRenderer::SetSpriteScale(float _Ratio /*= 1.0f*/, int _CurIndex
 	return Scale;
 }
 
-void USpriteRenderer::CreateAnimation(std::string_view _AnimationName, std::string_view _SpriteName, int _Start, int _End, float Time /*= 0.1f*/, bool _Loop /*= true*/)
+void USpriteRenderer::CreateAnimation(std::string_view _AnimationName, std::string_view _SpriteName, int _Start, int _End, float Time /*= 0.1f*/, bool _Loop /*= true*/, int _Round)
 {
 	int Inter = 0;
 
@@ -188,10 +191,10 @@ void USpriteRenderer::CreateAnimation(std::string_view _AnimationName, std::stri
 		}
 	}
 
-	CreateAnimation(_AnimationName, _SpriteName, Indexs, Times, _Loop);
+	CreateAnimation(_AnimationName, _SpriteName, Indexs, Times, _Loop, _Round);
 }
 
-void USpriteRenderer::CreateAnimation(std::string_view _AnimationName, std::string_view _SpriteName, std::vector<int> _Indexs, float _Frame, bool _Loop /*= true*/)
+void USpriteRenderer::CreateAnimation(std::string_view _AnimationName, std::string_view _SpriteName, std::vector<int> _Indexs, float _Frame, bool _Loop /*= true*/, int _Round)
 {
 	std::vector<float> Times;
 
@@ -200,10 +203,10 @@ void USpriteRenderer::CreateAnimation(std::string_view _AnimationName, std::stri
 		Times.push_back(_Frame);
 	}
 
-	CreateAnimation(_AnimationName, _SpriteName, _Indexs, Times, _Loop);
+	CreateAnimation(_AnimationName, _SpriteName, _Indexs, Times, _Loop, _Round);
 }
 
-void USpriteRenderer::CreateAnimation(std::string_view _AnimationName, std::string_view _SpriteName, std::vector<int> _Indexs, std::vector<float> _Frame, bool _Loop /*= true*/)
+void USpriteRenderer::CreateAnimation(std::string_view _AnimationName, std::string_view _SpriteName, std::vector<int> _Indexs, std::vector<float> _Frame, bool _Loop /*= true*/, int _Round)
 {
 	std::string UpperName = UEngineString::ToUpper(_AnimationName);
 
@@ -232,6 +235,7 @@ void USpriteRenderer::CreateAnimation(std::string_view _AnimationName, std::stri
 	NewAnimation.FrameTime = _Frame;
 	NewAnimation.Loop = _Loop;
 	NewAnimation.Name = _AnimationName;
+	NewAnimation.Round = _Round;
 	NewAnimation.Reset();
 
 	FrameAnimations.insert({ UpperName, NewAnimation });

@@ -11,11 +11,13 @@ ABalloon::ABalloon()
 {
 	Speed = 20.f;
 	SetName("Balloon");
+	CanHit = true;
 
-	Fsm.CreateState(EMonsterState::INIT_BLINK, std::bind(&ABalloon::Blinking, this, std::placeholders::_1));
+	Fsm.CreateState(EMonsterState::BLINKING, std::bind(&ABalloon::Blinking, this, std::placeholders::_1));
 	Fsm.CreateState(EMonsterState::INIT_WALKING, std::bind(&ABalloon::WalkingForStart, this, std::placeholders::_1));
 	Fsm.CreateState(EMonsterState::THINKING, std::bind(&ABalloon::Thinking, this, std::placeholders::_1));
 	Fsm.CreateState(EMonsterState::WALKING, std::bind(&ABalloon::Walking, this, std::placeholders::_1));
+	Fsm.CreateState(EMonsterState::DAMAGED, std::bind(&ABalloon::Damaging, this, std::placeholders::_1));
 	Fsm.CreateState(EMonsterState::DYING, std::bind(&ABalloon::Dying, this, std::placeholders::_1));
 	Fsm.CreateState(EMonsterState::PASS_AWAY, std::bind(&ABalloon::PassAwaing, this, std::placeholders::_1), std::bind(&ABalloon::OnPassaway, this));
 }
@@ -43,7 +45,7 @@ void ABalloon::Tick(float _deltaTime)
 		if (accSecs >= StartDelayMs)
 		{
 			IsInited = true;
-			Fsm.ChangeState(EMonsterState::INIT_BLINK);
+			Fsm.ChangeState(EMonsterState::BLINKING);
 			SRBody->SetActive(true);
 		}
 
@@ -115,6 +117,16 @@ void ABalloon::InitCollision()
 	Collision->SetCollisionType(ECollisionType::CirCle);
 }
 
+FVector2D ABalloon::GetMonsterSize()
+{
+	return SRBody->GetComponentScale();
+}
+
+FIntPoint ABalloon::GetDamageRange()
+{
+	return FIntPoint{ 1, 1 };
+}
+
 void ABalloon::ChangeMoveAnim(const FVector2D& _direction)
 {
 	if (_direction == FVector2D::UP)
@@ -139,6 +151,15 @@ void ABalloon::Move(const FVector2D& _direction, float _deltaTime)
 {
 	ChangeMoveAnim(_direction);
 	AddActorLocation(_direction * _deltaTime * Speed);
+}
+
+void ABalloon::Damaged(unsigned __int8 _power)
+{
+	if (static_cast<EMonsterState>(Fsm.GetState()) != EMonsterState::DAMAGED)
+	{
+		Health -= _power;
+		Fsm.ChangeState(EMonsterState::DAMAGED);
+	}
 }
 
 void ABalloon::Kill()
@@ -282,6 +303,16 @@ void ABalloon::Walking(float _deltaTime)
 	FVector2D direction = GetDirection(destRealLocInt - monsterRealLocInt);
 
 	Move(direction, _deltaTime);
+}
+
+void ABalloon::Damaging(float _deltaTime)
+{
+	// TODO: blinking..
+
+	if (Health <= 0)
+	{
+		Kill();
+	}
 }
 
 void ABalloon::Dying(float _deltaTime)

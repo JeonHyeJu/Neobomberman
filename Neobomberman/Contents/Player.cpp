@@ -75,15 +75,15 @@ APlayer::APlayer()
 	{
 		FVector2D collSize = GlobalVar::BOMB_SIZE;
 
-		/*Collision = CreateDefaultSubObject<U2DCollision>();
-		Collision->SetComponentLocation({ 0.f, -collSize.hY()});
+		Collision = CreateDefaultSubObject<U2DCollision>();
+		Collision->SetComponentLocation(collSize.Half());
 		Collision->SetComponentScale(collSize);
 		Collision->SetCollisionGroup(ECollisionGroup::PlayerBody);
 		Collision->SetCollisionType(ECollisionType::CirCle);
 
 		Collision->SetCollisionEnter(std::bind(&APlayer::OnEnterCollision, this, std::placeholders::_1));
 
-		GetWorld()->CollisionGroupLink(ECollisionGroup::PlayerBody, ECollisionGroup::MonsterBody);*/
+		GetWorld()->CollisionGroupLink(ECollisionGroup::PlayerBody, ECollisionGroup::MonsterBody);
 
 		/*Collision->SetCollisionStay(std::bind(&ANewPlayer::CollisionStay, this, std::placeholders::_1));
 		Collision->SetCollisionEnd(std::bind(&ANewPlayer::CollisionEnd, this, std::placeholders::_1));*/
@@ -411,11 +411,11 @@ void APlayer::Moving(float _deltaTime)
 		// Portal
 		if (CurMapPtr->GetIsPortalOpened())
 		{
-			FIntPoint curIdx = CurMapPtr->LocationToMatrixIdx(GetActorLocation() - FVector2D{ 16, 16 });
+			FIntPoint curIdx = CurMapPtr->LocationToMatrixIdx(nextPosLB);
 			if (curIdx == portalIdx)
 			{
 				// Move to orginized location
-				FVector2D organizedLoc = CurMapPtr->GetPortalLoc() + GlobalVar::BOMBERMAN_SIZE.Half().Half();
+				FVector2D organizedLoc = CurMapPtr->GetPortalLoc();
 				SetActorLocation(organizedLoc);
 
 				FsmH.ChangeState(EPlayerState::PORTAL);

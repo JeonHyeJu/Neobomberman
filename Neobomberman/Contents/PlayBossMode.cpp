@@ -34,10 +34,11 @@ void APlayBossMode::BeginPlay()
 	/* Stage 1-1 */
 	ABossMap* pBossMap = pLevel->SpawnActor<ABossMap>();
 	pBossMap->InitMap();
+	pBossMap->BindExplodeEvent(std::bind(&APlayBossMode::OnExplodeBomb, this));
+	CurMapPtr = pBossMap;
 
 	Player->SetCurMap(pBossMap);
-	FVector2D playerStartLoc = pBossMap->MatrixIdxToLocation(StartPoint);	// Temp
-	Player->SetActorLocation(playerStartLoc + GlobalVar::BOMBERMAN_SIZE.Half().Half());
+	Player->SetActorLocation(pBossMap->MatrixIdxToLocation(StartPoint));
 
 	AHoopGhost* boss = pLevel->SpawnActor<AHoopGhost>();
 	boss->SetCurMap(pBossMap);
@@ -58,7 +59,20 @@ void APlayBossMode::Tick(float _deltaTime)
 	static float elpasedSecs = 0.f;	// Temp
 	elpasedSecs += _deltaTime;
 
-	if (elpasedSecs > .5f)
+	if (elpasedSecs >= 1.f)
+	{
+		elpasedSecs = 0.f;
+		CheckDeadMonster();
+		if (IsAllMonstersDead())
+		{
+			if (!isShowingResult)
+			{
+				isShowingResult = true;
+				FadeOut();
+			}
+		}
+	}
+	/*if (elpasedSecs > .5f)
 	{
 		elpasedSecs = 0.f;
 
@@ -66,6 +80,22 @@ void APlayBossMode::Tick(float _deltaTime)
 		{
 			isShowingResult = true;
 			FadeOut();
+		}
+	}*/
+}
+
+void APlayBossMode::CheckDeadMonster()
+{
+	std::list<AMonster*>::iterator it = MonsterList.begin();
+	std::list<AMonster*>::iterator itEnd = MonsterList.end();
+	for (; it != itEnd; ++it)
+	{
+		AMonster* monster = *it;
+		if (monster->GetIsDestroiable())
+		{
+			monster->Destroy();
+			it = MonsterList.erase(it);
+			if (it == itEnd) break;
 		}
 	}
 }
@@ -85,4 +115,69 @@ void APlayBossMode::OnEndFadeOut()
 	int lastTime = AGameUI::GetLastTime();
 	ResultScene->SetLastSecs(lastTime);
 	ResultScene->SetTotal(GameData::GetInstance().GetPlayer1Score());
+}
+
+void APlayBossMode::OnExplodeBomb()
+{
+	if (CurMapPtr == nullptr) return;
+
+	const std::vector<FIntPoint>& vec = CurMapPtr->GetSplashTileIdxs();
+
+	std::list<AMonster*>::iterator it = MonsterList.begin();
+	std::list<AMonster*>::iterator itEnd = MonsterList.end();
+	for (; it != itEnd; ++it)
+	{
+		AMonster* monster = *it;
+		if (monster->GetCanHit())
+		{
+			FIntPoint rangeIdx = monster->GetDamageRange();
+
+			if (rangeIdx.X == 1 && rangeIdx.Y == 1)
+			{
+				FIntPoint curIdx = CurMapPtr->LocationToMatrixIdx(monster->GetActorLocation());
+				if (CurMapPtr->IsInSplash(curIdx))
+				{
+					monster->Damaged();
+				}
+				return;
+			}
+
+			// I had to subtract from left top base.
+			FVector2D monsterSize = monster->GetMonsterSize().Half().Half();
+			FVector2D monsterLoc =monster->GetActorLocation();
+
+			FIntPoint orgIdx = CurMapPtr->LocationToMatrixIdx(monster->GetActorLocation());
+			FIntPoint curIdx = CurMapPtr->LocationToMatrixIdx(monster->GetActorLocation() + monsterSize);
+
+			/*OutputDebugString(("monsterLoc: " + std::to_string(monsterLoc.X) + ", " + std::to_string(monsterLoc.Y) + "\n").c_str());
+			OutputDebugString(("orgIdx: " + std::to_string(orgIdx.X) + ", " + std::to_string(orgIdx.Y) + "\n").c_str());
+			OutputDebugString(("curIdx: " + std::to_string(curIdx.X) + ", " + std::to_string(curIdx.Y) + "\n").c_str());*/
+
+			std::vector<FIntPoint> temp;	// TODO: check duplicated value
+			for (int y = -rangeIdx.Y + 1; y < rangeIdx.Y; ++y)
+			{
+				for (int x = -rangeIdx.X + 1; x < rangeIdx.X; ++x)
+				{
+					temp.push_back(curIdx + FIntPoint( x, y ));
+				}
+			}
+
+			//OutputDebugString("---------------------------- S\n");
+			for (size_t i = 0, size = temp.size(); i < size; ++i)
+			{
+				//OutputDebugString(("checkIdx: " + std::to_string(temp[i].X) + ", " + std::to_string(temp[i].Y) + "\n").c_str());
+				if (CurMapPtr->IsInSplash(temp[i]))
+				{
+					monster->Damaged();
+				}
+			}
+			
+			//OutputDebugString("---------------------------- E\n");
+		}
+	}
+}
+
+bool APlayBossMode::IsAllMonstersDead() const
+{
+	return MonsterList.size() == 0;
 }

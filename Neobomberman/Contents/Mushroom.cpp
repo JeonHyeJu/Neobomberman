@@ -12,13 +12,15 @@ AMushroom::AMushroom()
 {
 	Speed = 20.f;
 	Random.SetSeed(MonsterIdx);
+	CanHit = true;
 
 	SetName("Mushroom");
 
-	Fsm.CreateState(EMonsterState::INIT_BLINK, std::bind(&AMushroom::Blinking, this, std::placeholders::_1));
+	Fsm.CreateState(EMonsterState::BLINKING, std::bind(&AMushroom::Blinking, this, std::placeholders::_1));
 	Fsm.CreateState(EMonsterState::INIT_WALKING, std::bind(&AMushroom::WalkingForStart, this, std::placeholders::_1));
 	Fsm.CreateState(EMonsterState::THINKING, std::bind(&AMushroom::Thinking, this, std::placeholders::_1));
 	Fsm.CreateState(EMonsterState::WALKING, std::bind(&AMushroom::Walking, this, std::placeholders::_1));
+	Fsm.CreateState(EMonsterState::DAMAGED, std::bind(&AMushroom::Damaging, this, std::placeholders::_1));
 	Fsm.CreateState(EMonsterState::DYING, std::bind(&AMushroom::Dying, this, std::placeholders::_1));
 	Fsm.CreateState(EMonsterState::PASS_AWAY, std::bind(&AMushroom::PassAwaing, this, std::placeholders::_1), std::bind(&AMushroom::OnPassaway, this));
 	Fsm.CreateState(EMonsterState::JUMPING, std::bind(&AMushroom::Jumping, this, std::placeholders::_1));
@@ -47,7 +49,7 @@ void AMushroom::Tick(float _deltaTime)
 		if (accSecs >= StartDelayMs)
 		{
 			IsInited = true;
-			Fsm.ChangeState(EMonsterState::INIT_BLINK);
+			Fsm.ChangeState(EMonsterState::BLINKING);
 			SRBody->SetActive(true);
 		}
 
@@ -152,6 +154,16 @@ void AMushroom::InitCollision()
 	Collision->SetCollisionType(ECollisionType::CirCle);
 }
 
+FVector2D AMushroom::GetMonsterSize()
+{
+	return SRBody->GetComponentScale();
+}
+
+FIntPoint AMushroom::GetDamageRange()
+{
+	return FIntPoint{ 1, 1 };
+}
+
 void AMushroom::ChangeMoveAnim(const FVector2D& _direction)
 {
 	if (_direction == FVector2D::UP)
@@ -199,6 +211,15 @@ void AMushroom::Move(const FVector2D& _direction, float _deltaTime)
 {
 	ChangeMoveAnim(_direction);
 	AddActorLocation(_direction * _deltaTime * Speed);
+}
+
+void AMushroom::Damaged(unsigned __int8 _power)
+{
+	if (static_cast<EMonsterState>(Fsm.GetState()) != EMonsterState::DAMAGED)
+	{
+		Health -= _power;
+		Fsm.ChangeState(EMonsterState::DAMAGED);
+	}
 }
 
 void AMushroom::Kill()
@@ -348,6 +369,16 @@ void AMushroom::Walking(float _deltaTime)
 	FVector2D direction = GetDirection(destRealLocInt - monsterRealLocInt);
 
 	Move(direction, _deltaTime);
+}
+
+void AMushroom::Damaging(float _deltaTime)
+{
+	// TODO: blinking..
+
+	if (Health <= 0)
+	{
+		Kill();
+	}
 }
 
 void AMushroom::Dying(float _deltaTime)
