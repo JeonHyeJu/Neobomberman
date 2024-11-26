@@ -132,7 +132,6 @@ void AGameOver::Countdown(float _deltaTime)
 	}
 }
 
-// TODO: anim
 void AGameOver::GameOverStrAnim()
 {
 	int vecSize = sizeof(SRGameOverStrs) / sizeof(USpriteRenderer*);

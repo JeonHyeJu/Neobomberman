@@ -87,9 +87,6 @@
     <ClInclude Include="BossMap.h">
       <Filter>Map</Filter>
     </ClInclude>
-    <ClInclude Include="GameData.h">
-      <Filter>Actor\NotGame</Filter>
-    </ClInclude>
     <ClInclude Include="BaseMap.h">
       <Filter>Map</Filter>
     </ClInclude>
@@ -119,6 +116,9 @@
     </ClInclude>
     <ClInclude Include="Mushroom.h">
       <Filter>Actor\Monsters</Filter>
+    </ClInclude>
+    <ClInclude Include="GameData.h">
+      <Filter>Util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -11,6 +11,7 @@
 
 bool AGameUI::IsStop = true;
 int AGameUI::Seconds = 0;
+//const int AGameUI::START_SECONDS = 5;
 const int AGameUI::START_SECONDS = 60 + 59;
 
 /* AGameUI::StatusTopBarUI */
@@ -56,12 +57,12 @@ void AGameUI::Tick(float _deltaTime)
 
 	CheckInsertingCoin();
 	UpdateCoinUI();
+	UpdatePlayer1LifeUI();
+	UpdateScoreUI();
 
 	if (IsStop) return;
 
 	CountDown(_deltaTime);
-	UpdateScoreUI();
-	UpdatePlayer1LifeUI();
 }
 
 void AGameUI::UpdatePushStartBlink()
@@ -89,15 +90,9 @@ void AGameUI::CountDown(float _deltaTime)
 		ElapsedSecs = 0.f;
 		UpdatePushStartBlink();
 
-		if (Seconds >= 0)
+		if (!IsTimeOver())
 		{
-			UpdateTimerUI(Seconds);
-			Seconds--;
-		}
-		else
-		{
-			GetWorld()->GetPawn<APlayer>()->Kill();
-			ResetTimer();
+			UpdateTimerUI(Seconds--);
 		}
 	}
 }
@@ -313,7 +308,6 @@ void AGameUI::UpdatePlayer1LifeUI()
 	if (StatusTopBar.IsHidden()) return;
 
 	int p1Life = GameData::GetInstance().GetPlayer1Life();
-
 	if (PrevP1Life != p1Life)
 	{
 		PrevP1Life = p1Life;

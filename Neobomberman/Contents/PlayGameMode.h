@@ -16,14 +16,19 @@ public:
 	void Tick(float _deltaTime) override;
 	void LevelChangeStart() override;
 
+	void StopGame();
+	void RestartGame();
+
 protected:
 
 private:
 	void FadeOut();
 	void OnEndFadeOut();
 
+	void StartFromCoin();
 	void CheckGameOver();
 	void CheckDeadMonster();
+	void CheckTimeOver();
 	bool IsAllMonstersDead() const;
 	void OnExplodeBomb();
 	void GameOver();

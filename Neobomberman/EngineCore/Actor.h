@@ -59,6 +59,7 @@ public:
 			IsPauseValue = false;
 		}
 	}
+
 	void Pause() override
 	{
 		if (!IsPauseValue)

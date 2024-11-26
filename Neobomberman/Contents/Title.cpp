@@ -393,7 +393,6 @@ void ATitle::Countdown(const ESceneType& _type)
 		if (_type == ESceneType::START)
 		{
 			// TODO: Play video
-			// Temp
 			if (GameUIPtr == nullptr) return;
 			if (GameUIPtr->GetCoin() == 0)
 			{

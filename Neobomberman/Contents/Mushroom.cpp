@@ -21,7 +21,7 @@ AMushroom::AMushroom()
 	Fsm.CreateState(EMonsterState::THINKING, std::bind(&AMushroom::Thinking, this, std::placeholders::_1));
 	Fsm.CreateState(EMonsterState::WALKING, std::bind(&AMushroom::Walking, this, std::placeholders::_1));
 	Fsm.CreateState(EMonsterState::DAMAGED, std::bind(&AMushroom::Damaging, this, std::placeholders::_1));
-	Fsm.CreateState(EMonsterState::DYING, std::bind(&AMushroom::Dying, this, std::placeholders::_1));
+	Fsm.CreateState(EMonsterState::DYING, std::bind(&AMushroom::Dying, this, std::placeholders::_1), std::bind(&AMushroom::OnDead, this));
 	Fsm.CreateState(EMonsterState::PASS_AWAY, std::bind(&AMushroom::PassAwaing, this, std::placeholders::_1), std::bind(&AMushroom::OnPassaway, this));
 	Fsm.CreateState(EMonsterState::JUMPING, std::bind(&AMushroom::Jumping, this, std::placeholders::_1));
 }
@@ -114,9 +114,10 @@ void AMushroom::InitSprite()
 		FVector2D size = GlobalVar::BOMBERMAN_SIZE;
 		SRCloud = CreateDefaultSubObject<USpriteRenderer>();
 		SRCloud->SetSprite(CLOUD_SPRITE_PATH);
-		SRCloud->SetComponentLocation(size.Half().Half().Half() + FVector2D{ 0, 16 });	// Temp
+		SRCloud->SetComponentLocation(size.Half().Half());
 		SRCloud->SetComponentScale(size);
-		SRCloud->CreateAnimation("Disappear", CLOUD_SPRITE_PATH, 0, 7, .2f, false);
+		SRCloud->CreateAnimation(ANIM_CLOUD, CLOUD_SPRITE_PATH, 0, 7, .2f, false);
+		SRCloud->SetOrder(ERenderOrder::MONSTER_CLOUD);
 		SRCloud->SetActive(false);
 	}
 
@@ -124,8 +125,9 @@ void AMushroom::InitSprite()
 		FVector2D size = GlobalVar::BOMB_SIZE;
 		SRScore = CreateDefaultSubObject<USpriteRenderer>();
 		SRScore->SetSprite(MONSTER_SCORE_PATH);
-		SRScore->SetComponentLocation(size.Half().Half());
+		SRScore->SetComponentLocation(size.Half().Half() + FVector2D{ size.Half().Half().X + 1.f, 0.f });
 		SRScore->SetComponentScale(size);
+		SRScore->SetOrder(ERenderOrder::MONSTER_SCORE);
 
 		std::vector<int> idxs;
 		std::vector<float> times(SCORE_ANIM_CNT, .2f);
@@ -137,7 +139,7 @@ void AMushroom::InitSprite()
 		}
 		times[SCORE_ANIM_CNT - 2] = 1.f;
 
-		SRScore->CreateAnimation("Disappear", MONSTER_SCORE_PATH, idxs, times, false);
+		SRScore->CreateAnimation(ANIM_SCORE, MONSTER_SCORE_PATH, idxs, times, false);
 		SRScore->SetActive(false);
 	}
 
@@ -251,12 +253,17 @@ void AMushroom::OnResume()
 }
 
 /* FSM start callbacks */
+void AMushroom::OnDead()
+{
+	CanHit = false;
+}
+
 void AMushroom::OnPassaway()
 {
-	SRCloud->ChangeAnimation("Disappear", true);
+	SRCloud->ChangeAnimation(ANIM_CLOUD, true);
 	SRCloud->SetActive(true);
 
-	SRScore->ChangeAnimation("Disappear");
+	SRScore->ChangeAnimation(ANIM_SCORE);
 	SRScore->SetActive(true);
 
 	GameData::GetInstance().AddPlayer1Score(GetScore());

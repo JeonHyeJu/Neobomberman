@@ -70,6 +70,6 @@ public:
 
 private:
 	unsigned __int8 Coin = 0;
-	int Player1Life = 0;
+	int Player1Life = MAX_PLAYER_LIFE;
 	int Player1Score = 0;
 };

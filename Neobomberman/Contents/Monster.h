@@ -71,7 +71,7 @@ public:
 	{
 		return StartDelayMs;
 	}
-	bool GetCanHit()	// for boss.. TODO: adjust to all monsters.
+	bool GetCanHit()
 	{
 		return CanHit;
 	}
@@ -91,7 +91,6 @@ protected:
 	float Speed = 1.f;
 
 	const int MonsterIdx;
-	bool IsDestroiable = false;
 
 	const int SCORE_ANIM_CNT = 7;
 	const float BLINK_SECONDS = 2.f;
@@ -108,8 +107,10 @@ protected:
 	std::list<FIntPoint> Route;
 	FIntPoint Destination = FIntPoint::NEGATIVE_ONE;
 
-	bool CanHit = false;
 	int Health = 1;
+
+	bool IsDestroiable = false;
+	bool CanHit = false;
 	
 private:
 	/* Path finder */

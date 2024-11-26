@@ -43,6 +43,7 @@ private:
 	void OnResume() override;
 
 	/* FSM start callbacks */
+	void OnDead();
 	void OnPassaway();
 
 	const char* SPRITE_NAME = "Balloon_long.png";
@@ -51,6 +52,9 @@ private:
 	const char* ANIM_RUN_DOWN = "Run_Down";
 	const char* ANIM_RUN_LEFT = "Run_Left";
 	const char* ANIM_RUN_RIGHT = "Run_Right";
+
+	const char* ANIM_CLOUD = "Show_Cloud";
+	const char* ANIM_SCORE = "Show_Score";
 
 	USpriteRenderer* SRBody = nullptr;
 	USpriteRenderer* SRCloud = nullptr;

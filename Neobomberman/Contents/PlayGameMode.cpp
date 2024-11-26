@@ -55,14 +55,14 @@ void APlayGameMode::BeginPlay()
 	//Player->SetActorLocation(monsterStartingLoc + FVector2D({ 16.f, -16.f }));	// temp
 
 	// Temp. To test collision
-	AMushroom* monster = pLevel->SpawnActor<AMushroom>();
+	/*AMushroom* monster = pLevel->SpawnActor<AMushroom>();
 	monster->SetCurMap(pStage1);
 	monster->SetFirstDestination({ 0, 0 });
 	monster->SetActorLocation(Player->GetActorLocation() + FVector2D({ 64, 0 }));
-	MonsterList.push_back(monster);
+	MonsterList.push_back(monster);*/
 	
 	// TODO: spawn delay
-	/*{
+	{
 		AMushroom* monster = pLevel->SpawnActor<AMushroom>();
 		monster->SetCurMap(pStage1);
 		monster->SetFirstDestination({ 5, 10 });
@@ -95,7 +95,7 @@ void APlayGameMode::BeginPlay()
 		monster->SetActorLocation(monsterStartingLoc);
 		monster->SetStartDelay(3.f);
 		MonsterList.push_back(monster);
-	}*/
+	}
 	
 	//pStage2->SetPortalIdx(FIntPoint(6, 10));	// temp
 
@@ -113,6 +113,7 @@ void APlayGameMode::Tick(float _deltaTime)
 	{
 		ElapsedSecs = 0.f;
 
+		CheckTimeOver();
 		CheckDeadMonster();
 		if (IsAllMonstersDead())
 		{
@@ -127,9 +128,10 @@ void APlayGameMode::Tick(float _deltaTime)
 				FadeOut();
 			}
 		}
-
-		CheckGameOver();
 	}
+
+	// This requires checking the F1 key input, so the delayed time is not suitable.
+	CheckGameOver();
 }
 
 void APlayGameMode::LevelChangeStart()
@@ -154,19 +156,50 @@ void APlayGameMode::CheckDeadMonster()
 	}
 }
 
-// TODO: organize
+void APlayGameMode::GameOver()
+{
+	if (isShowContinueScene == false)
+	{
+		isShowContinueScene = true;
+
+		StopGame();
+
+		AFade::MainFade->SetFadeMinMax(0.f, .5f);
+		AFade::MainFade->SetFadeSpeed(.5f);
+		AFade::MainFade->FadeOut();
+
+		GameOverScenePtr->ShowAndStart();
+	}
+	else
+	{
+		if (GameOverScenePtr->GetIsOver())
+		{
+			AFade::MainFade->SetFadeMinMax(.5f, 1.f);
+			AFade::MainFade->SetFadeSpeed(.5f);
+			AFade::MainFade->BindEndEvent(std::bind(&APlayGameMode::OnEndGameOverFadeOut, this));
+			AFade::MainFade->FadeOut(.5f);
+		}
+	}
+}
+
+void APlayGameMode::CheckTimeOver()
+{
+	if (AGameUI::IsTimeOver())
+	{
+		GetWorld()->GetPawn<APlayer>()->Kill();
+	}
+}
+
 void APlayGameMode::CheckGameOver()
 {
 	int p1Life = GameData::GetInstance().GetPlayer1Life();
 	if (p1Life >= 0) return;
+	if (!Player->GetIsDead()) return;
 
 	unsigned __int8 coin = GameData::GetInstance().GetCoin();
 	if (coin == 0)
 	{
-		if (GetWorld()->GetPawn<APlayer>()->GetIsDead())
-		{
-			GameOver();
-		}
+		GameOver();
 	}
 	else
 	{
@@ -175,24 +208,55 @@ void APlayGameMode::CheckGameOver()
 			if (UEngineInput::GetInst().IsDown(VK_F1))
 			{
 				isShowContinueScene = false;
-				GetWorld()->GetPawn<APlayer>()->Resume();
-				GameUiPtr->ResetTimer();
-				GameUiPtr->StartTimer();
 
-				std::list<AMonster*>::iterator it = MonsterList.begin();
-				std::list<AMonster*>::iterator itEnd = MonsterList.end();
-				for (; it != itEnd ; ++it)
-				{
-					(*it)->Resume();
-				}
-				return;
+				AFade::MainFade->SetFadeMinMax(0.f, 1.f);
+				AFade::MainFade->SetFadeSpeed(1.f);
+				AFade::MainFade->FadeIn(.5f);
+				
+				StartFromCoin();
+
+				GameOverScenePtr->SetActive(false);
+				RestartGame();
 			}
 		}
 		else
 		{
-			GameData::GetInstance().AddCoin(-1);
-			GameData::GetInstance().AddPlayer1Life(3);
+			StartFromCoin();
 		}
+	}
+}
+
+void APlayGameMode::StartFromCoin()
+{
+	GameData::GetInstance().AddCoin(-1);
+	GameData::GetInstance().AddPlayer1Life(3);
+	GameData::GetInstance().ResetScore();
+}
+
+void APlayGameMode::StopGame()
+{
+	GetWorld()->GetPawn<APlayer>()->Pause();
+	GameUiPtr->StopTimer();
+
+	std::list<AMonster*>::iterator it = MonsterList.begin();
+	std::list<AMonster*>::iterator itEnd = MonsterList.end();
+	for (; it != itEnd; ++it)
+	{
+		(*it)->Pause();
+	}
+}
+
+void APlayGameMode::RestartGame()
+{
+	GetWorld()->GetPawn<APlayer>()->Resume();
+	GameUiPtr->ResetTimer();
+	GameUiPtr->StartTimer();
+
+	std::list<AMonster*>::iterator it = MonsterList.begin();
+	std::list<AMonster*>::iterator itEnd = MonsterList.end();
+	for (; it != itEnd; ++it)
+	{
+		(*it)->Resume();
 	}
 }
 
@@ -212,44 +276,13 @@ void APlayGameMode::OnExplodeBomb()
 	for (; it != itEnd; ++it)
 	{
 		AMonster* monster = *it;
-		FIntPoint curIdx = CurMapPtr->LocationToMatrixIdx(monster->GetActorLocation());
-		if (CurMapPtr->IsInSplash(curIdx))
+		if (monster->GetCanHit())
 		{
-			monster->Kill();
-		}
-	}
-}
-
-void APlayGameMode::GameOver()
-{
-	if (isShowContinueScene == false)
-	{
-		isShowContinueScene = true;
-
-		GetWorld()->GetPawn<APlayer>()->Pause();
-		GameUiPtr->StopTimer();
-
-		std::list<AMonster*>::iterator it = MonsterList.begin();
-		std::list<AMonster*>::iterator itEnd = MonsterList.end();
-		for (; it != itEnd; ++it)
-		{
-			(*it)->Pause();
-		}
-
-		AFade::MainFade->SetFadeMinMax(0.f, .5f);
-		AFade::MainFade->SetFadeSpeed(.5f);
-		AFade::MainFade->FadeOut();
-
-		GameOverScenePtr->ShowAndStart();
-	}
-	else
-	{
-		if (GameOverScenePtr->GetIsOver())
-		{
-			AFade::MainFade->SetFadeMinMax(.5f, 1.f);
-			AFade::MainFade->SetFadeSpeed(.5f);
-			AFade::MainFade->BindEndEvent(std::bind(&APlayGameMode::OnEndGameOverFadeOut, this));
-			AFade::MainFade->FadeOut(.5f);
+			FIntPoint curIdx = CurMapPtr->LocationToMatrixIdx(monster->GetActorLocation());
+			if (CurMapPtr->IsInSplash(curIdx))
+			{
+				monster->Kill();
+			}
 		}
 	}
 }

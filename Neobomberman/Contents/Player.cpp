@@ -95,11 +95,14 @@ APlayer::APlayer()
 	SpriteRendererHead->SetOrder(ERenderOrder::PLAYER);
 	SpriteRendererBody->SetOrder(ERenderOrder::PLAYER);
 
-	FsmH.CreateState(EPlayerState::REBORN, std::bind(&APlayer::Reborning, this, std::placeholders::_1), std::bind(&APlayer::OnReborn, this));
-	FsmH.CreateState(EPlayerState::IDLE, std::bind(&APlayer::Idling, this, std::placeholders::_1), std::bind(&APlayer::OnIdle, this));
-	FsmH.CreateState(EPlayerState::MOVE, std::bind(&APlayer::Moving, this, std::placeholders::_1));
-	FsmH.CreateState(EPlayerState::DEAD, std::bind(&APlayer::Dying, this, std::placeholders::_1), std::bind(&APlayer::OnDead, this));
-	FsmH.CreateState(EPlayerState::PORTAL, nullptr, std::bind(&APlayer::OnShift, this));
+	Fsm.CreateState(EPlayerState::REBORN, nullptr, std::bind(&APlayer::OnReborn, this));
+	Fsm.CreateState(EPlayerState::IDLE, std::bind(&APlayer::Idling, this, std::placeholders::_1), std::bind(&APlayer::OnIdle, this));
+	Fsm.CreateState(EPlayerState::MOVE, std::bind(&APlayer::Moving, this, std::placeholders::_1));
+	Fsm.CreateState(EPlayerState::DEAD, std::bind(&APlayer::Dying, this, std::placeholders::_1), std::bind(&APlayer::OnDead, this));
+	Fsm.CreateState(EPlayerState::PORTAL, nullptr, std::bind(&APlayer::OnShift, this));
+
+	FsmH.CreateState(EPlayerBlinkAndColState::BLINK_ON_COL_OFF, std::bind(&APlayer::Blinking, this, std::placeholders::_1), std::bind(&APlayer::OnTurnOnBlink, this));
+	FsmH.CreateState(EPlayerBlinkAndColState::BLINK_OFF_COL_ON, nullptr, std::bind(&APlayer::OnTurnOffBlink, this));
 
 	DebugOn();
 }
@@ -112,7 +115,7 @@ void APlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
-	FsmH.ChangeState(EPlayerState::IDLE);
+	Reborn();
 }
 
 void APlayer::Tick(float _deltaTime)
@@ -122,9 +125,10 @@ void APlayer::Tick(float _deltaTime)
 	UEngineDebug::CoreOutPutString("FPS : " + std::to_string(1.0f / _deltaTime));
 	//UEngineDebug::CoreOutPutString("PlayerPos : " + GetActorLocation().ToString());
 
+	Fsm.Update(_deltaTime);
 	FsmH.Update(_deltaTime);
 
-	EPlayerState nowState = static_cast<EPlayerState>(FsmH.GetState());
+	EPlayerState nowState = static_cast<EPlayerState>(Fsm.GetState());
 
 	// state != DEAD and PORTAL
 	if (nowState < EPlayerState::DEAD)
@@ -145,7 +149,7 @@ void APlayer::Tick(float _deltaTime)
 		if (IsDownAnyKeyWithSetDir())
 		{
 			// Start to move
-			FsmH.ChangeState(EPlayerState::MOVE);
+			Fsm.ChangeState(EPlayerState::MOVE);
 			return;
 		}
 		else if (IsPressedAnyKey())
@@ -154,8 +158,7 @@ void APlayer::Tick(float _deltaTime)
 		}
 		else
 		{
-			FsmH.ChangeState(EPlayerState::IDLE);
-			return;
+			Fsm.ChangeState(EPlayerState::IDLE);
 		}
 	}
 
@@ -169,6 +172,18 @@ void APlayer::LevelChangeStart()
 {
 	IsClear = false;
 	IsDead = false;
+}
+
+void APlayer::OnResume()
+{
+	// Temp
+	DyingAnimInfo.Seconds = DyingAnimInfo.WaitSeconds;
+}
+
+void APlayer::Reborn()
+{
+	Fsm.ChangeState(EPlayerState::REBORN);
+	FsmH.ChangeState(EPlayerBlinkAndColState::BLINK_ON_COL_OFF);
 }
 
 void APlayer::InitSounds()
@@ -254,7 +269,7 @@ void APlayer::DropBomb()
 
 void APlayer::Kill()
 {
-	FsmH.ChangeState(EPlayerState::DEAD);
+	Fsm.ChangeState(EPlayerState::DEAD);
 }
 
 void APlayer::OnEnterCollision(AActor* _actor)
@@ -268,9 +283,23 @@ void APlayer::OnEndPortalAnim()
 	IsClear = true;
 }
 
+/* FSM2 start functions */
+void APlayer::OnTurnOnBlink()
+{
+	Collision->SetActive(false);
+}
+
+void APlayer::OnTurnOffBlink()
+{
+	Collision->SetActive(true);
+}
+
 /* FSM start functions */
 void APlayer::OnReborn()
 {
+	AGameUI::ResetTimer();
+	AGameUI::StartTimer();
+
 	SpriteRendererHead->SetActive(true);
 	SpriteRendererBody->SetActive(true);
 
@@ -301,9 +330,11 @@ void APlayer::OnIdle()
 void APlayer::OnDead()
 {
 	GameData::GetInstance().AddPlayer1Life(-1);
-	GameData::GetInstance().ResetScore();
+
 	SpriteRendererHead->ChangeAnimation("Dead");
 	SpriteRendererBody->ChangeAnimation("Dead");
+
+	AGameUI::StopTimer();
 }
 
 void APlayer::OnShift()
@@ -313,7 +344,7 @@ void APlayer::OnShift()
 }
 
 /* FSM update functions */
-void APlayer::Reborning(float _deltaTime)
+void APlayer::Blinking(float _deltaTime)
 {
 	static float allElapsedSecs = 0.f;		// Temp
 	static float elapsedSecs = 0.f;		// TODO: change to local
@@ -321,12 +352,15 @@ void APlayer::Reborning(float _deltaTime)
 	allElapsedSecs += _deltaTime;
 	elapsedSecs += _deltaTime;
 
-	if (allElapsedSecs >= 1.f)
+	if (allElapsedSecs >= BLINK_SECS)
 	{
+		allElapsedSecs = 0.f;
+		elapsedSecs = 0.f;
+
 		SpriteRendererHead->SetActive(true);
 		SpriteRendererBody->SetActive(true);
 
-		FsmH.ChangeState(EPlayerState::IDLE);
+		FsmH.ChangeState(EPlayerBlinkAndColState::BLINK_OFF_COL_ON);
 		return;
 	}
 
@@ -418,7 +452,7 @@ void APlayer::Moving(float _deltaTime)
 				FVector2D organizedLoc = CurMapPtr->GetPortalLoc();
 				SetActorLocation(organizedLoc);
 
-				FsmH.ChangeState(EPlayerState::PORTAL);
+				Fsm.ChangeState(EPlayerState::PORTAL);
 				AGameUI::StopTimer();
 				return;
 			}
@@ -512,7 +546,8 @@ void APlayer::Dying(float _deltaTime)
 				SpriteRendererBody->SetActive(false);
 			}
 
-			if (GameData::GetInstance().GetPlayer1Life() > 0)
+			int life = GameData::GetInstance().GetPlayer1Life();
+			if (life >= 0)
 			{
 				if (DyingAnimInfo.Seconds >= DyingAnimInfo.WaitSeconds)
 				{
@@ -520,7 +555,7 @@ void APlayer::Dying(float _deltaTime)
 					elapsedSecs = 0.f;
 					DyingAnimInfo.Seconds = 0.f;
 
-					FsmH.ChangeState(EPlayerState::REBORN);
+					Reborn();
 					return;
 				}
 			}

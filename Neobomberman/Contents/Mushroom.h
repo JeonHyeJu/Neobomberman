@@ -44,6 +44,7 @@ private:
 	void OnResume() override;
 
 	/* FSM start callbacks */
+	void OnDead();
 	void OnPassaway();
 
 	bool IsJump();
@@ -60,6 +61,9 @@ private:
 	const char* ANIM_RUN_DOWN = "Run_Down";
 	const char* ANIM_RUN_LEFT = "Run_Left";
 	const char* ANIM_RUN_RIGHT = "Run_Right";
+
+	const char* ANIM_CLOUD = "Show_Cloud";
+	const char* ANIM_SCORE = "Show_Score";
 
 	const char* ANIM_JUMP = "Jump";
 

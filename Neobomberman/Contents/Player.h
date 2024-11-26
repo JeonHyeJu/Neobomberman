@@ -5,6 +5,12 @@
 #include <vector>
 #include "ContentsEnum.h"
 
+enum class EPlayerBlinkAndColState
+{
+	BLINK_ON_COL_OFF = 0,	// Blink on, collision off
+	BLINK_OFF_COL_ON,
+};
+
 enum class EPlayerState
 {
 	REBORN = 0,
@@ -69,12 +75,14 @@ public:
 	void Kill();
 
 protected:
+	void OnResume() override;
 
 private:
 	void InitSounds();
 
 	std::string GetDirectionStr();
 	void DropBomb();
+	void Reborn();
 
 	bool IsDownAnyKeyWithSetDir();
 	bool IsPressedAnyKey();
@@ -87,10 +95,13 @@ private:
 	void OnDead();
 	void OnShift();
 
-	void Reborning(float _deltaTime);
+	void OnTurnOnBlink();
+	void OnTurnOffBlink();
+
 	void Idling(float _deltaTime);
 	void Moving(float _deltaTime);
 	void Dying(float _deltaTime);
+	void Blinking(float _deltaTime);
 
 	void OnEndFadeOut();
 
@@ -109,6 +120,7 @@ private:
 
 	SPlayerAbility Ability;
 
+	UFSMStateManager Fsm;
 	UFSMStateManager FsmH;
 
 	FVector2D Direction;
@@ -120,4 +132,6 @@ private:
 	int Score = 600;	// Temp
 	bool IsClear = false;
 	bool IsDead = false;
+
+	const float BLINK_SECS = 2.f;
 };

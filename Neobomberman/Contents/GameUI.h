@@ -70,6 +70,10 @@ public:
 	{
 		return Seconds;
 	}
+	static bool IsTimeOver()
+	{
+		return Seconds < 0;
+	}
 
 protected:
 	void BeginPlay() override;
