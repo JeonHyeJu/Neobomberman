@@ -5,6 +5,7 @@
 #include "GameData.h"
 #include "GameUI.h"
 #include "UtilFn.h"
+#include "HurryUp.h"
 #include <EngineCore/SpriteRenderer.h>
 #include <EnginePlatform/EngineInput.h>
 #include <EngineBase/EngineString.h>
@@ -92,6 +93,11 @@ void AGameUI::CountDown(float _deltaTime)
 
 		if (!IsTimeOver())
 		{
+			if (IsHalfTime())
+			{
+				AHurryUp* hurryUp = GetWorld()->SpawnActor<AHurryUp>();
+			}
+
 			UpdateTimerUI(Seconds--);
 		}
 	}

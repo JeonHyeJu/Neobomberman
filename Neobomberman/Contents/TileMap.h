@@ -99,8 +99,8 @@ public:
 
 	Tile* GetTileRef(FIntPoint _idx);
 	Tile* GetTileRef(FVector2D _loc);
-	bool IsBlocked(const FVector2D& _loc);
-	bool IsBlocked(const FIntPoint& _idx);
+	bool HasTileSprite(const FVector2D& _loc);
+	bool HasTileSprite(const FIntPoint& _idx);
 
 	bool IsIndexOver(FIntPoint _Index);
 	bool IsEdge(FIntPoint _Index);

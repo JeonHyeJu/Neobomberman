@@ -421,3 +421,11 @@ struct URect
 	float Top = 0.f;
 	float Bottom = 0.f;
 };
+
+struct FVRect
+{
+	FVector2D LT;
+	FVector2D RT;
+	FVector2D LB;
+	FVector2D RB;
+};

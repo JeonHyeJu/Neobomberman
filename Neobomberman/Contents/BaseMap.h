@@ -15,8 +15,8 @@ public:
 	ABaseMap& operator=(ABaseMap&& _other) noexcept = delete;
 
 	bool Deserialize(ATileMap* _tileMap, std::string_view _savePath, std::string_view _saveName);
-	bool CanMove(const FVector2D& _loc);
-	bool CanMove(const FIntPoint& _idx);
+	bool CanMove(const FVector2D& _loc, bool _isPlayer=false);
+	bool CanMove(const FIntPoint& _idx, bool _isPlayer=false);
 	bool IsMove(const FIntPoint& _Point) override;
 
 	inline ATileMap* GetGroundMap() const

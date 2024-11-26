@@ -11,8 +11,13 @@ enum class ERenderOrder
 	CUT_LETTER_BOX = 4,
 	OPENING = 5,
 	OPENING_STRING = 6,
-	PORTAL = 9990,
-	BOMB = 9995,
+	PORTAL = 9980,
+	BOMB_0 = 9984,
+	BOMB_1 = 9985,
+	BOMB_2 = 9986,
+	BOMB_3 = 9987,
+	BOMB_4 = 9988,
+	BOMB_5 = 9989,
 	CRUMBLING_BOX = 9996,
 	MONSTER_CLOUD = 9997,
 	MONSTER_SCORE = 9998,
@@ -55,5 +60,6 @@ enum class ECollisionGroup
 {
 	PlayerBody,
 	MonsterBody,
+	Bomb,
 };
 

@@ -37,8 +37,8 @@ void AMonster::OnResume()
 
 void AMonster::SetCurMap(ABaseMap* _map)
 {
-	CurMap = _map;
-	PathFinder.SetData(CurMap);
+	CurMapPtr = _map;
+	PathFinder.SetData(CurMapPtr);
 }
 
 void AMonster::SetScore(EMonsterScore _score)
@@ -80,14 +80,20 @@ FVector2D AMonster::GetDirection(const FIntPoint& _vec)
 	return direction;
 }
 
-void AMonster::FindPath()
+void AMonster::FindPath(bool _force)
 {
-	if (PathFinderIdx != MonsterIdx) return;
+	if (PathFinderIdx != MonsterIdx)
+	{
+		if (!_force)
+		{
+			return;
+		}
+	}
 
 	FVector2D playerLoc = GetWorld()->GetPawn()->GetActorLocation();
-	FIntPoint playerIdx = CurMap->LocationToMatrixIdx(playerLoc);
+	FIntPoint playerIdx = CurMapPtr->LocationToMatrixIdx(playerLoc);
 	FVector2D monsterLoc = GetActorLocation();
-	FIntPoint monsterIdx = CurMap->LocationToMatrixIdx(monsterLoc);
+	FIntPoint monsterIdx = CurMapPtr->LocationToMatrixIdx(monsterLoc);
 
 	Route = PathFinder.PathFind(monsterIdx, playerIdx);
 	if (Route.empty())

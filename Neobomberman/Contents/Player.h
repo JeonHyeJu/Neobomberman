@@ -71,6 +71,10 @@ public:
 	{
 		return IsDead;
 	}
+	void SetStartLoc(const FVector2D& _val)
+	{
+		StartLocation = _val;
+	}
 
 	void Kill();
 
@@ -79,6 +83,7 @@ protected:
 
 private:
 	void InitSounds();
+	void ResetDroppedBombs();
 
 	std::string GetDirectionStr();
 	void DropBomb();
@@ -87,7 +92,8 @@ private:
 	bool IsDownAnyKeyWithSetDir();
 	bool IsPressedAnyKey();
 
-	void OnEnterCollision(class AActor* _actor);
+	void OnEnterCollision(AActor* _actor);
+	void OnEndCollision(AActor* _actor);
 	void OnEndPortalAnim();
 
 	void OnReborn();
@@ -132,6 +138,10 @@ private:
 	int Score = 600;	// Temp
 	bool IsClear = false;
 	bool IsDead = false;
+	bool IsImmotal = false;
 
 	const float BLINK_SECS = 2.f;
+
+	std::list<class ABomb*> DroppedBombs;
+	FVector2D StartLocation;
 };

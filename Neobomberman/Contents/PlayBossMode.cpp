@@ -38,7 +38,7 @@ void APlayBossMode::BeginPlay()
 	CurMapPtr = pBossMap;
 
 	Player->SetCurMap(pBossMap);
-	Player->SetActorLocation(pBossMap->MatrixIdxToLocation(StartPoint));
+	Player->SetStartLoc(pBossMap->MatrixIdxToLocation(StartPoint));
 
 	AHoopGhost* boss = pLevel->SpawnActor<AHoopGhost>();
 	boss->SetCurMap(pBossMap);

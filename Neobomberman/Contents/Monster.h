@@ -83,9 +83,13 @@ protected:
 	void SetScore(EMonsterScore _score);
 	bool IsRouteEmpty();
 	bool IsArrivedAtOneBlock();
-	void FindPath();
+	void FindPath(bool _force=false);
+	void ClearRoute()
+	{
+		Route.clear();
+	}
 
-	ABaseMap* CurMap = nullptr;
+	ABaseMap* CurMapPtr = nullptr;
 
 	EMonsterScore Score = EMonsterScore::S100;
 	float Speed = 1.f;

@@ -119,13 +119,37 @@ public:
 
 		for (size_t i = 0; i < CollisionLink.size(); i++)
 		{
-			if (CollisionLink[i].Key == _Right)
+			if (CollisionLink[i].Key == LinkData.Key)
 			{
 				return;
 			}
 		}
 		
 		CollisionLink.push_back(LinkData);
+	}
+
+	template<typename ActorType>
+	std::list<ActorType*> GetActorsFromClass()
+	{
+		std::list<ActorType*> Result;
+
+		std::list<AActor*>::iterator StartIter = AllActors.begin();
+		std::list<AActor*>::iterator EndIter = AllActors.end();
+
+		for (; StartIter != EndIter; ++StartIter)
+		{
+			AActor* CurActor = *StartIter;
+
+			ActorType* ConvertActor = dynamic_cast<ActorType*>(CurActor);
+
+			if (nullptr == ConvertActor)
+			{
+				continue;
+			}
+
+			Result.push_back(ConvertActor);
+		}
+		return Result;
 	}
 
 

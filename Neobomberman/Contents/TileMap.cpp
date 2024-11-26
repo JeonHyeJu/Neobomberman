@@ -164,13 +164,13 @@ Tile* ATileMap::GetTileRef(FIntPoint _idx)
 	return &AllTiles[_idx.Y][_idx.X];
 }
 
-bool ATileMap::IsBlocked(const FVector2D& _loc)
+bool ATileMap::HasTileSprite(const FVector2D& _loc)
 {
 	FIntPoint idx = LocationToIndex(_loc - GetActorLocation());
-	return IsBlocked(idx);
+	return HasTileSprite(idx);
 }
 
-bool ATileMap::IsBlocked(const FIntPoint& _idx)
+bool ATileMap::HasTileSprite(const FIntPoint& _idx)
 {
 	if (IsIndexOver(_idx) == true)
 	{

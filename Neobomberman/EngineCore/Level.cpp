@@ -233,6 +233,29 @@ void ULevel::Collision(float _DeltaTime)
 			}
 		}
 	}
+
+	// 충돌에서 죽은애들을 한번 체크해주는 용도
+	for (size_t i = 0; i < CollisionLink.size(); i++)
+	{
+		CollisionLinkData Data = CollisionLink[i];
+		int Left = Data.Left;
+		int Right = Data.Right;
+		// 이벤트로 충돌체크하는 그룹
+		std::list<class U2DCollision*>& LeftList = CheckCollisions[Left];
+		std::list<class U2DCollision*>::iterator StartLeftIter = LeftList.begin();
+		std::list<class U2DCollision*>::iterator EndLeftIter = LeftList.end();
+		for (; StartLeftIter != EndLeftIter; ++StartLeftIter)
+		{
+			U2DCollision* LeftCollision = *StartLeftIter;
+
+			if (false == LeftCollision->IsActive())
+			{
+				continue;
+			}
+
+			LeftCollision->CollisionSetRelease();
+		}
+	}
 }
 
 // 엔진 이벤트코드니까 이상한 곳에서 할필요가 없다.

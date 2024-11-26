@@ -134,6 +134,7 @@ void ContentsCore::InitResources()
 	imgManager.CuttingSprite("LeftBears.png", { 96, 196 });
 	imgManager.CuttingSprite("RightBears.png", { 96, 196 });
 	imgManager.CuttingSprite("HoopGhost.png", { 256, 256 });
+	imgManager.CuttingSprite("HurryUp.png", { 510, 64 });
 }
 
 void ContentsCore::LoadImages(std::string_view _path)

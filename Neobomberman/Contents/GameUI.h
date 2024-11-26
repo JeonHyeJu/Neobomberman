@@ -74,6 +74,10 @@ public:
 	{
 		return Seconds < 0;
 	}
+	static bool IsHalfTime()
+	{
+		return Seconds == 60;
+	}
 
 protected:
 	void BeginPlay() override;

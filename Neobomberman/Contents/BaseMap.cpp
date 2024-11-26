@@ -55,32 +55,130 @@ bool ABaseMap::Deserialize(ATileMap* _tileMap, std::string_view _savePath, std::
 	return true;
 }
 
-bool ABaseMap::CanMove(const FVector2D& _loc)
+bool ABaseMap::CanMove(const FVector2D& _loc, bool _isPlayer /*= false*/)
 {
-	bool canMoveWall = true;
-	bool canMoveBox = true;
+	FIntPoint _idx = LocationToMatrixIdx(_loc);
+
+	std::list<ABomb*>::iterator it = ABomb::BombList.begin();
+	std::list<ABomb*>::iterator itEnd = ABomb::BombList.end();
+	for (; it != itEnd; ++it)
+	{
+		ABomb* pBomb = *it;
+		if (_idx == pBomb->GetMatrixIdx())
+		{
+			if (_isPlayer)
+			{
+				if (!pBomb->GetIsMovableForPlayer())
+				{
+					return false;
+				}
+			}
+			else
+			{
+				return false;
+			}
+		}
+	}
 
 	if (MapWall)
 	{
-		canMoveWall = MapWall->GetIsMovable(_loc);
+		if (!MapWall->GetIsMovable(_loc))
+		{
+			return false;
+		}
 	}
 
 	if (MapBox)
 	{
-		canMoveBox = MapBox->GetIsMovable(_loc);
+		if (!MapBox->GetIsMovable(_loc))
+		{
+			return false;
+		}
 	}
 	
-	bool canMove = canMoveWall && canMoveBox;
-	return canMove;
+	return true;
 }
 
-bool ABaseMap::CanMove(const FIntPoint& _idx)
+bool ABaseMap::CanMove(const FIntPoint& _idx, bool _isPlayer /*= false*/)
 {
-	bool hasWall = MapWall->IsBlocked(_idx);
-	bool hasBox = MapBox->IsBlocked(_idx);
+	std::list<ABomb*>::iterator it = ABomb::BombList.begin();
+	std::list<ABomb*>::iterator itEnd = ABomb::BombList.end();
+	for (; it != itEnd; ++it)
+	{
+		ABomb* pBomb = *it;
 
-	bool isBlocked = hasWall || hasBox;
-	return !isBlocked;
+		if (_idx == pBomb->GetMatrixIdx())
+		{
+			if (_isPlayer)
+			{
+				if (!pBomb->GetIsMovableForPlayer())
+				{
+					return false;
+				}
+			}
+			else
+			{
+				return false;
+			}
+		}
+	}
+
+	if (MapWall)
+	{
+		if (MapWall->GetIsMovable(_idx))
+		{
+			return false;
+		}
+	}
+	
+	if (MapBox)
+	{
+		if (MapBox->GetIsMovable(_idx))
+		{
+			return false;
+		}
+	}
+	
+	return true;
+}
+
+bool ABaseMap::IsMove(const FIntPoint& _idx)
+{
+	std::list<ABomb*>::iterator it = ABomb::BombList.begin();
+	std::list<ABomb*>::iterator itEnd = ABomb::BombList.end();
+	for (; it != itEnd; ++it)
+	{
+		ABomb* pBomb = *it;
+
+		if (_idx == pBomb->GetMatrixIdx())
+		{
+			return false;
+		}
+	}
+
+	if (_idx == PortalIdx)
+	{
+		return false;
+	}
+
+	if (MapWall)
+	{
+		//if (!MapWall->GetIsMovable(_idx))
+		if (MapWall->HasTileSprite(_idx))
+		{
+			return false;
+		}
+	}
+	if (MapBox)
+	{
+		//if (!MapBox->GetIsMovable(_idx))
+		if (MapBox->HasTileSprite(_idx))
+		{
+			return false;
+		}
+	}
+
+	return true;
 }
 
 bool ABaseMap::GetIsPortalOpened() const
@@ -225,30 +323,4 @@ void ABaseMap::AppendSplash(const std::vector<FIntPoint>& _appendIdxs)
 
 		SplashTileIdxs.push_back(_appendIdxs[i]);
 	}
-}
-
-bool ABaseMap::IsMove(const FIntPoint& _Point)
-{
-	bool hasWall = false;
-	bool hasBox = false;
-
-	// Temp
-	bool isPortal = _Point == FIntPoint({ 6, 10 });
-
-	if (MapWall)
-	{
-		hasWall = MapWall->IsBlocked(_Point);
-	}
-	if (MapBox)
-	{
-		hasBox = MapBox->IsBlocked(_Point);
-	}
-
-	/*bool hasWall = MapWall->GetIsMovable(_Point);
-	bool hasBox = MapBox->GetIsMovable(_Point);*/
-
-	// TODO!!: hasBomb
-
-	bool isBlocked = hasWall || hasBox || isPortal;
-	return !isBlocked;
 }

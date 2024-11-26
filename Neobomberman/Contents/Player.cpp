@@ -40,9 +40,13 @@ APlayer::APlayer()
 		SpriteRendererHead->CreateAnimation("Idle_Right", PLAYER_SPRITE_PATH, 24, 24, 0.1f);
 		SpriteRendererHead->CreateAnimation("Run_Right", PLAYER_SPRITE_PATH, 25, 30, 0.1f);
 
+		const int BLINK_CNT = 5;
 		std::vector<int> idxs{ 580, 581, 580, 581, 580 };
+		std::vector<float> times(BLINK_CNT, .2f);
 		idxs.resize(5);
-		SpriteRendererHead->CreateAnimation("BlinkingEyes", PLAYER_SPRITE_PATH, idxs, 0.3f);
+		times[BLINK_CNT - 1] = 2.f;
+
+		SpriteRendererHead->CreateAnimation("BlinkingEyes", PLAYER_SPRITE_PATH, idxs, times);
 		SpriteRendererHead->CreateAnimation("Dead", PLAYER_SPRITE_PATH, 591, 600, 0.2f, false);
 		SpriteRendererHead->CreateAnimation("Ride_Portal", PLAYER_SPRITE_PATH, 583, 589, 0.1f, false);
 		SpriteRendererHead->SetAnimationEvent("Ride_Portal", 589, std::bind(&APlayer::OnEndPortalAnim, this));
@@ -67,7 +71,7 @@ APlayer::APlayer()
 		SpriteRendererBody->CreateAnimation("Idle_Right", PLAYER_SPRITE_PATH, 56, 56, 0.1f);
 		SpriteRendererBody->CreateAnimation("Run_Right", PLAYER_SPRITE_PATH, 57, 62, 0.1f);
 
-		SpriteRendererBody->CreateAnimation("BlinkingEyes", PLAYER_SPRITE_PATH, 612, 613, 0.3f);
+		SpriteRendererBody->CreateAnimation("BlinkingEyes", PLAYER_SPRITE_PATH, 612, 613, 1.f);
 		SpriteRendererBody->CreateAnimation("Dead", PLAYER_SPRITE_PATH, 622, 631, 0.2f, false);
 		SpriteRendererBody->CreateAnimation("Ride_Portal", PLAYER_SPRITE_PATH, 615, 621, 0.1f, false);
 	}
@@ -82,8 +86,10 @@ APlayer::APlayer()
 		Collision->SetCollisionType(ECollisionType::CirCle);
 
 		Collision->SetCollisionEnter(std::bind(&APlayer::OnEnterCollision, this, std::placeholders::_1));
+		Collision->SetCollisionEnd(std::bind(&APlayer::OnEndCollision, this, std::placeholders::_1));
 
 		GetWorld()->CollisionGroupLink(ECollisionGroup::PlayerBody, ECollisionGroup::MonsterBody);
+		GetWorld()->CollisionGroupLink(ECollisionGroup::PlayerBody, ECollisionGroup::Bomb);
 
 		/*Collision->SetCollisionStay(std::bind(&ANewPlayer::CollisionStay, this, std::placeholders::_1));
 		Collision->SetCollisionEnd(std::bind(&ANewPlayer::CollisionEnd, this, std::placeholders::_1));*/
@@ -184,6 +190,14 @@ void APlayer::Reborn()
 {
 	Fsm.ChangeState(EPlayerState::REBORN);
 	FsmH.ChangeState(EPlayerBlinkAndColState::BLINK_ON_COL_OFF);
+
+	ResetDroppedBombs();
+	SetActorLocation(StartLocation);
+}
+
+void APlayer::ResetDroppedBombs()
+{
+	DroppedBombs.clear();
 }
 
 void APlayer::InitSounds()
@@ -262,20 +276,51 @@ void APlayer::DropBomb()
 	int curBombCnt = ABomb::GetBombCnt();
 	if (ABomb::CanSetBombThisIdx(idx) && curBombCnt < Ability.BombCount)
 	{
+		ERenderOrder order = static_cast<ERenderOrder>(static_cast<int>(ERenderOrder::BOMB_5) - curBombCnt);
+
 		ABomb* pBomb = GetWorld()->SpawnActor<ABomb>();
-		pBomb->Init(loc, Ability.BombType, Ability.Power, CurMapPtr);
+		pBomb->Init(loc, Ability.BombType, Ability.Power, CurMapPtr, order);
+
+		DroppedBombs.push_back(pBomb);
 	}
 }
 
 void APlayer::Kill()
 {
-	Fsm.ChangeState(EPlayerState::DEAD);
+	if (!IsImmotal)
+	{
+		Fsm.ChangeState(EPlayerState::DEAD);
+	}
 }
 
 void APlayer::OnEnterCollision(AActor* _actor)
 {
-	//_actor->SetActive(false);	// temp
-	Kill();
+	if (_actor->GetName() != "Bomb")
+	{
+		Kill();
+	}
+}
+
+void APlayer::OnEndCollision(AActor* _actor)
+{
+	std::list<ABomb*>::iterator it = DroppedBombs.begin();
+	std::list<ABomb*>::iterator itEnd = DroppedBombs.end();
+
+	for (; it != itEnd; ++it)
+	{
+		ABomb* pBomb = *it;
+		if (pBomb == nullptr)
+		{
+			continue;
+		}
+
+		if (pBomb == _actor)
+		{
+			pBomb->SetIsMovableForPlayer(false);
+			it = DroppedBombs.erase(it);
+			if (it == itEnd) break;
+		}
+	}
 }
 
 void APlayer::OnEndPortalAnim()
@@ -286,12 +331,12 @@ void APlayer::OnEndPortalAnim()
 /* FSM2 start functions */
 void APlayer::OnTurnOnBlink()
 {
-	Collision->SetActive(false);
+	IsImmotal = true;
 }
 
 void APlayer::OnTurnOffBlink()
 {
-	Collision->SetActive(true);
+	IsImmotal = false;
 }
 
 /* FSM start functions */
@@ -376,17 +421,7 @@ void APlayer::Idling(float _deltaTime)
 {
 	BlinkEyeAnimInfo.Seconds += _deltaTime;
 
-	if (BlinkEyeAnimInfo.IsRunning)
-	{
-		if (BlinkEyeAnimInfo.Seconds >= BlinkEyeAnimInfo.AnimSeconds)
-		{
-			BlinkEyeAnimInfo.Seconds = 0.f;
-			BlinkEyeAnimInfo.IsRunning = false;
-			SpriteRendererHead->ChangeAnimation("Idle_Down");
-			SpriteRendererBody->ChangeAnimation("Idle_Down");
-		}
-	}
-	else
+	if (!BlinkEyeAnimInfo.IsRunning)
 	{
 		if (BlinkEyeAnimInfo.Seconds >= BlinkEyeAnimInfo.WaitSeconds)
 		{
@@ -401,6 +436,7 @@ void APlayer::Idling(float _deltaTime)
 void APlayer::Moving(float _deltaTime)
 {
 	BlinkEyeAnimInfo.Seconds = 0.f;
+	BlinkEyeAnimInfo.IsRunning = false;
 
 	std::string suffixStr = GetDirectionStr();
 	SpriteRendererHead->ChangeAnimation("Run_" + suffixStr);
@@ -429,10 +465,10 @@ void APlayer::Moving(float _deltaTime)
 	{
 		//bool canMoveMap = CurMapPtr->CanMove(nextPos);
 		//isMove = isMove && canMoveMap;
-		bool canMoveMapLT = CurMapPtr->CanMove(nextPosLT);
-		bool canMoveMapRT = CurMapPtr->CanMove(nextPosRT);
-		bool canMoveMapLB = CurMapPtr->CanMove(nextPosLB);
-		bool canMoveMapRB = CurMapPtr->CanMove(nextPosRB);
+		bool canMoveMapLT = CurMapPtr->CanMove(nextPosLT, true);
+		bool canMoveMapRT = CurMapPtr->CanMove(nextPosRT, true);
+		bool canMoveMapLB = CurMapPtr->CanMove(nextPosLB, true);
+		bool canMoveMapRB = CurMapPtr->CanMove(nextPosRB, true);
 		isMove = isMove && canMoveMapLB && canMoveMapRB && canMoveMapLT && canMoveMapRT;
 
 		/*OutputDebugString(std::string(canMoveMapLT ? "canMoveMapLT\n" : "NLT....").c_str());

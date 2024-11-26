@@ -8,6 +8,7 @@
 
 #include <EngineCore/SpriteRenderer.h>
 #include <EngineBase/EngineDebug.h>
+#include <EngineCore/2DCollision.h>
 #include <functional>
 #include <algorithm>
 
@@ -41,6 +42,20 @@ ABomb::ABomb()
 	Fsm.CreateState(EBombState::Launched, nullptr, std::bind(&ABomb::OnLaunched, this));
 	Fsm.CreateState(EBombState::Exploding, nullptr, nullptr);
 	Fsm.CreateState(EBombState::Over, nullptr, nullptr);
+
+	{
+		FVector2D collSize = GlobalVar::BOMB_SIZE;
+
+		Collision = CreateDefaultSubObject<U2DCollision>();
+		Collision->SetComponentLocation(collSize.Half());
+		Collision->SetComponentScale(collSize);
+		Collision->SetCollisionGroup(ECollisionGroup::Bomb);
+		Collision->SetCollisionType(ECollisionType::CirCle);
+	}
+
+	SetName("Bomb");
+
+	//DebugOn();
 }
 
 ABomb::~ABomb()
@@ -62,7 +77,7 @@ void ABomb::Tick(float _deltaTime)
 }
 
 /* Initialize */
-void ABomb::Init(const FVector2D& _loc, EBombType _bombType, int _power, ABaseMap* _curMap)
+void ABomb::Init(const FVector2D& _loc, EBombType _bombType, int _power, ABaseMap* _curMap, ERenderOrder _order)
 {
 	if (ABomb::BombList.size() >= GlobalVar::MAX_BOMB_CNT) return;
 
@@ -84,10 +99,16 @@ void ABomb::Init(const FVector2D& _loc, EBombType _bombType, int _power, ABaseMa
 	//DebugPrintFIntVector(explodeIdxs, "explodeIdxs");
 
 	Size = GlobalVar::BOMB_SIZE;
+	Order = _order;
 	Power = _power;
 	BombType = _bombType;
 	MatrixIdx = matIdx;
 	ExplodeIdxs = explodeIdxs;
+
+	VertexPts.LT = orderedLoc;
+	VertexPts.RT = orderedLoc + FVector2D{ Size.X, 0.f };
+	VertexPts.LB = orderedLoc + FVector2D{ 0.f, Size.Y };
+	VertexPts.RB = orderedLoc + FVector2D{ Size.X, Size.Y };
 
 	SetActorLocation(orderedLoc);
 	InitSpriteAndAnim(bombTailTypes);
@@ -170,7 +191,7 @@ void ABomb::_InitDefaultSprite(USpriteRenderer** _spriteRenderer, std::string_vi
 	(*_spriteRenderer)->SetComponentLocation(loc);
 	(*_spriteRenderer)->SetComponentScale(Size);
 	(*_spriteRenderer)->SetPivotType(PivotType::Center);
-	(*_spriteRenderer)->SetOrder(ERenderOrder::BOMB);
+	(*_spriteRenderer)->SetOrder(Order);
 
 	std::vector<int> idxs;
 	std::vector<float> secs;
@@ -199,16 +220,13 @@ SBombTailTypes ABomb::GetBombTailTypes(const FIntPoint& _matIdx, EBombType _bomb
 	bool isLeftEnd = false;
 	bool isRightEnd = false;
 
-	ATileMap* pMapWall = CurMapPtr->GetWallMap();
-	ATileMap* pBoxWall = CurMapPtr->GetBoxMap();
-
 	for (int i = 1; i <= _power; i++)
 	{
 		bool isLast = (i == _power);
-		EBombTailType upType = GetBombTailType(pMapWall, pBoxWall, _matIdx + FIntPoint::UP * i, &isUpEnd, isLast);
-		EBombTailType downType = GetBombTailType(pMapWall, pBoxWall, _matIdx + FIntPoint::DOWN * i, &isDownEnd, isLast);
-		EBombTailType leftType = GetBombTailType(pMapWall, pBoxWall, _matIdx + FIntPoint::LEFT * i, &isLeftEnd, isLast);
-		EBombTailType rightType = GetBombTailType(pMapWall, pBoxWall, _matIdx + FIntPoint::RIGHT * i, &isRightEnd, isLast);
+		EBombTailType upType = GetBombTailType(_matIdx + FIntPoint::UP * i, &isUpEnd, isLast);
+		EBombTailType downType = GetBombTailType(_matIdx + FIntPoint::DOWN * i, &isDownEnd, isLast);
+		EBombTailType leftType = GetBombTailType(_matIdx + FIntPoint::LEFT * i, &isLeftEnd, isLast);
+		EBombTailType rightType = GetBombTailType(_matIdx + FIntPoint::RIGHT * i, &isRightEnd, isLast);
 
 		if (upType != EBombTailType::NONE) bombTailTypes.Up.push_back(upType);
 		if (downType != EBombTailType::NONE) bombTailTypes.Down.push_back(downType);
@@ -224,45 +242,58 @@ SBombTailTypes ABomb::GetBombTailTypes(const FIntPoint& _matIdx, EBombType _bomb
 	return bombTailTypes;
 }
 
-EBombTailType ABomb::GetBombTailType(ATileMap* _pWallMap, ATileMap* _pBoxMap, const FIntPoint& _nextIdx, bool* _isEnd, bool _isLast)
+EBombTailType ABomb::GetBombTailType(const FIntPoint& _idx, bool* _isEnd, bool _isLast)
 {
 	if (CurMapPtr == nullptr)
 	{
 		MSGASSERT("맵이 세팅되지 않은채 폭탄을 설치했습니다.");
 	}
 
-	bool hasWall = _pWallMap->IsBlocked(_nextIdx);
-	bool hasBox = _pBoxMap->IsBlocked(_nextIdx);
+	bool hasPortal = false;
 
-	if (hasWall == false && *_isEnd == false)
+	if (_idx == CurMapPtr->GetPortalIdx())
 	{
-		if (hasBox == true)
-		{
-			*_isEnd = true;
-			return EBombTailType::CONNECT;
-		}
-		else
-		{
-			if (_isLast)
-			{
-				return EBombTailType::END;
-			}
-			else if (_pWallMap->IsEdge(_nextIdx))
-			{
-				return EBombTailType::CONNECT;
-			}
-			else
-			{
-				return EBombTailType::CONNECT;
-			}
-		}
+		hasPortal = true;
 	}
-	else
+
+	if (hasPortal || *_isEnd == true)
+	{
+		return EBombTailType::NONE;
+	}
+
+	bool hasWall = false;
+	bool hasBox = false;
+	bool isIndexOver = false;
+
+	ATileMap* pWallMap = CurMapPtr->GetWallMap();
+	ATileMap* pBoxMap = CurMapPtr->GetBoxMap();
+
+	if (pWallMap)
+	{
+		hasWall = pWallMap->HasTileSprite(_idx);
+		isIndexOver = pWallMap->IsIndexOver(_idx);
+	}
+	if (pBoxMap)
+	{
+		hasBox = pBoxMap->HasTileSprite(_idx);
+	}
+
+	if (hasWall || hasBox)
 	{
 		*_isEnd = true;
 	}
 
-	return EBombTailType::NONE;
+	if (hasWall || isIndexOver)
+	{
+		return EBombTailType::NONE;
+	}
+
+	if (_isLast)
+	{
+		return EBombTailType::END;
+	}
+
+	return EBombTailType::CONNECT;
 }
 
 std::vector<FIntPoint> ABomb::GetBombRange(const FIntPoint& _matIdx, const SBombTailTypes& _tailInfo)

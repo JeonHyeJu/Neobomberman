@@ -31,7 +31,7 @@ public:
 	void BeginPlay() override;
 	void Tick(float _DeltaTime) override;
 
-	void Init(const FVector2D& _loc, EBombType _bombType, int _power, ABaseMap* _curMap);
+	void Init(const FVector2D& _loc, EBombType _bombType, int _power, ABaseMap* _curMap, ERenderOrder _order);
 	void InitSpriteAndAnim(const SBombTailTypes& _tailInfo);
 	void ExplodeBySplash();
 	void SetCurMap(ABaseMap* _map)
@@ -56,6 +56,18 @@ public:
 			}
 		}
 		return false;
+	}
+	inline FIntPoint GetMatrixIdx() const
+	{
+		return MatrixIdx;
+	}
+	inline void SetIsMovableForPlayer(bool _val)
+	{
+		IsMovableForPlayer = _val;
+	}
+	inline bool GetIsMovableForPlayer() const
+	{
+		return IsMovableForPlayer;
 	}
 
 	/* Static function */
@@ -87,7 +99,7 @@ private:
 	void _InitDefaultSprite(USpriteRenderer** _spriteRenderer, std::string_view _spriteName, std::string_view _animName, const FVector2D& _animLoc);
 
 	SBombTailTypes GetBombTailTypes(const FIntPoint& _matIdx, EBombType _bombType, int _power);
-	EBombTailType GetBombTailType(ATileMap* _pWallMap, ATileMap* _pBoxMap, const FIntPoint& _nextIdx, bool* _isEnd, bool _isLast);		// Temp. intergrate two tile map.
+	EBombTailType GetBombTailType(const FIntPoint& _nextIdx, bool* _isEnd, bool _isLast);		// Temp. intergrate two tile map.
 	std::vector<FIntPoint> GetBombRange(const FIntPoint& _matIdx, const SBombTailTypes& _tailInfo);
 
 	void Running(float _deltaTime);
@@ -101,8 +113,11 @@ private:
 
 	static std::list<ABomb*> BombList;
 
+	ERenderOrder Order;
+
 	UFSMStateManager Fsm;
 	ABaseMap* CurMapPtr = nullptr;
+	class U2DCollision* Collision = nullptr;	// For checking overlaped position with palyer.
 
 	EBombType BombType = EBombType::PLAIN;
 
@@ -113,6 +128,9 @@ private:
 	FIntPoint MatrixIdx;
 	SBombTailTypes BombTails;
 	std::vector<FIntPoint> ExplodeIdxs;
+
+	FVRect VertexPts;
+	bool IsMovableForPlayer = true;
 
 	USpriteRenderer* ExplodeSprite_Center = nullptr;
 	std::vector<USpriteRenderer*> ExplodeSprites_Up;

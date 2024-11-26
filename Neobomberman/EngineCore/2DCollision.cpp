@@ -37,11 +37,14 @@ void U2DCollision::ComponentTick(float _DeltaTime)
 
 	if (true == IsDebug() || true == GetActor()->IsDebug())
 	{
-
 		FTransform ActorTransform = GetActorTransform();
 		FVector2D CameraPos = GetActor()->GetWorld()->GetCameraPos();
 
-		ActorTransform.Location -= CameraPos;
+		
+		if (true == IsCameraEffect)
+		{
+			ActorTransform.Location -= CameraPos;
+		}
 
 		switch (CollisionType)
 		{
@@ -119,7 +122,7 @@ void U2DCollision::SetCollisionEnter(std::function<void(AActor*)> _Function)
 
 	ULevel* Level = GetActor()->GetWorld();
 
-	if (nullptr != GetActor()->GetWorld())
+	if (Level != nullptr)
 	{
 		Level->PushCheckCollision(this);
 	}
@@ -131,11 +134,10 @@ void U2DCollision::SetCollisionStay(std::function<void(AActor*)> _Function)
 
 	ULevel* Level = GetActor()->GetWorld();
 
-	if (nullptr != GetActor()->GetWorld())
+	if (Level != nullptr)
 	{
 		Level->PushCheckCollision(this);
 	}
-
 }
 
 void U2DCollision::SetCollisionEnd(std::function<void(AActor*)> _Function)
@@ -144,11 +146,39 @@ void U2DCollision::SetCollisionEnd(std::function<void(AActor*)> _Function)
 
 	ULevel* Level = GetActor()->GetWorld();
 
-	if (nullptr != GetActor()->GetWorld())
+	if (Level != nullptr)
 	{
 		Level->PushCheckCollision(this);
 	}
+}
 
+void U2DCollision::CollisionSetRelease()
+{
+	std::set<U2DCollision*>::iterator StartIter = CollisionCheckSet.begin();
+	std::set<U2DCollision*>::iterator EndIter = CollisionCheckSet.end();
+
+	for (; StartIter != EndIter; )
+	{
+		U2DCollision* ColCollison = *StartIter;
+
+		if (nullptr == ColCollison)
+		{
+			++StartIter;
+			continue;
+		}
+
+		if (false == ColCollison->IsActive() || true == ColCollison->IsDestroy())
+		{
+			if (nullptr != End)
+			{
+				End(ColCollison->GetActor());
+			}
+			StartIter = CollisionCheckSet.erase(StartIter);
+			continue;
+		}
+
+		++StartIter;
+	}
 }
 
 void U2DCollision::CollisionEventCheck(class U2DCollision* _Other)

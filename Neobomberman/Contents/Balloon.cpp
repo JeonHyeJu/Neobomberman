@@ -150,8 +150,33 @@ void ABalloon::ChangeMoveAnim(const FVector2D& _direction)
 
 void ABalloon::Move(const FVector2D& _direction, float _deltaTime)
 {
-	ChangeMoveAnim(_direction);
-	AddActorLocation(_direction * _deltaTime * Speed);
+	bool isMove = false;
+
+	if (CurMapPtr != nullptr)
+	{
+		FVector2D curLoc = GetActorLocation();
+		FVector2D nextPosLT = curLoc + (_direction * _deltaTime * Speed) + FVector2D{ 1, 1 };
+		FVector2D nextPosRT = curLoc + (_direction * _deltaTime * Speed) + FVector2D{ 31, 1 };
+		FVector2D nextPosLB = curLoc + (_direction * _deltaTime * Speed) + FVector2D{ 1, 31 };
+		FVector2D nextPosRB = curLoc + (_direction * _deltaTime * Speed) + FVector2D{ 31, 31 };
+
+		bool canMoveMapLT = CurMapPtr->CanMove(nextPosLT);
+		bool canMoveMapRT = CurMapPtr->CanMove(nextPosRT);
+		bool canMoveMapLB = CurMapPtr->CanMove(nextPosLB);
+		bool canMoveMapRB = CurMapPtr->CanMove(nextPosRB);
+		isMove = canMoveMapLB && canMoveMapRB && canMoveMapLT && canMoveMapRT;
+	}
+
+	if (isMove)
+	{
+		ChangeMoveAnim(_direction);
+		AddActorLocation(_direction * _deltaTime * Speed);
+	}
+	else
+	{
+		ClearRoute();
+		Fsm.ChangeState(EMonsterState::THINKING);
+	}
 }
 
 void ABalloon::Damaged(unsigned __int8 _power)
@@ -233,7 +258,7 @@ void ABalloon::Blinking(float _deltaTime)
 
 void ABalloon::WalkingForStart(float _deltaTime)
 {
-	FVector2D firstLoc = CurMap->MatrixIdxToLocation(FirstIdx);
+	FVector2D firstLoc = CurMapPtr->MatrixIdxToLocation(FirstIdx);
 	FVector2D monsterRealLoc = GetActorLocation();
 
 	FIntPoint firstLocInt = firstLoc.ConvertToPoint();
@@ -285,9 +310,9 @@ void ABalloon::Walking(float _deltaTime)
 
 	FVector2D monsterRealLoc = GetActorLocation();
 	FIntPoint monsterRealLocInt = monsterRealLoc.ConvertToPoint();
-	FIntPoint monsterMatrixIdx = CurMap->LocationToMatrixIdx(monsterRealLoc);
+	FIntPoint monsterMatrixIdx = CurMapPtr->LocationToMatrixIdx(monsterRealLoc);
 
-	FVector2D destRealLoc = CurMap->MatrixIdxToLocation(Destination);
+	FVector2D destRealLoc = CurMapPtr->MatrixIdxToLocation(Destination);
 	FIntPoint destRealLocInt = destRealLoc.ConvertToPoint();
 	FIntPoint destMatrixIdx = Destination;
 

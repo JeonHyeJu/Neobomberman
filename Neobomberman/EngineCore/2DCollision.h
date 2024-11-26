@@ -75,6 +75,12 @@ public:
 		return CollisionType;
 	}
 
+	void SetCameraEffect(bool _IsCameraEffect)
+	{
+		IsCameraEffect = _IsCameraEffect;
+	}
+
+	//                                        충돌한 상대
 	void SetCollisionEnter(std::function<void(AActor*)> _Function);
 	void SetCollisionStay(std::function<void(AActor*)> _Function);
 	void SetCollisionEnd(std::function<void(AActor*)> _Function);
@@ -82,12 +88,16 @@ public:
 protected:
 
 private:
+	void CollisionSetRelease();
+
 	void CollisionEventCheck(class U2DCollision* _Other);
 
 	ECollisionType CollisionType = ECollisionType::CirCle;
 	int CollisionGroup = -1;
 
 	std::set<U2DCollision*> CollisionCheckSet;
+
+	bool IsCameraEffect = true;
 
 	std::function<void(AActor*)> Enter;
 	std::function<void(AActor*)> Stay;

@@ -120,6 +120,9 @@
     <ClInclude Include="GameData.h">
       <Filter>Util</Filter>
     </ClInclude>
+    <ClInclude Include="HurryUp.h">
+      <Filter>Actor\UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Player.cpp">
@@ -196,6 +199,9 @@
     </ClCompile>
     <ClCompile Include="Mushroom.cpp">
       <Filter>Actor\Monsters</Filter>
+    </ClCompile>
+    <ClCompile Include="HurryUp.cpp">
+      <Filter>Actor\UI</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
