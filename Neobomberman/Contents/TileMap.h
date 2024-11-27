@@ -2,6 +2,7 @@
 #include <EngineCore/Actor.h>
 #include <EngineCore/SpriteRenderer.h>
 #include <EngineBase/EngineSerializer.h>
+#include "ContentsEnum.h"
 
 /*
 ***Important!!
@@ -12,18 +13,21 @@ enum class TileType
 	Ground = 0,
 	Wall,
 	Box,
+	Cover,
 };
 
 class Tile : public ISerializObject
 {
 public:
 	USpriteRenderer* SpriteRenderer = nullptr;
+	USpriteRenderer* SpriteRendererItem = nullptr;
 
 	bool IsMove = true;
 	int SpriteIndex = -1;
 	std::string SpriteName = "";
 	FVector2D Scale;
 	FVector2D Pivot;
+	EItem Item = EItem::NONE;
 
 	void Serialize(UEngineSerializer& _Ser)
 	{
@@ -48,7 +52,7 @@ public:
 		_Ser >> Scale;
 		_Ser >> Pivot;
 		
-		//SpriteRenderer->SetSprite(SpriteName);	// This done in ATileMap
+		//SpriteRenderer->SetSprite(SpriteName);	// This is done in ATileMap
 	}
 };
 
@@ -63,6 +67,8 @@ public:
 	ATileMap& operator=(const ATileMap& _Other) = delete;
 	ATileMap& operator=(ATileMap&& _Other) noexcept = delete;
 
+	// must be called before Deserialize.
+	void SetCustomOrder(ERenderOrder _order);
 	void Init(std::string_view _Sprite, const FIntPoint& _Count, const FVector2D& _TileSize, const TileType& _type);
 	void SetTileWithLoc(FVector2D _Location, int _SpriteIndex, bool _isMove);
 	void SetTile(const FIntPoint& _Index, int _SpriteIndex, bool _isMove);
@@ -95,6 +101,9 @@ public:
 	{
 		return IsPortalOpened;
 	}
+	bool HasItem(const FIntPoint& _idx);
+	EItem GetItem(const FIntPoint& _idx);
+	EItem PopItem(const FIntPoint& _idx);
 	bool GetIsMovable(const FVector2D& _loc);
 
 	Tile* GetTileRef(FIntPoint _idx);
@@ -105,24 +114,36 @@ public:
 	bool IsIndexOver(FIntPoint _Index);
 	bool IsEdge(FIntPoint _Index);
 
+	void SetItemsAfterLoad(const std::vector<EItem>& _items);
 	void SetTilesAnimAfterLoad(std::string_view _animName, std::string_view _spriteName);
 	void LaunchTileAnimAfterLoad(const FIntPoint& _pt, std::string_view _animName);
 
 	void Serialize(UEngineSerializer& _Ser);
 	void DeSerialize(UEngineSerializer& _Ser);
+	void DestroySpriteItem(const FIntPoint& _idx);
+
+	/* Cheats */
+	void CheatDestoyAllBoxes();
 
 protected:
 
 private:
-	void DestroySpriteAfterLoad(const FIntPoint& _idx);
+	void DestroySprite(const FIntPoint& _idx);
+	void OnEndCrumbling(const FIntPoint& _idx);
 	void OnRunPortalMove();
+
+	const char* ITEM_SPRITE_NAME = "items.png";
 
 	std::string SpriteName = "";
 	FIntPoint TileCount;
 	FVector2D TileSize;
 	TileType WholeTileType = TileType::Ground;
 	std::vector<std::vector<Tile>> AllTiles;
+	std::vector<FIntPoint> TileIdxs;
+	std::list<FIntPoint> HavingItemTileIdxs;
 
 	bool IsPortalOpened = false;
 	FIntPoint PortalIdx;
+
+	ERenderOrder CustomOrder = ERenderOrder::NONE;
 };

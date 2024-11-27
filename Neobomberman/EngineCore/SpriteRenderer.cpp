@@ -76,7 +76,14 @@ void USpriteRenderer::ComponentTick(float _DeltaTime)
 
 			if (CurAnimation->Events.contains(CurIndex))
 			{
+				int prevIdx = CurIndex;
 				CurAnimation->Events[CurIndex]();
+
+				// There are cases where changeAnimation is made during the event.
+				if (prevIdx != CurIndex)
+				{
+					return;
+				}
 			}
 
 			int nextIdx = CurAnimation->CurIndex + 1;
@@ -258,7 +265,7 @@ void USpriteRenderer::ChangeAnimation(std::string_view _AnimationName, bool _For
 		return;
 	}
 
-	CurAnimation = &FrameAnimations[UpperName];
+	CurAnimation = ChangeAnimation;
 	CurAnimation->Reset();
 	CurIndex = CurAnimation->FrameIndex[CurAnimation->CurIndex];
 

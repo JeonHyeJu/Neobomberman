@@ -1,6 +1,7 @@
 #pragma once
 #include <EngineCore/Actor.h>
 #include <EngineCore/PathFindAStar.h>
+#include "ContentsEnum.h"
 
 class ATileMap;
 class ABaseMap : public AActor, public IPathFindData
@@ -14,6 +15,7 @@ public:
 	ABaseMap& operator=(const ABaseMap& _other) = delete;
 	ABaseMap& operator=(ABaseMap&& _other) noexcept = delete;
 
+	void SetItems(const std::vector<EItem>& _list);
 	bool Deserialize(ATileMap* _tileMap, std::string_view _savePath, std::string_view _saveName);
 	bool CanMove(const FVector2D& _loc, bool _isPlayer=false);
 	bool CanMove(const FIntPoint& _idx, bool _isPlayer=false);
@@ -30,6 +32,10 @@ public:
 	inline ATileMap* GetBoxMap() const
 	{
 		return MapBox;
+	}
+	inline ATileMap* GetConverMap() const
+	{
+		return MapCover;
 	}
 
 	inline void SetPortalIdx(const FIntPoint& _idx)
@@ -66,6 +72,13 @@ public:
 		return false;
 	}
 
+	void RemoveItem(const FIntPoint& _idx);
+	bool HasItem(const FIntPoint& _idx);
+	EItem PopItem(const FIntPoint& _idx);
+
+	/* Cheats */
+	void CheatDestoyAllBoxes();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float _deltaTime) override;
@@ -79,10 +92,13 @@ protected:
 	ATileMap* MapGround = nullptr;
 	ATileMap* MapWall = nullptr;
 	ATileMap* MapBox = nullptr;
+	ATileMap* MapCover = nullptr;
 
 	FIntPoint PortalIdx = FIntPoint::NEGATIVE_ONE;
 
 	std::vector<FIntPoint> SplashTileIdxs;
 
 	std::function<void()> ExplodeEvent = nullptr;
+
+	const std::list<FIntPoint> Temp;
 };

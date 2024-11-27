@@ -10,6 +10,7 @@
 #include "Fade.h"
 
 #include <EngineCore/Level.h>
+#include <EnginePlatform/EngineInput.h>
 
 APlayBossMode::APlayBossMode()
 {
@@ -29,7 +30,6 @@ void APlayBossMode::BeginPlay()
 
 	Player = pLevel->GetPawn<APlayer>();
 	Player->SetGameUI(gameUI);
-	//Player->SetCollisionImage("Bg_1-Col.png");
 
 	/* Stage 1-1 */
 	ABossMap* pBossMap = pLevel->SpawnActor<ABossMap>();
@@ -58,6 +58,8 @@ void APlayBossMode::Tick(float _deltaTime)
 
 	static float elpasedSecs = 0.f;	// Temp
 	elpasedSecs += _deltaTime;
+
+	CheckCheat();
 
 	if (elpasedSecs >= 1.f)
 	{
@@ -111,6 +113,8 @@ void APlayBossMode::FadeOut()
 void APlayBossMode::OnEndFadeOut()
 {
 	ResultScene = GetWorld()->SpawnActor<AResult>();
+	ResultScene->SetNextLevel("Ending");
+	ResultScene->ChangeRImage("ResultImage2.png", 0);
 
 	int lastTime = AGameUI::GetLastTime();
 	ResultScene->SetLastSecs(lastTime);
@@ -175,9 +179,32 @@ void APlayBossMode::OnExplodeBomb()
 			//OutputDebugString("---------------------------- E\n");
 		}
 	}
+
+	// Check player
+	FIntPoint playerIdx = CurMapPtr->LocationToMatrixIdx(Player->GetActorLocation());
+	if (CurMapPtr->IsInSplash(playerIdx))
+	{
+		Player->Kill();
+	}
 }
 
 bool APlayBossMode::IsAllMonstersDead() const
 {
 	return MonsterList.size() == 0;
+}
+
+void APlayBossMode::CheckCheat()
+{
+	if (UEngineInput::GetInst().IsDown('N'))
+	{
+		if (!isShowingResult && !IsAllMonstersDead())
+		{
+			std::list<AMonster*>::iterator it = MonsterList.begin();
+			std::list<AMonster*>::iterator itEnd = MonsterList.end();
+			for (; it != itEnd; ++it)
+			{
+				(*it)->Kill();
+			}
+		}
+	}
 }

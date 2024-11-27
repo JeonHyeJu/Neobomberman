@@ -6,7 +6,7 @@
 #include <EngineBase/EngineFile.h>
 
 ABaseMap::ABaseMap()
-: AActor()
+: AActor(), Temp({})
 {
 
 }
@@ -286,6 +286,19 @@ void ABaseMap::RemoveExplodedBomb()
 	ABomb::BombList.remove(nullptr);
 }
 
+// TODO: organize
+bool ABaseMap::HasItem(const FIntPoint& _idx)
+{
+	if (MapBox == nullptr) return false;
+	return MapBox->HasItem(_idx);
+}
+
+EItem ABaseMap::PopItem(const FIntPoint& _idx)
+{
+	if (MapBox == nullptr) return EItem::NONE;
+	return MapBox->PopItem(_idx);
+}
+
 void ABaseMap::CheckExplodedBox()
 {
 	bool hasExploded = SplashTileIdxs.size() > 0;
@@ -296,6 +309,22 @@ void ABaseMap::CheckExplodedBox()
 			FIntPoint boxIdx = SplashTileIdxs[i];
 			MapBox->LaunchTileAnimAfterLoad(boxIdx, GlobalPath::ANIM_CRUMBLING_BOX);
 		}
+	}
+}
+
+void ABaseMap::SetItems(const std::vector<EItem>& _list)
+{
+	if (MapBox)
+	{
+		MapBox->SetItemsAfterLoad(_list);
+	}
+}
+
+void ABaseMap::RemoveItem(const FIntPoint& _idx)
+{
+	if (MapBox)
+	{
+		MapBox->DestroySpriteItem(_idx);
 	}
 }
 
@@ -322,5 +351,14 @@ void ABaseMap::AppendSplash(const std::vector<FIntPoint>& _appendIdxs)
 		}
 
 		SplashTileIdxs.push_back(_appendIdxs[i]);
+	}
+}
+
+/* Cheats */
+void ABaseMap::CheatDestoyAllBoxes()
+{
+	if (MapBox)
+	{
+		MapBox->CheatDestoyAllBoxes();
 	}
 }

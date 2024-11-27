@@ -12,7 +12,42 @@
 ABossMap::ABossMap()
 : ABaseMap()
 {
+	FVector2D winSize = GlobalVar::WINDOW_SIZE;
+	{
+		SRBackground = CreateDefaultSubObject<USpriteRenderer>();
+		SRBackground->SetSprite("PlayBackground");
+		SRBackground->SetComponentLocation(winSize.Half());
+		SRBackground->SetComponentScale(winSize);
+		SRBackground->SetOrder(ERenderOrder::BACKGROUND);
+		SRBackground->CreateAnimation("Run", "PlayBackground", 0, 9, 1.f);
+	}
 
+	{
+		FVector2D size{ 416.f, 32.f };
+		SRBackgroundBottom = CreateDefaultSubObject<USpriteRenderer>();
+		SRBackgroundBottom->SetSprite("BgBottom.png", 1);
+		SRBackgroundBottom->SetComponentLocation({ winSize.hX(), winSize.Y - size.hY() });
+		SRBackgroundBottom->SetComponentScale(size);
+		SRBackgroundBottom->SetOrder(999);
+	}
+
+	// TODO
+	{
+		FVector2D size = { 96, 196 };
+		SRLeftBear = CreateDefaultSubObject<USpriteRenderer>();
+		SRLeftBear->SetSprite("LeftBears.png");
+		SRLeftBear->SetComponentLocation(size.Half() + FVector2D{ -2.f, 150.f });
+		SRLeftBear->SetComponentScale(size);
+		SRLeftBear->SetOrder(ERenderOrder::BACKGROUND_OVER);
+		SRLeftBear->CreateAnimation("Run", "LeftBears.png", 0, 7, 1.f);
+
+		SRRightBear = CreateDefaultSubObject<USpriteRenderer>();
+		SRRightBear->SetSprite("RightBears.png");
+		SRRightBear->SetComponentLocation(size.Half() + FVector2D{ winSize.X - size.X + 2, 150.f });
+		SRRightBear->SetComponentScale(size);
+		SRRightBear->SetOrder(ERenderOrder::BACKGROUND_OVER);
+		SRRightBear->CreateAnimation("Run", "RightBears.png", 0, 7, 1.f);
+	}
 }
 
 ABossMap::~ABossMap()
@@ -23,6 +58,10 @@ ABossMap::~ABossMap()
 void ABossMap::BeginPlay()
 {
 	ABaseMap::BeginPlay();
+
+	SRBackground->ChangeAnimation("Run");
+	SRLeftBear->ChangeAnimation("Run");
+	SRRightBear->ChangeAnimation("Run");
 }
 
 void ABossMap::Tick(float _deltaTime)
@@ -46,7 +85,7 @@ void ABossMap::InitMap()
 	{
 		for (int x = 0; x < shape.X; x++)
 		{
-			MapGround->SetTile({ x, y }, 5, true);
+			MapGround->SetTile({ x, y }, 4, true);
 		}
 	}
 	MapGround->SetActorLocation(moveLoc);

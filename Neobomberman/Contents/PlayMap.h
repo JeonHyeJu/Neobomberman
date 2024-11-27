@@ -21,6 +21,7 @@ protected:
 
 private:
 	class USpriteRenderer* SRBackground = nullptr;
+	class USpriteRenderer* SRBackgroundBottom = nullptr;
 	class USpriteRenderer* SRLeftBear = nullptr;
 	class USpriteRenderer* SRRightBear = nullptr;
 };

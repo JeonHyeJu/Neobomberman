@@ -23,6 +23,15 @@ APlayMap::APlayMap()
 		SRBackground->CreateAnimation("Run", "PlayBackground", 0, 9, 1.f);
 	}
 
+	{
+		FVector2D size{ 416.f, 32.f };
+		SRBackgroundBottom = CreateDefaultSubObject<USpriteRenderer>();
+		SRBackgroundBottom->SetSprite("BgBottom.png");
+		SRBackgroundBottom->SetComponentLocation({ winSize.hX(), winSize.Y - size.hY() });
+		SRBackgroundBottom->SetComponentScale(size);
+		SRBackgroundBottom->SetOrder(999);
+	}
+
 	// TODO
 	{
 		FVector2D size = { 96, 196 };
@@ -89,11 +98,17 @@ void APlayMap::InitMap()
 	MapBox->Init(GlobalPath::TILE_STAGE_1, shape, tileSize, TileType::Box);
 	MapBox->SetActorLocation(moveLoc);
 
+	MapCover = GetWorld()->SpawnActor<ATileMap>();
+	MapCover->Init(GlobalPath::TILE_STAGE_1, shape, tileSize, TileType::Cover);
+	MapCover->SetActorLocation(moveLoc);
+	MapCover->SetCustomOrder(ERenderOrder::MAP_COVER);
+
 	GlobalPath path;
 	std::string tileDatPath = path.GetTileDataPath();
 
 	Deserialize(MapWall, tileDatPath, GlobalPath::MAP_WALL_DAT);
 	Deserialize(MapBox, tileDatPath, GlobalPath::MAP_BOX_DAT);
+	Deserialize(MapCover, tileDatPath, GlobalPath::MAP_COVER_DAT);
 
 	MapBox->SetTilesAnimAfterLoad(GlobalPath::ANIM_CRUMBLING_BOX, GlobalPath::ANIM_CRUMBLING_BOX);
 

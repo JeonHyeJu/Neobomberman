@@ -39,6 +39,7 @@ private:
 
 	/* Fsm start functions */
 	void OnWalk();
+	void OnPassaway();
 	void OnPressDown();
 	void OnDamage();
 
@@ -75,7 +76,7 @@ private:
 
 	FVector2D DetectShape = { 120, 64 };
 
-	const float WALKING_DELAY = .05f;
+	const float WALKING_DELAY = .03f;
 	const float WAIT_DELAY = WALKING_DELAY * 200;
 	float DelaySecs = WAIT_DELAY;
 

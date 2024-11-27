@@ -31,7 +31,7 @@ void AEnding::Tick(float _deltaTime)
 {
 	Super::Tick(_deltaTime);
 
-	if (UEngineInput::GetInst().IsDown(VK_SPACE))
+	if (UEngineInput::GetInst().IsDown(VK_SPACE) || UEngineInput::GetInst().IsDown(VK_RETURN))
 	{
 		AFade::MainFade->BindEndEvent(std::bind(&AEnding::OnEndFadeOut, this));
 		AFade::MainFade->FadeOut();

@@ -10,7 +10,6 @@
 
 AMushroom::AMushroom()
 {
-	Speed = 20.f;
 	Random.SetSeed(MonsterIdx);
 	CanHit = true;
 

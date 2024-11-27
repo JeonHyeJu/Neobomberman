@@ -16,6 +16,7 @@ public:
 	void Tick(float _deltaTime) override;
 
 private:
+	void CheckCheat();
 	void CheckDeadMonster();
 	void OnExplodeBomb();
 

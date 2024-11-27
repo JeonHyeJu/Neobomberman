@@ -245,11 +245,6 @@ unsigned __int8 AGameUI::GetCoin() const
 	return GameData::GetInstance().GetCoin();
 }
 
-void AGameUI::AddCoin(unsigned __int8 __addVal)
-{
-	unsigned __int8 coin = GameData::GetInstance().AddCoin(__addVal);
-}
-
 void AGameUI::CheckInsertingCoin()
 {
 	UEngineInput& input = UEngineInput::GetInst();
@@ -260,7 +255,7 @@ void AGameUI::CheckInsertingCoin()
 	if (isDownF3 || isDownF4)
 	{
 		unsigned __int8 coin = (isDownF3 ? 1 : 2);
-		AddCoin(coin);
+		GameData::GetInstance().AddCoin(coin);
 	}
 }
 

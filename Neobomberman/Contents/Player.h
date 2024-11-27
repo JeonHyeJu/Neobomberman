@@ -34,8 +34,8 @@ public:
 	struct SPlayerAbility
 	{
 		int Power = 2;
-		float Speed = 100.f;
-		int BombCount = 5;	// Temp
+		float Speed = 1;
+		int BombCount = 5;
 		bool HasGlove = false;
 		bool HasShoes = false;
 		bool HasMoveThrogh = false;
@@ -75,6 +75,7 @@ public:
 	{
 		StartLocation = _val;
 	}
+	void AddItem(EItem _item);
 
 	void Kill();
 
@@ -109,7 +110,8 @@ private:
 	void Dying(float _deltaTime);
 	void Blinking(float _deltaTime);
 
-	void OnEndFadeOut();
+	void CheckItem(float _deltaTime);
+	void _CheckItem(const FVector2D& _loc);
 
 	int CurIndex = 0;
 	const char* PLAYER_SPRITE_PATH = "MainCharater_White.png";	// 1024 x 640 (32x64)
@@ -144,4 +146,6 @@ private:
 
 	std::list<class ABomb*> DroppedBombs;
 	FVector2D StartLocation;
+
+	const float DEFAULT_SPEED = 75.f;
 };

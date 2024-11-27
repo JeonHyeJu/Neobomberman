@@ -43,6 +43,7 @@ private:
 	ATileMap* GroundTileMap = nullptr;
 	ATileMap* WallTileMap = nullptr;
 	ATileMap* BoxTileMap = nullptr;
+	ATileMap* CoverTileMap = nullptr;
 
 	class USpriteRenderer* MouseSpriteRender = nullptr;
 	std::string TileDataPath = "";

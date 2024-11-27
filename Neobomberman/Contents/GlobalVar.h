@@ -13,6 +13,7 @@ public:
 	static const FVector2D BAR_SCORE_NUMBER;
 	static const int STAGE_H_MARGIN;
 	static const int MAX_BOMB_CNT;
+	static const int MAX_SPEED;
 	static const int ORG_BOMB_POWER;
 	static const int MAX_BOMB_POWER;
 };
@@ -28,6 +29,7 @@ public:
 	static const char* TILE_STAGE_1;
 	static const char* TILE_STAGE_1_GUIDE;
 	static const char* ANIM_CRUMBLING_BOX;
+	static const char* ANIM_ITEM;
 
 	static const char* BACKGROUND;
 	static const char* CHARACTER;
@@ -39,6 +41,7 @@ public:
 
 	static const char* MAP_WALL_DAT;
 	static const char* MAP_BOX_DAT;
+	static const char* MAP_COVER_DAT;
 
 	// These are not static because only be used once or twice.
 	inline std::string GetAppendedRootPath(const char* _appendedStr) const

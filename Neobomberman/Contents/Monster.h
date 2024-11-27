@@ -92,7 +92,7 @@ protected:
 	ABaseMap* CurMapPtr = nullptr;
 
 	EMonsterScore Score = EMonsterScore::S100;
-	float Speed = 1.f;
+	float Speed = 50.f;
 
 	const int MonsterIdx;
 

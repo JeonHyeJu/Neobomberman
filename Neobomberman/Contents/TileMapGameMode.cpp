@@ -94,7 +94,7 @@ void ATileMapGameMode::InitMap()
 				//GroundTileMap->SetTile({ x, y }, static_cast<int>(TileType::Ground), true);
 
 				// Boss1. emp
-				GroundTileMap->SetTile({ x, y }, 5, true);
+				GroundTileMap->SetTile({ x, y }, 4, true);
 			}
 		}
 
@@ -115,6 +115,13 @@ void ATileMapGameMode::InitMap()
 		BoxTileMap->SetActorLocation(moveLoc);
 	}
 
+	{
+		CoverTileMap = GetWorld()->SpawnActor<ATileMap>();
+		CoverTileMap->Init(GlobalPath::TILE_STAGE_1, titleIdxs, tileSize, TileType::Cover);
+
+		CoverTileMap->SetActorLocation(moveLoc);
+	}
+
 	// Init frame
 	{
 		// 241119 - number of files in Resources\Tiles\TileStage_1
@@ -133,12 +140,17 @@ void ATileMapGameMode::InitMap()
 				data.Type = TileType::Box;
 				data.Container = BoxTileMap;
 			}
-			else if (i == 1 || i == 4 || i == 6)
+			else if (i == 3)
+			{
+				data.Type = TileType::Cover;
+				data.Container = CoverTileMap;
+			}
+			else if (i == 1 || i == 5)
 			{
 				data.Type = TileType::Wall;
 				data.Container = WallTileMap;
 			}
-			else // i == 0 || i == 5
+			else // i == 0 || i == 4
 			{
 				data.Type = TileType::Ground;
 				data.Container = GroundTileMap;
@@ -176,24 +188,30 @@ void ATileMapGameMode::NextTile()
 
 void ATileMapGameMode::AddTile(ATileMap* _curMapPtr, const FVector2D& _mousePos)
 {
-	// Remove existing tile
-	// Temp: i=1, 0 is ground.
-	for (int i = 1; i < EditorDatas.size(); i++)
+	TileType tileType = _curMapPtr->GetType();
+
+	if (tileType != TileType::Cover)
 	{
-		ATileMap* otherMapPtr = EditorDatas[i].Container;
-		if (_curMapPtr != otherMapPtr)
+		// Remove existing tile except ground
+		for (int i = 1; i < EditorDatas.size(); i++)
 		{
-			Tile* tile = otherMapPtr->GetTileRef(_mousePos);
-			if (tile != nullptr && tile->SpriteRenderer != nullptr && tile->SpriteIndex != -1)
+			if (EditorDatas[i].Type == TileType::Ground) continue;
+
+			ATileMap* otherMapPtr = EditorDatas[i].Container;
+			if (_curMapPtr != otherMapPtr)
 			{
-				tile->SpriteRenderer->Destroy();
-				tile->SpriteRenderer = nullptr;
+				Tile* tile = otherMapPtr->GetTileRef(_mousePos);
+				if (tile != nullptr && tile->SpriteRenderer != nullptr && tile->SpriteIndex != -1)
+				{
+					tile->SpriteRenderer->Destroy();
+					tile->SpriteRenderer = nullptr;
+				}
 			}
 		}
 	}
 
 	bool isMove = true;
-	if (_curMapPtr->GetType() != TileType::Ground)
+	if (tileType == TileType::Wall || tileType == TileType::Box)
 	{
 		isMove = false;
 	}
@@ -214,6 +232,7 @@ void ATileMapGameMode::SaveTileMap()
 {
 	Serialize(WallTileMap, TileDataPath, GlobalPath::MAP_WALL_DAT);
 	Serialize(BoxTileMap, TileDataPath, GlobalPath::MAP_BOX_DAT);
+	Serialize(CoverTileMap, TileDataPath, GlobalPath::MAP_COVER_DAT);
 	MessageBoxA(nullptr, "Saved", "Info", MB_OK);
 }
 
@@ -221,6 +240,7 @@ void ATileMapGameMode::LoadTileMap()
 {
 	Deserialize(WallTileMap, TileDataPath, GlobalPath::MAP_WALL_DAT);
 	Deserialize(BoxTileMap, TileDataPath, GlobalPath::MAP_BOX_DAT);
+	Deserialize(CoverTileMap, TileDataPath, GlobalPath::MAP_COVER_DAT);
 }
 
 bool ATileMapGameMode::Serialize(ATileMap* _tileMap, std::string_view _savePath, std::string_view _saveName)

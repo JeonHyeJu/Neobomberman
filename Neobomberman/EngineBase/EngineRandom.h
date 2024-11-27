@@ -32,6 +32,47 @@ public:
 		return RandomCreate.operator()(MtGen);
 	}
 
+	std::vector<int> RandomIntMultiple(int _Min, int _Max, int _cnt)
+	{
+		if (_Max < _Min)
+		{
+			int SwapValue = _Min;
+			_Min = _Max;
+			_Max = SwapValue;
+		}
+
+		std::vector<int> values;
+		values.reserve(_cnt);
+
+		if ((_Max - _Min) < _cnt)
+		{
+			return values;
+		}
+		
+		while (values.size() < _cnt)
+		{
+			std::uniform_int_distribution<int> RandomCreate(_Min, _Max);
+			int val = RandomCreate(MtGen);
+
+			bool isSame = false;
+			for (size_t i = 0, size = values.size(); i < size; ++i)
+			{
+				if (static_cast<int>(values[i]) == val)
+				{
+					isSame = true;
+					break;
+				}
+			}
+
+			if (!isSame)
+			{
+				values.push_back(val);
+			}
+		}
+
+		return values;
+	}
+
 	float Randomfloat(float _Min, float _Max)
 	{
 		if (_Max < _Min)

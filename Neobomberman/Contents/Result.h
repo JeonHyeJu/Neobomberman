@@ -31,6 +31,13 @@ public:
 	void Tick(float _deltaTime) override;
 	void ChangeRImage(std::string_view _path, int _spriteIdx);
 
+	// Temp
+	void SetNextLevel(std::string_view _levelName)
+	{
+		NextLevel = _levelName.data();
+	}
+	void SetRImageIdx(int _idx);
+
 	inline void SetLastSecs(int _lastSecs)
 	{
 		LastSecs = _lastSecs;
@@ -67,7 +74,7 @@ private:
 
 	const char* RESULT_COUNT_PATH = "ResultCount.png";
 	float Speed = 700.f;
-	float SpeedRImage = 500.f;
+	float SpeedRImage = 1000.f;
 
 	int LastSecs = 0;
 	int Bonus = 0;
@@ -77,4 +84,6 @@ private:
 
 	FVector2D LastLocRImage = FVector2D{ 460, 172 };
 	float ElapsedSecs = 0.f;
+
+	std::string NextLevel = "";
 };

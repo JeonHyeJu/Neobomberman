@@ -9,7 +9,6 @@
 
 ABalloon::ABalloon()
 {
-	Speed = 20.f;
 	SetName("Balloon");
 	CanHit = true;
 

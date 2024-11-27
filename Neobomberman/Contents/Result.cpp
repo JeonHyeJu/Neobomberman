@@ -293,7 +293,7 @@ void AResult::ShowingRImage(float _deltaTime)
 
 	if (loc.X > LastLocRImage.X)
 	{
-		SRResultRImage->SetComponentLocation(loc - FVector2D{ SpeedRImage* _deltaTime, 0.f });
+		SRResultRImage->SetComponentLocation(loc - FVector2D{ SpeedRImage * _deltaTime, 0.f });
 	}
 	else
 	{
@@ -325,8 +325,10 @@ void AResult::ShakingRImage(float _deltaTime)
 			// TODO: GO TO THE NEXT
 			FSM.ChangeState(EResultState::INIT);
 
-			// TODO: here?
-			UEngineAPICore::GetCore()->OpenLevel("Boss_Stage1");
+			if (NextLevel.size() > 0)
+			{
+				UEngineAPICore::GetCore()->OpenLevel(NextLevel);
+			}
 		}
 	}
 }

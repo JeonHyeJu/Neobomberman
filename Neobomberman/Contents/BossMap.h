@@ -22,4 +22,8 @@ protected:
 	void Tick(float _deltaTime) override;
 
 private:
+	class USpriteRenderer* SRBackground = nullptr;
+	class USpriteRenderer* SRBackgroundBottom = nullptr;
+	class USpriteRenderer* SRLeftBear = nullptr;
+	class USpriteRenderer* SRRightBear = nullptr;
 };

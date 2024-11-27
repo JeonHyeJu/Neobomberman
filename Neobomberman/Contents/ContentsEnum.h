@@ -2,6 +2,7 @@
 
 enum class ERenderOrder
 {
+	NONE = -9999,
 	COLMAP = -1000,
 	BACKGROUND = -999,
 	BACKGROUND_OVER = -998,
@@ -26,6 +27,7 @@ enum class ERenderOrder
 	BOSS_SHADOW = 10001,
 	BOSS = 10002,
 	BOSS_CLOUD = 10003,
+	MAP_COVER = 10004,
 	UI = 19000,
 	UI_PLUS = 19001,
 	FADE = 20000,
@@ -63,3 +65,11 @@ enum class ECollisionGroup
 	Bomb,
 };
 
+// Must match with png
+enum class EItem
+{
+	NONE = -1,
+	BOMB = 0,
+	SPEED,
+	POWER,
+};

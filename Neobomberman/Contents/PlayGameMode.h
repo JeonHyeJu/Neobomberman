@@ -35,6 +35,8 @@ private:
 
 	void OnEndGameOverFadeOut();
 
+	void CheckCheat();
+
 	FIntPoint StartPoint = { 0, 0 };
 
 	class ABaseMap* CurMapPtr = nullptr;

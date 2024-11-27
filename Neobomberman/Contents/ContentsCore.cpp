@@ -71,6 +71,7 @@ void ContentsCore::InitResources()
 	LoadImages("Resources\\Result");	// temp
 	LoadImages("Resources\\CutScene");	// temp
 	LoadImages("Resources\\Closing");	// temp
+	LoadImages("Resources\\Items");	// temp
 
 	LoadImageFolders(path.GetAppendedRootPath(GlobalPath::BOMB_ORG));
 	LoadImageFolders(path.GetAppendedRootPath(GlobalPath::BOMB_RED));
@@ -135,6 +136,8 @@ void ContentsCore::InitResources()
 	imgManager.CuttingSprite("RightBears.png", { 96, 196 });
 	imgManager.CuttingSprite("HoopGhost.png", { 256, 256 });
 	imgManager.CuttingSprite("HurryUp.png", { 510, 64 });
+	imgManager.CuttingSprite("Items.png", { 64, 64 });
+	imgManager.CuttingSprite("BgBottom.png", { 416, 32 });
 }
 
 void ContentsCore::LoadImages(std::string_view _path)

@@ -139,6 +139,8 @@ void APlayer::Tick(float _deltaTime)
 	// state != DEAD and PORTAL
 	if (nowState < EPlayerState::DEAD)
 	{
+		CheckItem(_deltaTime);
+
 		bool isDownSpace = UEngineInput::GetInst().IsDown(VK_SPACE);
 		if (isDownSpace)
 		{
@@ -184,6 +186,56 @@ void APlayer::OnResume()
 {
 	// Temp
 	DyingAnimInfo.Seconds = DyingAnimInfo.WaitSeconds;
+}
+
+void APlayer::AddItem(EItem _item)
+{
+	switch (_item)
+	{
+	case EItem::BOMB:
+		if (Ability.BombCount < GlobalVar::MAX_BOMB_CNT)
+		{
+			Ability.BombCount++;
+		}
+		break;
+	case EItem::SPEED:
+		if (Ability.Speed < GlobalVar::MAX_SPEED)
+		{
+			Ability.Speed++;
+		}
+		break;
+	case EItem::POWER:
+		if (Ability.Power < GlobalVar::MAX_BOMB_POWER)
+		{
+			Ability.Power++;
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+void APlayer::CheckItem(float _deltaTime)
+{
+	if (CurMapPtr == nullptr) return;
+
+	static float elaspedSecs = 0.f;
+	elaspedSecs += _deltaTime;
+
+	if (elaspedSecs >= .5f) {
+		float RealSpeed = DEFAULT_SPEED + Ability.Speed * 25.f;
+
+		FVector2D curLoc = GetActorLocation();
+		FVector2D nextPosLT = curLoc + (Direction * _deltaTime * RealSpeed) + FVector2D{ 6, 6 };
+		FVector2D nextPosRT = curLoc + (Direction * _deltaTime * RealSpeed) + FVector2D{ 26, 6 };
+		FVector2D nextPosLB = curLoc + (Direction * _deltaTime * RealSpeed) + FVector2D{ 6, 26 };
+		FVector2D nextPosRB = curLoc + (Direction * _deltaTime * RealSpeed) + FVector2D{ 26, 26 };
+
+		_CheckItem(nextPosLT);
+		_CheckItem(nextPosRT);
+		_CheckItem(nextPosLB);
+		_CheckItem(nextPosRB);
+	}
 }
 
 void APlayer::Reborn()
@@ -433,8 +485,20 @@ void APlayer::Idling(float _deltaTime)
 	}
 }
 
+void APlayer::_CheckItem(const FVector2D& _loc)
+{
+	FIntPoint nextIdx = CurMapPtr->LocationToMatrixIdx(_loc);
+	if (CurMapPtr->HasItem(nextIdx))
+	{
+		EItem item = CurMapPtr->PopItem(nextIdx);
+		AddItem(item);
+	}
+}
+
 void APlayer::Moving(float _deltaTime)
 {
+	float RealSpeed = DEFAULT_SPEED + Ability.Speed * 25.f;
+
 	BlinkEyeAnimInfo.Seconds = 0.f;
 	BlinkEyeAnimInfo.IsRunning = false;
 
@@ -443,10 +507,10 @@ void APlayer::Moving(float _deltaTime)
 	SpriteRendererBody->ChangeAnimation("Run_" + suffixStr);
 
 	FVector2D curLoc = GetActorLocation();
-	FVector2D nextPosLT = curLoc + (Direction * _deltaTime * Ability.Speed) + FVector2D{ 1, 1 };
-	FVector2D nextPosRT = curLoc + (Direction * _deltaTime * Ability.Speed) + FVector2D{ 31, 1 };
-	FVector2D nextPosLB = curLoc + (Direction * _deltaTime * Ability.Speed) + FVector2D{ 1, 31 };
-	FVector2D nextPosRB = curLoc + (Direction * _deltaTime * Ability.Speed) + FVector2D{ 31, 31 };
+	FVector2D nextPosLT = curLoc + (Direction * _deltaTime * RealSpeed) + FVector2D{ 1, 1 };
+	FVector2D nextPosRT = curLoc + (Direction * _deltaTime * RealSpeed) + FVector2D{ 31, 1 };
+	FVector2D nextPosLB = curLoc + (Direction * _deltaTime * RealSpeed) + FVector2D{ 1, 31 };
+	FVector2D nextPosRB = curLoc + (Direction * _deltaTime * RealSpeed) + FVector2D{ 31, 31 };
 
 	// Temp
 	const int POS_X_MIN = 97;
@@ -515,12 +579,12 @@ void APlayer::Moving(float _deltaTime)
 			{
 				if (canMoveMapLT && !canMoveMapRT || canMoveMapLB && !canMoveMapRB)
 				{
-					AddActorLocation(FVector2D::LEFT * _deltaTime * Ability.Speed);
+					AddActorLocation(FVector2D::LEFT * _deltaTime * RealSpeed);
 					return;
 				}
 				else if (!canMoveMapLT && canMoveMapRT || !canMoveMapLB && canMoveMapRB)
 				{
-					AddActorLocation(FVector2D::RIGHT * _deltaTime * Ability.Speed);
+					AddActorLocation(FVector2D::RIGHT * _deltaTime * RealSpeed);
 					return;
 				}
 			}
@@ -528,12 +592,12 @@ void APlayer::Moving(float _deltaTime)
 			{
 				if (canMoveMapRT && !canMoveMapRB || canMoveMapLT && !canMoveMapLB)
 				{
-					AddActorLocation(FVector2D::UP * _deltaTime * Ability.Speed);
+					AddActorLocation(FVector2D::UP * _deltaTime * RealSpeed);
 					return;
 				}
 				else if (!canMoveMapRT && canMoveMapRB || !canMoveMapLT && canMoveMapLB)
 				{
-					AddActorLocation(FVector2D::DOWN * _deltaTime * Ability.Speed);
+					AddActorLocation(FVector2D::DOWN * _deltaTime * RealSpeed);
 					return;
 				}
 			}
@@ -542,7 +606,7 @@ void APlayer::Moving(float _deltaTime)
 
 	if (isMove)
 	{
-		/*FVector2D nextPos = curLoc + Direction * _deltaTime * Ability.Speed;
+		/*FVector2D nextPos = curLoc + Direction * _deltaTime * RealSpeed;
 		FVector2D orginizedLoc = CurMapPtr->GetOrganizedLoc(nextPos);
 		if (Direction == FVector2D::UP || Direction == FVector2D::DOWN)
 		{
@@ -557,7 +621,7 @@ void APlayer::Moving(float _deltaTime)
 		OutputDebugString(("orginizedLoc : " + std::to_string(orginizedLoc.X) + ", " + std::to_string(orginizedLoc.Y) + "\n").c_str());
 		SetActorLocation(nextPos);*/
 
-		AddActorLocation(Direction * _deltaTime * Ability.Speed);
+		AddActorLocation(Direction * _deltaTime * RealSpeed);
 	}
 }
 

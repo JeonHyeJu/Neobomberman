@@ -39,12 +39,15 @@ void APlayGameMode::BeginPlay()
 	//Player->SetCollisionImage("Bg_1-Col.png");
 
 	/* Stage 1-1 */
+	std::vector<EItem> itemList = { EItem::BOMB, EItem::BOMB, EItem::SPEED };
+
 	APlayMap* pStage1 = pLevel->SpawnActor<APlayMap>();
 	pStage1->SetPortalIdx(PORTAL_IDX_STAGE_1);
 	pStage1->BindExplodeEvent(std::bind(&APlayGameMode::OnExplodeBomb, this));
 	CurMapPtr = pStage1;
 
 	pStage1->InitMap();
+	pStage1->SetItems(itemList);	// Must set after InitMap
 
 	Player->SetCurMap(pStage1);
 	Player->SetStartLoc(pStage1->MatrixIdxToLocation(StartPoint));
@@ -109,6 +112,7 @@ void APlayGameMode::Tick(float _deltaTime)
 {
 	ElapsedSecs += _deltaTime;
 
+	CheckCheat();
 	if (ElapsedSecs >= 1.f)
 	{
 		ElapsedSecs = 0.f;
@@ -140,22 +144,6 @@ void APlayGameMode::LevelChangeStart()
 	isShowingResult = false;
 }
 
-void APlayGameMode::CheckDeadMonster()
-{
-	std::list<AMonster*>::iterator it = MonsterList.begin();
-	std::list<AMonster*>::iterator itEnd = MonsterList.end();
-	for (; it != itEnd; ++it)
-	{
-		AMonster* monster = *it;
-		if (monster->GetIsDestroiable())
-		{
-			monster->Destroy();
-			it = MonsterList.erase(it);
-			if (it == itEnd) break;
-		}
-	}
-}
-
 void APlayGameMode::GameOver()
 {
 	if (isShowContinueScene == false)
@@ -182,6 +170,22 @@ void APlayGameMode::GameOver()
 	}
 }
 
+void APlayGameMode::CheckDeadMonster()
+{
+	std::list<AMonster*>::iterator it = MonsterList.begin();
+	std::list<AMonster*>::iterator itEnd = MonsterList.end();
+	for (; it != itEnd; ++it)
+	{
+		AMonster* monster = *it;
+		if (monster->GetIsDestroiable())
+		{
+			monster->Destroy();
+			it = MonsterList.erase(it);
+			if (it == itEnd) break;
+		}
+	}
+}
+
 void APlayGameMode::CheckTimeOver()
 {
 	if (AGameUI::IsTimeOver())
@@ -199,13 +203,19 @@ void APlayGameMode::CheckGameOver()
 	unsigned __int8 coin = GameData::GetInstance().GetCoin();
 	if (coin == 0)
 	{
+		if (UEngineInput::GetInst().IsDown(VK_RETURN))
+		{
+			GameData::GetInstance().AddCoin(1);
+			return;
+		}
+
 		GameOver();
 	}
 	else
 	{
 		if (isShowContinueScene)
 		{
-			if (UEngineInput::GetInst().IsDown(VK_F1))
+			if (UEngineInput::GetInst().IsDown(VK_F1) || UEngineInput::GetInst().IsDown(VK_RETURN))
 			{
 				isShowContinueScene = false;
 
@@ -226,11 +236,32 @@ void APlayGameMode::CheckGameOver()
 	}
 }
 
+void APlayGameMode::CheckCheat()
+{
+	if (UEngineInput::GetInst().IsDown('N'))
+	{
+		if (!isShowingResult && !IsAllMonstersDead())
+		{
+			std::list<AMonster*>::iterator it = MonsterList.begin();
+			std::list<AMonster*>::iterator itEnd = MonsterList.end();
+			for (; it != itEnd; ++it)
+			{
+				(*it)->Kill();
+			}
+		}
+		else
+		{
+			CurMapPtr->CheatDestoyAllBoxes();
+		}
+	}
+}
+
 void APlayGameMode::StartFromCoin()
 {
-	GameData::GetInstance().AddCoin(-1);
-	GameData::GetInstance().AddPlayer1Life(3);
-	GameData::GetInstance().ResetScore();
+	GameData& gameData = GameData::GetInstance();
+	gameData.AddCoin(-1);
+	gameData.AddPlayer1Life(3);
+	gameData.ResetScore();
 }
 
 void APlayGameMode::StopGame()
@@ -271,6 +302,7 @@ void APlayGameMode::OnExplodeBomb()
 
 	const std::vector<FIntPoint>& vec = CurMapPtr->GetSplashTileIdxs();
 
+	// Check monsters
 	std::list<AMonster*>::iterator it = MonsterList.begin();
 	std::list<AMonster*>::iterator itEnd = MonsterList.end();
 	for (; it != itEnd; ++it)
@@ -284,6 +316,13 @@ void APlayGameMode::OnExplodeBomb()
 				monster->Kill();
 			}
 		}
+	}
+
+	// Check player
+	FIntPoint playerIdx = CurMapPtr->LocationToMatrixIdx(Player->GetActorLocation());
+	if (CurMapPtr->IsInSplash(playerIdx))
+	{
+		Player->Kill();
 	}
 }
 
@@ -304,6 +343,7 @@ void APlayGameMode::FadeOut()
 void APlayGameMode::OnEndFadeOut()
 {
 	ResultScene = GetWorld()->SpawnActor<AResult>();
+	ResultScene->SetNextLevel("Boss_Stage1");
 
 	int lastTime = AGameUI::GetLastTime();
 	ResultScene->SetLastSecs(lastTime);

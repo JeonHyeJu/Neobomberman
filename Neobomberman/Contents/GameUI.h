@@ -50,7 +50,6 @@ public:
 	AGameUI& operator=(const AGameUI& _other) = delete;
 	AGameUI& operator=(AGameUI&& _other) noexcept = delete;
 
-	void AddCoin(unsigned __int8 __addVal);
 	void CheckInsertingCoin();
 	unsigned __int8 GetCoin() const;
 

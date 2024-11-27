@@ -2,6 +2,7 @@
 #include "ContentsEnum.h"
 #include "HoopGhost.h"
 #include "Player.h"
+#include "GameData.h"
 #include "UtilFn.h"
 #include <EngineCore/SpriteRenderer.h>
 #include <EngineCore/2DCollision.h>
@@ -12,13 +13,12 @@ AHoopGhost::AHoopGhost()
 {
 	SetName("HoopGhost");
 	Health = MAX_HEALTH;
-	CanHit = true;	// Temp
 
 	Fsm.CreateState(EMonsterState::WALKING, std::bind(&AHoopGhost::Walking, this, std::placeholders::_1), std::bind(&AHoopGhost::OnWalk, this));
 	Fsm.CreateState(EMonsterState::PRESS_DOWN, std::bind(&AHoopGhost::PressingDown, this, std::placeholders::_1), std::bind(&AHoopGhost::OnPressDown, this));
 	Fsm.CreateState(EMonsterState::DAMAGED, std::bind(&AHoopGhost::Damaging, this, std::placeholders::_1), std::bind(&AHoopGhost::OnDamage, this));
 	Fsm.CreateState(EMonsterState::DYING, std::bind(&AHoopGhost::Dying, this, std::placeholders::_1));
-	Fsm.CreateState(EMonsterState::PASS_AWAY, std::bind(&AHoopGhost::PassAwaing, this, std::placeholders::_1));
+	Fsm.CreateState(EMonsterState::PASS_AWAY, std::bind(&AHoopGhost::PassAwaing, this, std::placeholders::_1), std::bind(&AHoopGhost::OnPassaway, this));
 
 	InitMoveEllipse();
 }
@@ -36,6 +36,8 @@ void AHoopGhost::BeginPlay()
 
 	CenterLoc = GetActorLocation();
 	Fsm.ChangeState(EMonsterState::WALKING);
+
+	DelaySecs = WAIT_DELAY;
 }
 
 void AHoopGhost::Tick(float _deltaTime)
@@ -258,6 +260,11 @@ void AHoopGhost::OnDamage()
 	SRBody->ChangeAnimation(ANIM_DAMAGED);
 }
 
+void AHoopGhost::OnPassaway()
+{
+	GameData::GetInstance().AddPlayer1Score(GetScore());
+}
+
 void AHoopGhost::toggleShadow()
 {
 	if (!SRShadowS || !SRShadowL) return;
@@ -367,7 +374,7 @@ void AHoopGhost::PressingDown(float _deltaTime)
 			if (isAnimEnd)
 			{
 				Collision->SetActive(false);
-				//CanHit = false;
+				CanHit = false;
 
 				if (GetActorLocation().Y > SavedLoc.Y)
 				{

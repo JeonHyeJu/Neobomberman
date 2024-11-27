@@ -3,6 +3,7 @@
 #include "ContentsEnum.h"
 #include "GlobalVar.h"
 #include "GameUI.h"
+#include "GameData.h"
 #include "Fade.h"
 #include <EnginePlatform/EngineInput.h>
 #include <EngineCore/SpriteRenderer.h>
@@ -259,6 +260,16 @@ void ATitle::Tick(float _deltaTime)
 	int curState = FSM.GetState();
 	if (curState <= static_cast<int>(ETitleState::WAIT_START))
 	{
+		// Cheat
+		if (curState < static_cast<int>(ETitleState::WAIT_START))
+		{
+			if (UEngineInput::GetInst().IsDown(VK_RETURN) || UEngineInput::GetInst().IsDown(VK_SPACE))
+			{
+				GameData::GetInstance().AddCoin(1);
+				return;
+			}
+		}
+
 		WaitKeyF3F4();
 	}
 	else if (curState == static_cast<int>(ETitleState::WAIT_SELECT))
@@ -310,9 +321,7 @@ void ATitle::SwitchCutSceneUi(bool _isShow)
 
 void ATitle::WaitKeyF3F4()
 {
-	if (GameUIPtr == nullptr) return;
-
-	unsigned __int8 curCoin = GameUIPtr->GetCoin();
+	unsigned __int8 curCoin = GameData::GetInstance().GetCoin();
 	if (curCoin > 0 && curCoin != PrevCoin)
 	{
 		PrevCoin = curCoin;
@@ -393,10 +402,9 @@ void ATitle::Countdown(const ESceneType& _type)
 		if (_type == ESceneType::START)
 		{
 			// TODO: Play video
-			if (GameUIPtr == nullptr) return;
-			if (GameUIPtr->GetCoin() == 0)
+			if (GameData::GetInstance().GetCoin() == 0)
 			{
-				GameUIPtr->AddCoin(1);
+				GameData::GetInstance().AddCoin(1);
 			}
 			ChangeToStartScene();
 		}
@@ -446,11 +454,15 @@ void ATitle::ChangeToCutScene()
 
 void ATitle::ChangeToStartScene()
 {
-	if (GameUIPtr == nullptr) return;
-
 	if (FSM.GetState() < static_cast<int>(ETitleState::WAIT_SELECT_IDLE))
 	{
-		GameUIPtr->AddCoin(-1);
+		GameData& gameData = GameData::GetInstance();
+		//if (gameData.GetCoin() == 0)
+		//{
+		//	gameData.AddCoin(1);
+		//}
+
+		gameData.AddCoin(-1);
 		AFade::MainFade->BindEndEvent(std::bind(&ATitle::OnEndFadeOut, this));
 		AFade::MainFade->FadeOut();
 		FSM.ChangeState(ETitleState::WAIT_SELECT_IDLE);
@@ -548,7 +560,9 @@ void ATitle::WaitingToStart(float _deltaTime)
 	RunWaitSequence(_deltaTime, ESceneType::START);
 
 	bool isDownF1 = UEngineInput::GetInst().IsDown(VK_F1);
-	if (isDownF1)
+	bool isDownEnter = UEngineInput::GetInst().IsDown(VK_RETURN);
+	bool isDownSpace = UEngineInput::GetInst().IsDown(VK_SPACE);
+	if (isDownF1 || isDownEnter || isDownSpace)
 	{
 		ChangeToStartScene();
 	}
@@ -558,7 +572,7 @@ void ATitle::SelectingMode(float _deltaTime)
 {
 	RunWaitSequence(_deltaTime, ESceneType::SELECT);
 
-	bool isDownA = UEngineInput::GetInst().IsDown('A');
+	bool isDownA = UEngineInput::GetInst().IsDown(VK_SPACE) || UEngineInput::GetInst().IsDown(VK_RETURN);
 	if (isDownA)
 	{
 		if (FSM.GetState() < static_cast<int>(ETitleState::RUN_CUT_SCENE_IDLE))
@@ -626,7 +640,7 @@ void ATitle::RunningCutScene(float _deltaTime)
 		}
 	}
 
-	if (UEngineInput::GetInst().IsDown('A'))
+	if (UEngineInput::GetInst().IsDown(VK_SPACE) || UEngineInput::GetInst().IsDown(VK_RETURN))
 	{
 		OnEndCutScene();
 	}
