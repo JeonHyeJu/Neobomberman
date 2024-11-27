@@ -44,8 +44,8 @@ void ContentsCore::BeginPlay()
 	pCore->CreateLevel<APlayBossMode, APlayer>("Boss_Stage1");
 
 	//pCore->OpenLevel("Title");
-	pCore->OpenLevel("Play");
-	//pCore->OpenLevel("Boss_Stage1");
+	//pCore->OpenLevel("Play");
+	pCore->OpenLevel("Boss_Stage1");
 	//pCore->OpenLevel("Ending");
 }
 

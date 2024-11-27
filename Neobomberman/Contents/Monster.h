@@ -47,6 +47,9 @@ public:
 	virtual void OnPause() override;
 	virtual void OnResume() override;
 
+	// Temp. for boss
+	virtual bool IsDying() { return false; };
+
 	/* Setter */
 	void SetCurMap(class ABaseMap* _map);
 	void SetFirstDestination(const FIntPoint& _idx)

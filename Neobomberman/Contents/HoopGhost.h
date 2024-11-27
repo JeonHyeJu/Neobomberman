@@ -18,6 +18,7 @@ public:
 	void Tick(float _deltaTime) override;
 	void Damaged(unsigned __int8 _power) override;
 	void Kill() override;
+	bool IsDying() override;
 
 	FVector2D GetMonsterSize() override;
 	FIntPoint GetDamageRange() override;

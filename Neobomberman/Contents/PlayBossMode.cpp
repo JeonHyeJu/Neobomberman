@@ -69,6 +69,7 @@ void APlayBossMode::Tick(float _deltaTime)
 		{
 			if (!isShowingResult)
 			{
+				Player->ShowWinnerPose();
 				isShowingResult = true;
 				FadeOut();
 			}
@@ -93,6 +94,12 @@ void APlayBossMode::CheckDeadMonster()
 	for (; it != itEnd; ++it)
 	{
 		AMonster* monster = *it;
+
+		if (monster->IsDying())
+		{
+			Player->BlockMove();
+		}
+
 		if (monster->GetIsDestroiable())
 		{
 			monster->Destroy();

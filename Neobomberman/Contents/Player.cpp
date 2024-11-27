@@ -49,6 +49,8 @@ APlayer::APlayer()
 		SpriteRendererHead->CreateAnimation("BlinkingEyes", PLAYER_SPRITE_PATH, idxs, times);
 		SpriteRendererHead->CreateAnimation("Dead", PLAYER_SPRITE_PATH, 591, 600, 0.2f, false);
 		SpriteRendererHead->CreateAnimation("Ride_Portal", PLAYER_SPRITE_PATH, 583, 589, 0.1f, false);
+		SpriteRendererHead->CreateAnimation("Victory", PLAYER_SPRITE_PATH, 601, 604, 0.5f, false);
+
 		SpriteRendererHead->SetAnimationEvent("Ride_Portal", 589, std::bind(&APlayer::OnEndPortalAnim, this));
 	}
 	
@@ -74,6 +76,8 @@ APlayer::APlayer()
 		SpriteRendererBody->CreateAnimation("BlinkingEyes", PLAYER_SPRITE_PATH, 612, 613, 1.f);
 		SpriteRendererBody->CreateAnimation("Dead", PLAYER_SPRITE_PATH, 622, 631, 0.2f, false);
 		SpriteRendererBody->CreateAnimation("Ride_Portal", PLAYER_SPRITE_PATH, 615, 621, 0.1f, false);
+
+		SpriteRendererBody->CreateAnimation("Victory", PLAYER_SPRITE_PATH, 633, 636, 0.5f, false);
 	}
 
 	{
@@ -106,11 +110,12 @@ APlayer::APlayer()
 	Fsm.CreateState(EPlayerState::MOVE, std::bind(&APlayer::Moving, this, std::placeholders::_1));
 	Fsm.CreateState(EPlayerState::DEAD, std::bind(&APlayer::Dying, this, std::placeholders::_1), std::bind(&APlayer::OnDead, this));
 	Fsm.CreateState(EPlayerState::PORTAL, nullptr, std::bind(&APlayer::OnShift, this));
+	Fsm.CreateState(EPlayerState::END, nullptr, nullptr);
 
 	FsmH.CreateState(EPlayerBlinkAndColState::BLINK_ON_COL_OFF, std::bind(&APlayer::Blinking, this, std::placeholders::_1), std::bind(&APlayer::OnTurnOnBlink, this));
 	FsmH.CreateState(EPlayerBlinkAndColState::BLINK_OFF_COL_ON, nullptr, std::bind(&APlayer::OnTurnOffBlink, this));
 
-	DebugOn();
+	//DebugOn();
 }
 
 APlayer::~APlayer()
@@ -122,6 +127,11 @@ void APlayer::BeginPlay()
 	Super::BeginPlay();
 
 	Reborn();
+}
+
+void APlayer::BlockMove()
+{
+	Fsm.ChangeState(EPlayerState::END);
 }
 
 void APlayer::Tick(float _deltaTime)
@@ -186,6 +196,13 @@ void APlayer::OnResume()
 {
 	// Temp
 	DyingAnimInfo.Seconds = DyingAnimInfo.WaitSeconds;
+}
+
+void APlayer::ShowWinnerPose()
+{
+	IsBossStage = true;
+
+	Fsm.ChangeState(EPlayerState::PORTAL);
 }
 
 void APlayer::AddItem(EItem _item)
@@ -436,8 +453,16 @@ void APlayer::OnDead()
 
 void APlayer::OnShift()
 {
-	SpriteRendererHead->ChangeAnimation("Ride_Portal");
-	SpriteRendererBody->ChangeAnimation("Ride_Portal");
+	if (IsBossStage)
+	{
+		SpriteRendererHead->ChangeAnimation("Victory");
+		SpriteRendererBody->ChangeAnimation("Victory");
+	}
+	else
+	{
+		SpriteRendererHead->ChangeAnimation("Ride_Portal");
+		SpriteRendererBody->ChangeAnimation("Ride_Portal");
+	}
 }
 
 /* FSM update functions */

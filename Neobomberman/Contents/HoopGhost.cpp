@@ -148,7 +148,7 @@ void AHoopGhost::InitSprite()
 		SRCloud->SetSprite(DETROY_SPRITE_PATH);
 		SRCloud->SetComponentLocation(size.Half().Half() - FVector2D{ 0.f, 32.f });
 		SRCloud->SetComponentScale(size);
-		SRCloud->CreateAnimation(ANIM_DESTROY, DETROY_SPRITE_PATH, 0, 189, .05f, false);
+		SRCloud->CreateAnimation(ANIM_DESTROY, DETROY_SPRITE_PATH, 0, 189, .025f, false);
 		SRCloud->SetOrder(ERenderOrder::BOSS_CLOUD);
 		SRCloud->SetActive(false);
 	}
@@ -200,6 +200,11 @@ void AHoopGhost::InitMoveEllipse()
 
 	InitRoundingIdx = static_cast<int>(EllipsePtrSize * .25f);
 	RoundingIdx = InitRoundingIdx;
+}
+
+bool AHoopGhost::IsDying()
+{
+	return (static_cast<EMonsterState>(Fsm.GetState()) == EMonsterState::DYING);
 }
 
 FVector2D AHoopGhost::GetMonsterSize()

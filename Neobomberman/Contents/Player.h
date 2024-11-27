@@ -18,6 +18,7 @@ enum class EPlayerState
 	MOVE,
 	DEAD,
 	PORTAL,
+	END,
 };
 
 class APlayer : public AActor
@@ -76,6 +77,8 @@ public:
 		StartLocation = _val;
 	}
 	void AddItem(EItem _item);
+	void ShowWinnerPose();
+	void BlockMove();
 
 	void Kill();
 
@@ -148,4 +151,5 @@ private:
 	FVector2D StartLocation;
 
 	const float DEFAULT_SPEED = 75.f;
+	bool IsBossStage = false;	// Temp
 };
