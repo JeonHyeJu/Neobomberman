@@ -14,6 +14,7 @@
 #include <EngineCore/Level.h>
 #include <EngineCore/EngineAPICore.h>
 #include <EnginePlatform/EngineInput.h>
+#include <EnginePlatform/EngineSound.h>
 
 APlayGameMode::APlayGameMode()
 {
@@ -207,6 +208,7 @@ void APlayGameMode::CheckGameOver()
 	{
 		if (UEngineInput::GetInst().IsDown(VK_RETURN))
 		{
+			UEngineSound::Play("Coin.mp3", -1, 0, false);
 			GameData::GetInstance().AddCoin(1);
 			return;
 		}

@@ -9,6 +9,7 @@
 #include <EngineCore/SpriteRenderer.h>
 #include <EngineBase/EngineDebug.h>
 #include <EngineCore/2DCollision.h>
+#include <EnginePlatform/EngineSound.h>
 #include <functional>
 #include <algorithm>
 
@@ -342,6 +343,7 @@ void ABomb::Running(float _deltaTime)
 
 void ABomb::OnLaunched()
 {
+	UEngineSound::Play(SFXExplosion);
 	RunExplosionAnim(true);
 }
 

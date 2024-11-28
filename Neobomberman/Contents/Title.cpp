@@ -9,6 +9,7 @@
 #include <EngineCore/SpriteRenderer.h>
 #include <EngineCore/EngineAPICore.h>
 #include <EngineBase/EngineString.h>
+#include <EnginePlatform/EngineSound.h>
 
 ATitle::ATitle()
 {
@@ -273,6 +274,7 @@ void ATitle::Tick(float _deltaTime)
 		{
 			if (UEngineInput::GetInst().IsDown(VK_RETURN) || UEngineInput::GetInst().IsDown(VK_SPACE))
 			{
+				UEngineSound::Play("Coin.mp3", -1, 0, false);
 				GameData::GetInstance().AddCoin(1);
 				return;
 			}
@@ -417,6 +419,7 @@ void ATitle::Countdown(const ESceneType& _type)
 			// TODO: Play video
 			if (GameData::GetInstance().GetCoin() == 0)
 			{
+				UEngineSound::Play("Coin.mp3", -1, 0, false);
 				GameData::GetInstance().AddCoin(1);
 			}
 			ChangeToStartScene();
@@ -547,6 +550,7 @@ void ATitle::OnEndFadeOut()
 
 void ATitle::OnRunOpening()
 {
+	UEngineSound::Play(SFXOpening);
 	SROpening->ChangeAnimation(ANIM_RUN_NAME);
 	SROpening->SetActive(true);
 }
@@ -564,6 +568,8 @@ void ATitle::OnEndCutScene()
 /* FSM */
 void ATitle::OnWaitToStart()
 {
+	UEngineSound::StopPlayer(SFXOpening);
+
 	ResetSeconds();
 	SROpening->ChangeAnimation(ANIM_IDLE_NAME);
 	SwitchStartUi(true);

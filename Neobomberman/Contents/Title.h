@@ -123,4 +123,7 @@ private:
 
 	UFSMStateManager FSM;
 	AGameUI* GameUIPtr = nullptr;
+
+	/* Sounds */
+	const char* SFXOpening = "Opening.mp3";
 };

@@ -14,7 +14,7 @@
 #include <EngineCore/SpriteRenderer.h>
 #include <EngineCore/EngineCoreDebug.h>
 #include <EngineCore/2DCollision.h>
-
+#include <EnginePlatform/EngineSound.h>
 #include <EnginePlatform/EngineInput.h>
 
 APlayer::APlayer()
@@ -107,7 +107,7 @@ APlayer::APlayer()
 
 	Fsm.CreateState(EPlayerState::REBORN, nullptr, std::bind(&APlayer::OnReborn, this));
 	Fsm.CreateState(EPlayerState::IDLE, std::bind(&APlayer::Idling, this, std::placeholders::_1), std::bind(&APlayer::OnIdle, this));
-	Fsm.CreateState(EPlayerState::MOVE, std::bind(&APlayer::Moving, this, std::placeholders::_1));
+	Fsm.CreateState(EPlayerState::MOVE, std::bind(&APlayer::Moving, this, std::placeholders::_1), std::bind(&APlayer::OnMove, this));
 	Fsm.CreateState(EPlayerState::DEAD, std::bind(&APlayer::Dying, this, std::placeholders::_1), std::bind(&APlayer::OnDead, this));
 	Fsm.CreateState(EPlayerState::PORTAL, nullptr, std::bind(&APlayer::OnShift, this));
 	Fsm.CreateState(EPlayerState::END, nullptr, nullptr);
@@ -129,11 +129,6 @@ void APlayer::BeginPlay()
 	Reborn();
 }
 
-void APlayer::BlockMove()
-{
-	Fsm.ChangeState(EPlayerState::END);
-}
-
 void APlayer::Tick(float _deltaTime)
 {
 	Super::Tick(_deltaTime);
@@ -145,6 +140,10 @@ void APlayer::Tick(float _deltaTime)
 	FsmH.Update(_deltaTime);
 
 	EPlayerState nowState = static_cast<EPlayerState>(Fsm.GetState());
+	if (nowState != EPlayerState::MOVE)
+	{
+		UEngineSound::StopPlayer(SFXWalking);
+	}
 
 	// state != DEAD and PORTAL
 	if (nowState < EPlayerState::DEAD)
@@ -154,13 +153,6 @@ void APlayer::Tick(float _deltaTime)
 		bool isDownSpace = UEngineInput::GetInst().IsDown(VK_SPACE);
 		if (isDownSpace)
 		{
-			// Temp
-			//std::map<std::string, USoundPlayer>::iterator iterSfx = Sounds.find("DropBomb");
-			//if (iterSfx != Sounds.end())
-			//{
-			//	iterSfx->second.On();
-			//}
-			USoundPlayer splayer = UEngineSound::Play("CreateBomb.mp3");
 			DropBomb();
 		}
 
@@ -190,6 +182,11 @@ void APlayer::LevelChangeStart()
 {
 	IsClear = false;
 	IsDead = false;
+}
+
+void APlayer::BlockMove()
+{
+	Fsm.ChangeState(EPlayerState::END);
 }
 
 void APlayer::OnResume()
@@ -269,13 +266,6 @@ void APlayer::ResetDroppedBombs()
 	DroppedBombs.clear();
 }
 
-void APlayer::InitSounds()
-{
-	// TODO: Do I need to change string to enum?
-	//USoundPlayer splayer = UEngineSound::Play("CreateBomb.mp3");
-	//Sounds.insert({"DropBomb", splayer});
-}
-
 bool APlayer::IsDownAnyKeyWithSetDir()
 {
 	bool isDownRight = UEngineInput::GetInst().IsDown(VK_RIGHT);
@@ -351,6 +341,7 @@ void APlayer::DropBomb()
 		pBomb->Init(loc, Ability.BombType, Ability.Power, CurMapPtr, order);
 
 		DroppedBombs.push_back(pBomb);
+		UEngineSound::Play(SFXDropBomb, 100);
 	}
 }
 
@@ -441,9 +432,15 @@ void APlayer::OnIdle()
 	SpriteRendererBody->ChangeAnimation("Idle_" + suffixStr);
 }
 
+void APlayer::OnMove()
+{
+	
+}
+
 void APlayer::OnDead()
 {
 	GameData::GetInstance().AddPlayer1Life(-1);
+	UEngineSound::Play(SFXDying);
 
 	SpriteRendererHead->ChangeAnimation("Dead");
 	SpriteRendererBody->ChangeAnimation("Dead");
@@ -647,6 +644,7 @@ void APlayer::Moving(float _deltaTime)
 		SetActorLocation(nextPos);*/
 
 		AddActorLocation(Direction * _deltaTime * RealSpeed);
+		UEngineSound::Play(SFXWalking, -1, 1);
 	}
 }
 

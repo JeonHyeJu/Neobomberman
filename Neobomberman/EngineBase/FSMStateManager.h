@@ -90,6 +90,7 @@ public:
 			return;
 		}
 
+		PreState = CurState;
 		CurStateFn = &States[_Key];
 		CurState = _Key;
 		if (nullptr != CurStateFn->StartFunction)
@@ -102,10 +103,15 @@ public:
 	{
 		return CurState;
 	}
+	inline int GetPrevState() const
+	{
+		return PreState;
+	}
 
 protected:
 
 private:
+	int PreState = -1;
 	int CurState = -1;
 	FSMFunction* CurStateFn = nullptr;
 	std::map<int, FSMFunction> States;

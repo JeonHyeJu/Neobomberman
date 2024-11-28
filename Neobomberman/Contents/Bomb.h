@@ -154,4 +154,7 @@ private:
 	const char* ANIM_EXPLODE_DOWN = "ExplodeDown";
 	const char* ANIM_EXPLODE_LEFT = "ExplodeLeft";
 	const char* ANIM_EXPLODE_RIGHT = "ExplodeRight";
+
+	/* Sounds */
+	const char* SFXExplosion = "Explosion.mp3";
 };

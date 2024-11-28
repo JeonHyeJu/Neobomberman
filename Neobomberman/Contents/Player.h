@@ -1,7 +1,6 @@
 #pragma once
 #include <EngineCore/Actor.h>
 #include <EngineBase/FSMStateManager.h>
-#include <EnginePlatform/EngineSound.h>
 #include <vector>
 #include "ContentsEnum.h"
 
@@ -86,7 +85,6 @@ protected:
 	void OnResume() override;
 
 private:
-	void InitSounds();
 	void ResetDroppedBombs();
 
 	std::string GetDirectionStr();
@@ -102,6 +100,7 @@ private:
 
 	void OnReborn();
 	void OnIdle();
+	void OnMove();
 	void OnDead();
 	void OnShift();
 
@@ -152,4 +151,9 @@ private:
 
 	const float DEFAULT_SPEED = 75.f;
 	bool IsBossStage = false;	// Temp
+
+	/* Sounds */
+	const char* SFXDropBomb = "CreateBomb.mp3";
+	const char* SFXDying = "Dying.mp3";
+	const char* SFXWalking = "Walking.mp3";
 };

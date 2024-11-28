@@ -8,6 +8,7 @@
 #include "HurryUp.h"
 #include <EngineCore/SpriteRenderer.h>
 #include <EnginePlatform/EngineInput.h>
+#include <EnginePlatform/EngineSound.h>
 #include <EngineBase/EngineString.h>
 
 bool AGameUI::IsStop = true;
@@ -255,6 +256,7 @@ void AGameUI::CheckInsertingCoin()
 	if (isDownF3 || isDownF4)
 	{
 		unsigned __int8 coin = (isDownF3 ? 1 : 2);
+		UEngineSound::Play("Coin.mp3", -1, 0, false);
 		GameData::GetInstance().AddCoin(coin);
 	}
 }
