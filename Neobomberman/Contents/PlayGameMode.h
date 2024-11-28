@@ -32,6 +32,7 @@ private:
 	bool IsAllMonstersDead() const;
 	void OnExplodeBomb();
 	void GameOver();
+	void CheckAfterExplosion(float _deltaTime);
 
 	void OnEndGameOverFadeOut();
 
@@ -53,5 +54,8 @@ private:
 	bool isShowingResult = false;
 
 	float ElapsedSecs = 0.f;
+
+	std::vector<FIntPoint> SplashTileIdxsBackup;
+	bool IsSplashCheck = false;
 };
 

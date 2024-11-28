@@ -8,6 +8,9 @@ enum class ESceneType
 	SELECT,
 };
 
+/*
+* _IDLE : wait animation end..
+*/
 enum class ETitleState
 {
 	OPENING = 0,
@@ -16,6 +19,8 @@ enum class ETitleState
 	WAIT_SELECT,
 	RUN_CUT_SCENE_IDLE,
 	RUN_CUT_SCENE,
+	GO_TO_BATTLE_IDLE,
+	GO_TO_BATTLE,
 	PREPARE_PLAY,
 	PREPARE_DISAPPEAR
 };
@@ -43,6 +48,7 @@ protected:
 	void LevelChangeStart() override;
 
 private:
+	void DrawCircle();
 	void ResetSeconds();
 	void SwitchStartUi(bool _isShow);
 	void SwitchSelectUi(bool _isShow);
@@ -54,6 +60,7 @@ private:
 	void RunWaitSequence(float _deltaTime, const ESceneType& _type);
 	void RunPaintSequence(float _deltaTime);
 	void Countdown(const ESceneType& _type);
+	void ChangeToBattle();
 	void ChangeToCutScene();
 	void ChangeToStartScene();
 
@@ -68,6 +75,7 @@ private:
 	void OnWaitToStart();
 	void OnSelectMode();
 	void OnRunCutScene();
+	void OnGoToBattle();
 
 	void SelectingMode(float _deltaTime);
 	void WaitingToStart(float _deltaTime);
@@ -87,6 +95,7 @@ private:
 	USpriteRenderer* SRPushP1P2 = nullptr;
 
 	USpriteRenderer* SRSelectGameMode = nullptr;
+	USpriteRenderer* SRSelectExplanation = nullptr;
 	USpriteRenderer* SRSelectTimeCount[2] = { nullptr, nullptr };
 	USpriteRenderer* SRSelectSayHi = nullptr;
 
@@ -109,6 +118,8 @@ private:
 
 	bool isPainterMovingUp = false;
 	bool isPainterMovingDown = false;
+
+	const float PAINTER_SPEED = 200.f;
 
 	UFSMStateManager FSM;
 	AGameUI* GameUIPtr = nullptr;

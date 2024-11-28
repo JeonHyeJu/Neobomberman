@@ -234,7 +234,11 @@ void AMushroom::Move(const FVector2D& _direction, float _deltaTime)
 	}
 	else
 	{
-		ClearRoute();
+		if (PrevIdx != FIntPoint::NEGATIVE_ONE)
+		{
+			ClearRoute();
+			Route.push_back(PrevIdx);
+		}
 		Fsm.ChangeState(EMonsterState::THINKING);
 	}
 }
@@ -370,6 +374,7 @@ void AMushroom::Walking(float _deltaTime)
 
 	if (IsArrivedAtOneBlock())
 	{
+		PrevIdx = Destination;
 		Destination = Route.front();
 		Route.pop_front();
 	}

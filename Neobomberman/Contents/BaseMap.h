@@ -60,6 +60,17 @@ public:
 	{
 		return SplashTileIdxs;
 	}
+	bool IsInSplashWithVector(const FIntPoint& _pt, const std::vector<FIntPoint>& _vec)
+	{
+		for (size_t i = 0, size = _vec.size(); i < size; ++i)
+		{
+			if (_pt == _vec[i])
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 	bool IsInSplash(const FIntPoint& _pt)
 	{
 		for (size_t i = 0, size = SplashTileIdxs.size(); i < size; ++i)

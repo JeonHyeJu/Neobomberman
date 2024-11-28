@@ -90,6 +90,13 @@ ATitle::ATitle()
 		SRSelectGameMode->SetComponentLocation(winSize.Half());
 		SRSelectGameMode->SetComponentScale(winSize);
 		SRSelectGameMode->SetOrder(ERenderOrder::OPENING);
+		
+		SRSelectExplanation = CreateDefaultSubObject<USpriteRenderer>();
+		SRSelectExplanation->SetSprite("Explanation.png", 0);
+		SRSelectExplanation->SetComponentLocation(FVector2D{ 380, 282 });
+		SRSelectExplanation->SetComponentScale(FVector2D{ 360, 360 });
+		SRSelectExplanation->SetOrder(ERenderOrder::OPENING_STRING);
+		SRSelectExplanation->SetActive(false);
 	}
 
 	{
@@ -146,7 +153,7 @@ ATitle::ATitle()
 		SRSelectPainter->SetComponentLocation(PAINTER_START_LOC);
 		SRSelectPainter->SetComponentScale(size);
 
-		SRSelectPainter->CreateAnimation("GoingUpDown", "SelectPainterUpDown.png", 0, 6, .3f, false);
+		SRSelectPainter->CreateAnimation("GoingUpDown", "SelectPainterUpDown.png", 0, 6, .1f, false);
 		SRSelectPainter->CreateAnimation("DrawCircle", "SelectPainterCircle.png", 0, 8, .1f, false);
 		SRSelectPainter->SetAnimationEvent("DrawCircle", 8, std::bind(&ATitle::OnEndPainterDraw, this));
 		SRSelectPainter->SetOrder(ERenderOrder::OPENING_STRING);
@@ -156,7 +163,6 @@ ATitle::ATitle()
 		FVector2D size = { 128, 128 };
 		SRSelectCircle = CreateDefaultSubObject<USpriteRenderer>();
 		SRSelectCircle->SetSprite("BrushCircle.png");
-		SRSelectCircle->SetComponentLocation({ 140, 224 });
 		SRSelectCircle->SetComponentScale(size);
 
 		SRSelectCircle->CreateAnimation("DrawCircle", "BrushCircle.png", 0, 6, .1f, false);
@@ -240,6 +246,8 @@ ATitle::ATitle()
 	FSM.CreateState(ETitleState::WAIT_SELECT, std::bind(&ATitle::SelectingMode, this, std::placeholders::_1), std::bind(&ATitle::OnSelectMode, this));
 	FSM.CreateState(ETitleState::RUN_CUT_SCENE_IDLE, nullptr);
 	FSM.CreateState(ETitleState::RUN_CUT_SCENE, std::bind(&ATitle::RunningCutScene, this, std::placeholders::_1), std::bind(&ATitle::OnRunCutScene, this));
+	FSM.CreateState(ETitleState::GO_TO_BATTLE_IDLE, nullptr);
+	FSM.CreateState(ETitleState::GO_TO_BATTLE, nullptr);
 	FSM.CreateState(ETitleState::PREPARE_PLAY, nullptr);
 	FSM.CreateState(ETitleState::PREPARE_DISAPPEAR, nullptr);
 }
@@ -310,6 +318,7 @@ void ATitle::SwitchSelectUi(bool _isShow)
 	}
 	SRSelectSayHi->SetActive(_isShow);
 	SRSelectPainter->SetActive(_isShow);
+	SRSelectExplanation->SetActive(_isShow);
 }
 
 void ATitle::SwitchCutSceneUi(bool _isShow)
@@ -353,13 +362,15 @@ void ATitle::RunPaintSequence(float _deltaTime)
 				SRSelectPainter->ChangeAnimation("GoingUpDown", true);
 				tempAnimFlag = false;
 			}
-			SRSelectPainter->SetComponentLocation({ curLoc.X, curLoc.Y + 100 * _deltaTime });
+			SRSelectPainter->SetComponentLocation({ curLoc.X, curLoc.Y + PAINTER_SPEED * _deltaTime });
 		}
 		else
 		{
 			tempAnimFlag = true;
 			isPainterMovingUp = false;
 			isPainterMovingDown = false;
+
+			SRSelectExplanation->SetSprite("Explanation.png", 1);
 		}
 	}
 	else if (isPainterMovingUp)
@@ -372,13 +383,15 @@ void ATitle::RunPaintSequence(float _deltaTime)
 				tempAnimFlag = false;
 			}
 			SRSelectPainter->ChangeAnimation("GoingUpDown");
-			SRSelectPainter->SetComponentLocation({ curLoc.X, curLoc.Y - 100 * _deltaTime });
+			SRSelectPainter->SetComponentLocation({ curLoc.X, curLoc.Y - PAINTER_SPEED * _deltaTime });
 		}
 		else
 		{
 			tempAnimFlag = true;
 			isPainterMovingUp = false;
 			isPainterMovingDown = false;
+
+			SRSelectExplanation->SetSprite("Explanation.png", 0);
 		}
 	}
 }
@@ -441,14 +454,31 @@ void ATitle::Countdown(const ESceneType& _type)
 	Seconds--;
 }
 
+void ATitle::DrawCircle()
+{
+	SRSelectPainter->ChangeAnimation("DrawCircle", true);
+
+	FVector2D painterLoc = SRSelectPainter->GetComponentLocation();
+	SRSelectCircle->SetComponentLocation(painterLoc + FVector2D{ 77.f, 0.f });
+}
+
+void ATitle::ChangeToBattle()
+{
+	if (FSM.GetState() < static_cast<int>(ETitleState::GO_TO_BATTLE_IDLE))
+	{
+		FSM.ChangeState(ETitleState::GO_TO_BATTLE_IDLE);
+		DrawCircle();
+		// The following actions are executed in an animated end event.
+	}
+}
+
 void ATitle::ChangeToCutScene()
 {
 	if (FSM.GetState() < static_cast<int>(ETitleState::RUN_CUT_SCENE_IDLE))
 	{
 		FSM.ChangeState(ETitleState::RUN_CUT_SCENE_IDLE);
-		SRSelectPainter->ChangeAnimation("DrawCircle", true);
+		DrawCircle();
 		// The following actions are executed in an animated end event.
-		return;
 	}
 }
 
@@ -502,6 +532,10 @@ void ATitle::OnEndFadeOut()
 	case ETitleState::RUN_CUT_SCENE_IDLE:
 		FSM.ChangeState(ETitleState::RUN_CUT_SCENE);
 		AFade::MainFade->FadeIn();
+		break;
+	case ETitleState::GO_TO_BATTLE_IDLE:
+		FSM.ChangeState(ETitleState::GO_TO_BATTLE);
+		UEngineAPICore::GetCore()->OpenLevel("Battle");
 		break;
 	case ETitleState::PREPARE_PLAY:
 		FSM.ChangeState(ETitleState::PREPARE_DISAPPEAR);
@@ -575,9 +609,19 @@ void ATitle::SelectingMode(float _deltaTime)
 	bool isDownA = UEngineInput::GetInst().IsDown(VK_SPACE) || UEngineInput::GetInst().IsDown(VK_RETURN);
 	if (isDownA)
 	{
-		if (FSM.GetState() < static_cast<int>(ETitleState::RUN_CUT_SCENE_IDLE))
+		float halfY = PAINTER_START_LOC.Y + (PAINTER_END_LOC - PAINTER_START_LOC).hY();
+		FVector2D painterLoc = SRSelectPainter->GetComponentLocation();
+		if (painterLoc.Y >= halfY)
 		{
+			SRSelectPainter->SetComponentLocation(PAINTER_END_LOC);
+			ChangeToBattle();
+			return;
+		}
+		else
+		{
+			SRSelectPainter->SetComponentLocation(PAINTER_START_LOC);
 			ChangeToCutScene();
+			return;
 		}
 	}
 
@@ -589,7 +633,6 @@ void ATitle::SelectingMode(float _deltaTime)
 		FVector2D curLoc = SRSelectPainter->GetComponentLocation();
 		if (curLoc.Y >= PAINTER_END_LOC.Y)
 		{
-			SRSelectPainter->SetComponentLocation({ curLoc.X, curLoc.Y - 1 });
 			isPainterMovingUp = true;
 		}
 	}
@@ -598,7 +641,6 @@ void ATitle::SelectingMode(float _deltaTime)
 		FVector2D curLoc = SRSelectPainter->GetComponentLocation();
 		if (curLoc.Y <= PAINTER_START_LOC.Y)
 		{
-			SRSelectPainter->SetComponentLocation({ curLoc.X, curLoc.Y + 1 });
 			isPainterMovingDown = true;
 		}
 	}

@@ -113,6 +113,8 @@ void APlayGameMode::Tick(float _deltaTime)
 	ElapsedSecs += _deltaTime;
 
 	CheckCheat();
+	CheckAfterExplosion(_deltaTime);
+
 	if (ElapsedSecs >= 1.f)
 	{
 		ElapsedSecs = 0.f;
@@ -296,34 +298,105 @@ bool APlayGameMode::IsAllMonstersDead() const
 	return MonsterList.size() == 0;
 }
 
+// Hack code.. lasting explosion impact..
+void APlayGameMode::CheckAfterExplosion(float _deltaTime)
+{
+	if (CurMapPtr == nullptr) return;
+	if (!IsSplashCheck) return;
+	if (SplashTileIdxsBackup.size() == 0) return;
+
+	static float elapsedSecs = 0.f;
+	static int executeCnt = 0;
+
+	elapsedSecs += _deltaTime;
+
+	if (elapsedSecs >= .4f)	// match with explosion anim
+	{
+		elapsedSecs = 0.f;
+		if (executeCnt > 3)
+		{
+			executeCnt = 0;
+			IsSplashCheck = false;
+			return;
+		}
+
+		// Check monsters
+		std::list<AMonster*>::iterator it = MonsterList.begin();
+		std::list<AMonster*>::iterator itEnd = MonsterList.end();
+		for (; it != itEnd; ++it)
+		{
+			AMonster* monster = *it;
+			if (monster->GetCanHit())
+			{
+				FVector2D monsterLoc = monster->GetActorLocation();
+				FVector2D margin{ 10, 10 };
+
+				FVector2D nextPosLT = monsterLoc + margin;
+				FVector2D nextPosRT = FVector2D{ nextPosLT.X + GlobalVar::BOMB_SIZE.hX() * .5f, nextPosLT.Y };
+				FVector2D nextPosLB = FVector2D{ nextPosLT.X, monsterLoc.Y + GlobalVar::BOMB_SIZE.hY() * .4f + margin.Y };
+				FVector2D nextPosRB = FVector2D{ nextPosRT.X, nextPosLB.Y };
+
+				FIntPoint nextIdxLT = CurMapPtr->LocationToMatrixIdx(nextPosLT);
+				FIntPoint nextIdxRT = CurMapPtr->LocationToMatrixIdx(nextPosRT);
+				FIntPoint nextIdxLB = CurMapPtr->LocationToMatrixIdx(nextPosLB);
+				FIntPoint nextIdxRB = CurMapPtr->LocationToMatrixIdx(nextPosRB);
+
+				bool isInSplashLT = CurMapPtr->IsInSplashWithVector(nextIdxLT, SplashTileIdxsBackup);
+				bool isInSplashRT = CurMapPtr->IsInSplashWithVector(nextIdxRT, SplashTileIdxsBackup);
+				bool isInSplashLB = CurMapPtr->IsInSplashWithVector(nextIdxLB, SplashTileIdxsBackup);
+				bool isInSplashRB = CurMapPtr->IsInSplashWithVector(nextIdxRB, SplashTileIdxsBackup);
+
+				/*FIntPoint curIdx = CurMapPtr->LocationToMatrixIdx(monster->GetActorLocation());
+				if (CurMapPtr->IsInSplashWithVector(curIdx, SplashTileIdxsBackup))*/
+
+				if (isInSplashLT || isInSplashRT || isInSplashLB || isInSplashRB)
+				{
+					monster->Kill();
+				}
+			}
+		}
+
+		// Check player
+		FVector2D playerLoc = Player->GetActorLocation();
+		FVector2D margin{ 10, 10 };
+
+		FVector2D nextPosLT = playerLoc + margin;
+		FVector2D nextPosRT = FVector2D{ nextPosLT.X + GlobalVar::BOMBERMAN_SIZE.hX() * .5f, nextPosLT.Y};
+		FVector2D nextPosLB = FVector2D{ nextPosLT.X, playerLoc.Y + GlobalVar::BOMBERMAN_SIZE.hY() *.4f + margin.Y };
+		FVector2D nextPosRB = FVector2D{ nextPosRT.X, nextPosLB.Y };
+
+		FIntPoint nextIdxLT = CurMapPtr->LocationToMatrixIdx(nextPosLT);
+		FIntPoint nextIdxRT = CurMapPtr->LocationToMatrixIdx(nextPosRT);
+		FIntPoint nextIdxLB = CurMapPtr->LocationToMatrixIdx(nextPosLB);
+		FIntPoint nextIdxRB = CurMapPtr->LocationToMatrixIdx(nextPosRB);
+
+		bool isInSplashLT = CurMapPtr->IsInSplashWithVector(nextIdxLT, SplashTileIdxsBackup);
+		bool isInSplashRT = CurMapPtr->IsInSplashWithVector(nextIdxRT, SplashTileIdxsBackup);
+		bool isInSplashLB = CurMapPtr->IsInSplashWithVector(nextIdxLB, SplashTileIdxsBackup);
+		bool isInSplashRB = CurMapPtr->IsInSplashWithVector(nextIdxRB, SplashTileIdxsBackup);
+
+		/*OutputDebugString(("nextIdxLT : " + std::to_string(nextIdxLT.X) + ", " + std::to_string(nextIdxLT.Y) + "\n").c_str());
+		OutputDebugString(("nextIdxRT : " + std::to_string(nextIdxRT.X) + ", " + std::to_string(nextIdxRT.Y) + "\n").c_str());
+		OutputDebugString(("nextIdxLB : " + std::to_string(nextIdxLB.X) + ", " + std::to_string(nextIdxLB.Y) + "\n").c_str());
+		OutputDebugString(("nextIdxRB : " + std::to_string(nextIdxRB.X) + ", " + std::to_string(nextIdxRB.Y) + "\n").c_str());
+		OutputDebugString("----------------------------------\n");*/
+		if (isInSplashLT || isInSplashRT || isInSplashLB || isInSplashRB)
+		{
+			Player->Kill();
+		}
+
+		executeCnt++;
+	}
+}
+
 void APlayGameMode::OnExplodeBomb()
 {
 	if (CurMapPtr == nullptr) return;
 
-	const std::vector<FIntPoint>& vec = CurMapPtr->GetSplashTileIdxs();
+	SplashTileIdxsBackup = CurMapPtr->GetSplashTileIdxs();
+	IsSplashCheck = true;
 
-	// Check monsters
-	std::list<AMonster*>::iterator it = MonsterList.begin();
-	std::list<AMonster*>::iterator itEnd = MonsterList.end();
-	for (; it != itEnd; ++it)
-	{
-		AMonster* monster = *it;
-		if (monster->GetCanHit())
-		{
-			FIntPoint curIdx = CurMapPtr->LocationToMatrixIdx(monster->GetActorLocation());
-			if (CurMapPtr->IsInSplash(curIdx))
-			{
-				monster->Kill();
-			}
-		}
-	}
-
-	// Check player
-	FIntPoint playerIdx = CurMapPtr->LocationToMatrixIdx(Player->GetActorLocation());
-	if (CurMapPtr->IsInSplash(playerIdx))
-	{
-		Player->Kill();
-	}
+	CheckAfterExplosion(.4f);
 }
 
 void APlayGameMode::OnEndGameOverFadeOut()

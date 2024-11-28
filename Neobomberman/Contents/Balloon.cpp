@@ -173,7 +173,12 @@ void ABalloon::Move(const FVector2D& _direction, float _deltaTime)
 	}
 	else
 	{
-		ClearRoute();
+		if (PrevIdx != FIntPoint::NEGATIVE_ONE)
+		{
+			ClearRoute();
+			Route.push_back(PrevIdx);
+		}
+		
 		Fsm.ChangeState(EMonsterState::THINKING);
 	}
 }
@@ -189,7 +194,7 @@ void ABalloon::Damaged(unsigned __int8 _power)
 
 void ABalloon::Kill()
 {
-	if (static_cast<EMonsterState>(Fsm.GetState()) != EMonsterState::DYING)
+	if (Fsm.GetState() < static_cast<int>(EMonsterState::DYING))
 	{
 		if (Collision != nullptr)
 		{
@@ -303,6 +308,7 @@ void ABalloon::Walking(float _deltaTime)
 
 	if (IsArrivedAtOneBlock())
 	{
+		PrevIdx = Destination;
 		Destination = Route.front();
 		Route.pop_front();
 	}

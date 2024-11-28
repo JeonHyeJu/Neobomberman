@@ -113,6 +113,7 @@ protected:
 	int PathFinderIdx = 0;
 	std::list<FIntPoint> Route;
 	FIntPoint Destination = FIntPoint::NEGATIVE_ONE;
+	FIntPoint PrevIdx;
 
 	int Health = 1;
 

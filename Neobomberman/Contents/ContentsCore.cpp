@@ -11,6 +11,7 @@
 #include "TitleGameMode.h"
 #include "EndingGameMode.h"
 #include "TileMapGameMode.h"
+#include "BattleGameMode.h"
 #include "PlayGameMode.h"
 #include "PlayBossMode.h"
 #include "Player.h"
@@ -42,10 +43,11 @@ void ContentsCore::BeginPlay()
 	pCore->CreateLevel<AEndingGameMode, AActor>("Ending");
 	pCore->CreateLevel<APlayGameMode, APlayer>("Play");
 	pCore->CreateLevel<APlayBossMode, APlayer>("Boss_Stage1");
+	pCore->CreateLevel<ABattleGameMode, AActor>("Battle");
 
-	//pCore->OpenLevel("Title");
+	pCore->OpenLevel("Title");
 	//pCore->OpenLevel("Play");
-	pCore->OpenLevel("Boss_Stage1");
+	//pCore->OpenLevel("Boss_Stage1");
 	//pCore->OpenLevel("Ending");
 }
 
@@ -138,6 +140,8 @@ void ContentsCore::InitResources()
 	imgManager.CuttingSprite("HurryUp.png", { 510, 64 });
 	imgManager.CuttingSprite("Items.png", { 64, 64 });
 	imgManager.CuttingSprite("BgBottom.png", { 416, 32 });
+	imgManager.CuttingSprite("Siren.png", { 32, 32 });
+	imgManager.CuttingSprite("Explanation.png", { 360, 360 });
 }
 
 void ContentsCore::LoadImages(std::string_view _path)
