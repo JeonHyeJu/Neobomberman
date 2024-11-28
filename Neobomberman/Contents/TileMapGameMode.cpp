@@ -91,10 +91,10 @@ void ATileMapGameMode::InitMap()
 			for (int x = 0; x < titleIdxs.X; x++)
 			{
 				// Stage1. temp
-				//GroundTileMap->SetTile({ x, y }, static_cast<int>(TileType::Ground), true);
+				GroundTileMap->SetTile({ x, y }, static_cast<int>(TileType::Ground), true);
 
 				// Boss1. emp
-				GroundTileMap->SetTile({ x, y }, 4, true);
+				//GroundTileMap->SetTile({ x, y }, 4, true);
 			}
 		}
 
@@ -205,6 +205,7 @@ void ATileMapGameMode::AddTile(ATileMap* _curMapPtr, const FVector2D& _mousePos)
 				{
 					tile->SpriteRenderer->Destroy();
 					tile->SpriteRenderer = nullptr;
+					tile->SpriteIndex = -1;
 				}
 			}
 		}
@@ -225,6 +226,7 @@ void ATileMapGameMode::RemoveTile(ATileMap* _curMapPtr, const FVector2D& _mouseP
 	{
 		tile->SpriteRenderer->Destroy();
 		tile->SpriteRenderer = nullptr;
+		tile->SpriteIndex = -1;
 	}
 }
 

@@ -156,4 +156,6 @@ private:
 	const char* SFXDropBomb = "CreateBomb.mp3";
 	const char* SFXDying = "Dying.mp3";
 	const char* SFXWalking = "Walking.mp3";
+	const char* SFXRidePortal = "RidePortal.mp3";
+	const char* SFXWin = "Win.mp3";
 };

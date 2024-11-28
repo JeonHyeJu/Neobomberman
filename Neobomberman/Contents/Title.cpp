@@ -247,7 +247,7 @@ ATitle::ATitle()
 	FSM.CreateState(ETitleState::WAIT_SELECT, std::bind(&ATitle::SelectingMode, this, std::placeholders::_1), std::bind(&ATitle::OnSelectMode, this));
 	FSM.CreateState(ETitleState::RUN_CUT_SCENE_IDLE, nullptr);
 	FSM.CreateState(ETitleState::RUN_CUT_SCENE, std::bind(&ATitle::RunningCutScene, this, std::placeholders::_1), std::bind(&ATitle::OnRunCutScene, this));
-	FSM.CreateState(ETitleState::GO_TO_BATTLE_IDLE, nullptr);
+	FSM.CreateState(ETitleState::GO_TO_BATTLE_IDLE, nullptr, std::bind(&ATitle::OnGoToBattleIdle, this));
 	FSM.CreateState(ETitleState::GO_TO_BATTLE, nullptr);
 	FSM.CreateState(ETitleState::PREPARE_PLAY, nullptr);
 	FSM.CreateState(ETitleState::PREPARE_DISAPPEAR, nullptr);
@@ -448,6 +448,7 @@ void ATitle::Countdown(const ESceneType& _type)
 		}
 		else if (base10 == 0)
 		{
+			UEngineSound::Play(SFXCountDown, -1, 0, false);
 			resourcePath = SPRITE_SELECT_TIME_COUNT_P;
 		}
 		SRSelectTimeCount[0]->SetSprite(resourcePath, base10);
@@ -541,6 +542,7 @@ void ATitle::OnEndFadeOut()
 		UEngineAPICore::GetCore()->OpenLevel("BattleSelect");
 		break;
 	case ETitleState::PREPARE_PLAY:
+		UEngineSound::StopPlayer(SFXCutScene);
 		FSM.ChangeState(ETitleState::PREPARE_DISAPPEAR);
 		UEngineAPICore::GetCore()->OpenLevel("Play");
 	default:
@@ -569,6 +571,7 @@ void ATitle::OnEndCutScene()
 void ATitle::OnWaitToStart()
 {
 	UEngineSound::StopPlayer(SFXOpening);
+	UEngineSound::Play(SFXTitle, -1, 5);
 
 	ResetSeconds();
 	SROpening->ChangeAnimation(ANIM_IDLE_NAME);
@@ -577,6 +580,9 @@ void ATitle::OnWaitToStart()
 
 void ATitle::OnSelectMode()
 {
+	UEngineSound::StopPlayer(SFXTitle);
+	UEngineSound::Play(SFXSelect, -1, 5);
+
 	ResetSeconds();
 	SROpening->SetActive(false);
 	SwitchStartUi(false);
@@ -586,6 +592,9 @@ void ATitle::OnSelectMode()
 
 void ATitle::OnRunCutScene()
 {
+	UEngineSound::StopPlayer(SFXSelect);
+	UEngineSound::Play(SFXCutScene);
+
 	SRSelectCircle->SetActive(false);
 	SRLetterBoxUpper->SetActive(true);
 	SRLetterBoxLower->SetActive(true);
@@ -593,6 +602,11 @@ void ATitle::OnRunCutScene()
 	SwitchStartUi(false);
 	SwitchSelectUi(false);
 	SwitchCutSceneUi(true);
+}
+
+void ATitle::OnGoToBattleIdle()
+{
+	UEngineSound::StopPlayer(SFXSelect);
 }
 
 void ATitle::WaitingToStart(float _deltaTime)

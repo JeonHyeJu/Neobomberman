@@ -198,6 +198,7 @@ void APlayer::OnResume()
 void APlayer::ShowWinnerPose()
 {
 	IsBossStage = true;
+	UEngineSound::Play(SFXWin);
 
 	Fsm.ChangeState(EPlayerState::PORTAL);
 }
@@ -457,6 +458,7 @@ void APlayer::OnShift()
 	}
 	else
 	{
+		UEngineSound::Play(SFXRidePortal);
 		SpriteRendererHead->ChangeAnimation("Ride_Portal");
 		SpriteRendererBody->ChangeAnimation("Ride_Portal");
 	}

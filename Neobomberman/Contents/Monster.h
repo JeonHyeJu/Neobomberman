@@ -119,6 +119,8 @@ protected:
 
 	bool IsDestroiable = false;
 	bool CanHit = false;
+
+	const char* SFXDying = "MonsterDying.mp3";
 	
 private:
 	/* Path finder */

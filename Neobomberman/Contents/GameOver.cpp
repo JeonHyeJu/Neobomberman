@@ -4,6 +4,7 @@
 #include "GameOver.h"
 #include "Fade.h"
 #include <EngineCore/SpriteRenderer.h>
+#include <EnginePlatform/EngineSound.h>
 
 AGameOver::AGameOver()
 {
@@ -86,14 +87,18 @@ void AGameOver::ShowAndStart()
 {
 	Reset();
 	SetActive(true);
+	UEngineSound::Play(SFXContinue);
 }
 
 void AGameOver::Reset()
 {
+	UEngineSound::StopPlayer(SFXContinue);
+
 	ElapsedSecs = 0.f;
 	CurSeconds = WAIT_SECONDS;
-	TIME_CNT = 1.f;
+	TIME_CNT = .9f;
 	IsOver = false;
+	GameoverSeconds = 0;
 
 	SRContinueStr->ChangeAnimation("Run", true);
 	SRContinueNum->ChangeAnimation("Run9", true);
@@ -112,7 +117,7 @@ void AGameOver::Countdown(float _deltaTime)
 		{
 			if (SRContinueNum->IsCurAnimationEnd())
 			{
-				TIME_CNT = .5f;		// Temp
+				TIME_CNT = .4f;		// Temp
 				SRContinueStr->SetActive(false);
 				SRContinueNum->SetActive(false);
 
@@ -122,11 +127,18 @@ void AGameOver::Countdown(float _deltaTime)
 					return;
 				}
 
+				if (GameoverSeconds == 0)
+				{
+					UEngineSound::StopPlayer(SFXContinue);
+					UEngineSound::Play(SFXGameOver);
+				}
+
 				GameOverStrAnim();
 			}
 		}
 		else
 		{
+			UEngineSound::Play(SFXBonusCount);
 			SRContinueNum->ChangeAnimation("Run" + std::to_string(CurSeconds - 1));
 		}
 	}

@@ -40,9 +40,10 @@ private:
 
 	/* Fsm start functions */
 	void OnWalk();
-	void OnPassaway();
 	void OnPressDown();
 	void OnDamage();
+	void OnDead();
+	void OnPassaway();
 
 	// for debug start
 	const char* DEBUG_IMG_PATH = "Bg_1-Col.png";
@@ -95,4 +96,8 @@ private:
 	const int MAX_HEALTH = 1;	// Temp
 
 	const FVector2D MONSTER_SIZE{ 256, 256 };
+
+	/* Sounds */
+	const char* SFXHoop = "Hoop.mp3";
+	const char* SFXCrash = "Crash.mp3";
 };

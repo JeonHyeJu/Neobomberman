@@ -9,6 +9,7 @@
 #include "Mushroom.h"
 #include "Balloon.h"
 #include "Result.h"
+#include "HurryUp.h"
 #include "Fade.h"
 
 #include <EngineCore/Level.h>
@@ -107,6 +108,34 @@ void APlayGameMode::BeginPlay()
 	fade->FadeIn();
 
 	GameUiPtr->StartTimer();
+	UEngineSound::Play(SFXBg);
+}
+
+void APlayGameMode::CheckAndPlayBgSound()
+{
+	if (isShowContinueScene) return;
+	if (isShowingResult) return;
+
+	if (GameUiPtr->GetIsHalfTime())
+	{
+		// Temp
+		static bool onlyOnce = true;
+		if (onlyOnce)
+		{
+			onlyOnce = false;
+			AHurryUp* hurryUp = GetWorld()->SpawnActor<AHurryUp>();
+			UEngineSound::StopPlayer(SFXBg);
+			UEngineSound::Play(SFXAlertHurryUp);
+			UEngineSound::Play(SFXBgHurryUp, -1, 100);
+		}
+	}
+	else
+	{
+		if (!UEngineSound::IsPlaying(SFXBg))
+		{
+			UEngineSound::Play(SFXBg, 7700);
+		}
+	}
 }
 
 void APlayGameMode::Tick(float _deltaTime)
@@ -115,6 +144,7 @@ void APlayGameMode::Tick(float _deltaTime)
 
 	CheckCheat();
 	CheckAfterExplosion(_deltaTime);
+	CheckAndPlayBgSound();
 
 	if (ElapsedSecs >= 1.f)
 	{
@@ -127,6 +157,7 @@ void APlayGameMode::Tick(float _deltaTime)
 			if (CurMapPtr && !CurMapPtr->GetIsPortalOpened())
 			{
 				CurMapPtr->OpenPortal();
+				UEngineSound::Play(SFXOpenPortal);
 				return;
 			}
 			if (!isShowingResult && Player->GetIsClear())
@@ -159,6 +190,7 @@ void APlayGameMode::GameOver()
 		AFade::MainFade->SetFadeSpeed(.5f);
 		AFade::MainFade->FadeOut();
 
+		UEngineSound::AllSoundStop();
 		GameOverScenePtr->ShowAndStart();
 	}
 	else
@@ -191,9 +223,9 @@ void APlayGameMode::CheckDeadMonster()
 
 void APlayGameMode::CheckTimeOver()
 {
-	if (AGameUI::IsTimeOver())
+	if (GameUiPtr->IsTimeOver())
 	{
-		GetWorld()->GetPawn<APlayer>()->Kill();
+		Player->Kill();
 	}
 }
 
@@ -230,6 +262,7 @@ void APlayGameMode::CheckGameOver()
 				StartFromCoin();
 
 				GameOverScenePtr->SetActive(false);
+				GameOverScenePtr->Reset();
 				RestartGame();
 			}
 		}
@@ -403,6 +436,7 @@ void APlayGameMode::OnExplodeBomb()
 
 void APlayGameMode::OnEndGameOverFadeOut()
 {
+	UEngineSound::AllSoundStop();
 	UEngineAPICore::GetCore()->OpenLevel("Title");
 }
 

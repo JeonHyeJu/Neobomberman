@@ -34,4 +34,7 @@ private:
 	bool isShowingResult = false;
 
 	class ABaseMap* CurMapPtr = nullptr;
+
+	/* Sounds */
+	const char* SFXBg = "Stage1Boss.mp3";
 };

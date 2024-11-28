@@ -52,6 +52,25 @@ void UEngineSound::StopPlayer(std::string_view _Name)
 	}
 }
 
+// Temp
+bool UEngineSound::IsPlaying(std::string_view _Name)
+{
+	std::list<USoundPlayer>::iterator StartIter = Players.begin();
+	std::list<USoundPlayer>::iterator EndIter = Players.end();
+
+	bool isExists = false;
+	for (; StartIter != EndIter; ++StartIter)
+	{
+		USoundPlayer& CurSoundPlayer = *StartIter;
+		if (CurSoundPlayer.GetName() == _Name)
+		{
+			isExists = true;
+			break;
+		}
+	}
+	return isExists;
+}
+
 void UEngineSound::AllSoundStop()
 {
 	std::list<USoundPlayer>::iterator StartIter = Players.begin();
@@ -98,13 +117,9 @@ void UEngineSound::Update()
 	std::list<USoundPlayer>::iterator StartIter = Players.begin();
 	std::list<USoundPlayer>::iterator EndIter = Players.end();
 
-	std::string log = "------------------------------------------\n";
 	for (; StartIter != EndIter; )
 	{
 		USoundPlayer& CurSoundPlayer = *StartIter;
-		const std::string& name = CurSoundPlayer.GetName();
-		log += name + ", ";
-
 		if (true == CurSoundPlayer.IsPlaying())
 		{
 			++StartIter;
@@ -113,9 +128,6 @@ void UEngineSound::Update()
 
 		StartIter = Players.erase(StartIter);
 	}
-
-	log += "\n";
-	OutputDebugString(log.c_str());
 
 	if (FMOD_RESULT::FMOD_OK != SoundSystem->update())
 	{

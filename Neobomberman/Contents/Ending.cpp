@@ -3,6 +3,7 @@
 #include "GlobalVar.h"
 #include "Fade.h"
 #include <EnginePlatform/EngineInput.h>
+#include <EnginePlatform/EngineSound.h>
 #include <EngineCore/SpriteRenderer.h>
 #include <EngineCore/EngineAPICore.h>
 
@@ -25,6 +26,9 @@ AEnding::~AEnding()
 
 void AEnding::BeginPlay()
 {
+	Super::BeginPlay();
+
+	UEngineSound::Play(SFXBg);
 }
 
 void AEnding::Tick(float _deltaTime)
@@ -40,5 +44,6 @@ void AEnding::Tick(float _deltaTime)
 
 void AEnding::OnEndFadeOut()
 {
+	UEngineSound::AllSoundStop();
 	UEngineAPICore::GetCore()->OpenLevel("Title");
 }

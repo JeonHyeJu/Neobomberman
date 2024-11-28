@@ -75,7 +75,7 @@ private:
 	void OnWaitToStart();
 	void OnSelectMode();
 	void OnRunCutScene();
-	void OnGoToBattle();
+	void OnGoToBattleIdle();
 
 	void SelectingMode(float _deltaTime);
 	void WaitingToStart(float _deltaTime);
@@ -126,4 +126,8 @@ private:
 
 	/* Sounds */
 	const char* SFXOpening = "Opening.mp3";
+	const char* SFXTitle = "Title.mp3";
+	const char* SFXSelect = "SelectMusic.mp3";
+	const char* SFXCountDown = "CountDown.mp3";
+	const char* SFXCutScene = "CutScene.mp3";
 };

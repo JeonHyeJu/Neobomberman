@@ -24,6 +24,7 @@ protected:
 private:
 	void FadeOut();
 	void OnEndFadeOut();
+	void CheckAndPlayBgSound();
 
 	void StartFromCoin();
 	void CheckGameOver();
@@ -57,5 +58,11 @@ private:
 
 	std::vector<FIntPoint> SplashTileIdxsBackup;
 	bool IsSplashCheck = false;
+
+	/* Sounds */
+	const char* SFXBg = "Stage1Music.mp3";
+	const char* SFXBgHurryUp = "HurryUpMusic.mp3";
+	const char* SFXAlertHurryUp = "HurryUpWarning.mp3";
+	const char* SFXOpenPortal = "OpenPortal.mp3";
 };
 

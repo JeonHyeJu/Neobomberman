@@ -36,10 +36,10 @@ public:
 	{
 		NextLevel = _levelName.data();
 	}
-	void SetRImageIdx(int _idx);
 
 	inline void SetLastSecs(int _lastSecs)
 	{
+		LastSecsInit = _lastSecs;
 		LastSecs = _lastSecs;
 	}
 	inline void SetTotal(int _prevTotal)
@@ -49,13 +49,14 @@ public:
 
 private:
 	void SetLastTimeUI(int _lastSecs);
-	void _SetNumberUI(USpriteRenderer** _arr, int _val);
 
 	void SetBonusUI(int _bonus);
 	void SetTotalUI(int _total);
 
 	void HideAllBonusUI();
 	void HideAllTotalUI();
+
+	void OnShowRImage();
 
 	void Moving(float _deltaTime);
 	void CalculatingBonus(float _deltaTime);
@@ -76,6 +77,8 @@ private:
 	float Speed = 700.f;
 	float SpeedRImage = 1000.f;
 
+	int LastSecsInit = 0;
+
 	int LastSecs = 0;
 	int Bonus = 0;
 	int Total = 0;
@@ -86,4 +89,11 @@ private:
 	float ElapsedSecs = 0.f;
 
 	std::string NextLevel = "";
+
+	/* Sounds */
+	const char* SFXClear = "Clear.mp3";
+	const char* SFXResultGreat = "Result_Great.mp3";
+	const char* SFXResultGood = "Result_Good.mp3";
+	const char* SFXResultBad = "Result_Bad.mp3";
+	const char* SFXBonusCount = "BonusCount.mp3";
 };

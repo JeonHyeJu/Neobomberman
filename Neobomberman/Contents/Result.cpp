@@ -2,11 +2,13 @@
 #include "Result.h"
 #include "ContentsEnum.h"
 #include "GlobalVar.h"
+#include "GameUI.h"
 #include "UtilFn.h"
 #include "GameData.h"
 #include <EngineCore/Actor.h>
 #include <EngineCore/SpriteRenderer.h>
 #include <EngineCore/EngineAPICore.h>
+#include <EnginePlatform/EngineSound.h>
 
 AResult::AResult()
 {
@@ -87,7 +89,7 @@ AResult::AResult()
 	FSM.CreateState(EResultState::CALCULATE_BONUS, std::bind(&AResult::CalculatingBonus, this, std::placeholders::_1));
 	FSM.CreateState(EResultState::CALCULATE_TOTAL, std::bind(&AResult::CalculatingTotal, this, std::placeholders::_1));
 	FSM.CreateState(EResultState::STAMP, std::bind(&AResult::Stamping, this, std::placeholders::_1));
-	FSM.CreateState(EResultState::SHOW_RIMAGE, std::bind(&AResult::ShowingRImage, this, std::placeholders::_1));
+	FSM.CreateState(EResultState::SHOW_RIMAGE, std::bind(&AResult::ShowingRImage, this, std::placeholders::_1), std::bind(&AResult::OnShowRImage, this));
 	FSM.CreateState(EResultState::SHAKE_RIMAGE, std::bind(&AResult::ShakingRImage, this, std::placeholders::_1));
 
 	FSM.ChangeState(EResultState::INIT);
@@ -113,6 +115,9 @@ void AResult::BeginPlay()
 	SRStageClear->ChangeAnimation("Blinking");
 
 	FSM.ChangeState(EResultState::MOVE);
+
+	UEngineSound::AllSoundStop();
+	UEngineSound::Play(SFXClear);
 }
 
 void AResult::Tick(float _deltaTime)
@@ -214,6 +219,22 @@ void AResult::HideAllTotalUI()
 	}
 }
 
+void AResult::OnShowRImage()
+{
+	if (LastSecsInit > 60)
+	{
+		UEngineSound::Play(SFXResultGreat);
+	}
+	else if (LastSecsInit > 30)
+	{
+		UEngineSound::Play(SFXResultGood);
+	}
+	else
+	{
+		UEngineSound::Play(SFXResultBad);
+	}
+}
+
 void AResult::Moving(float _deltaTime)
 {
 	if (GetActorLocation().X < 0.f)
@@ -230,7 +251,7 @@ void AResult::CalculatingBonus(float _deltaTime)
 {
 	ElapsedSecs += _deltaTime;
 
-	if (ElapsedSecs > .01f)
+	if (ElapsedSecs > .025f)
 	{
 		ElapsedSecs = 0.f;
 
@@ -238,6 +259,7 @@ void AResult::CalculatingBonus(float _deltaTime)
 		{
 			SetLastTimeUI(LastSecs - 1);
 			SetBonusUI(Bonus + 50);
+			UEngineSound::Play(SFXBonusCount, -1, 0, false);
 		}
 		else
 		{
@@ -258,6 +280,7 @@ void AResult::CalculatingTotal(float _deltaTime)
 		{
 			SetTotalUI(Total + Bonus);
 			SetBonusUI(0);
+			UEngineSound::Play(SFXBonusCount);
 		}
 		else
 		{

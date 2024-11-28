@@ -4,8 +4,10 @@
 #include "Player.h"
 #include "GameData.h"
 #include "UtilFn.h"
+#include "GameUI.h"
 #include <EngineCore/SpriteRenderer.h>
 #include <EngineCore/2DCollision.h>
+#include <EnginePlatform/EngineSound.h>
 #include <algorithm>
 
 AHoopGhost::AHoopGhost()
@@ -17,7 +19,7 @@ AHoopGhost::AHoopGhost()
 	Fsm.CreateState(EMonsterState::WALKING, std::bind(&AHoopGhost::Walking, this, std::placeholders::_1), std::bind(&AHoopGhost::OnWalk, this));
 	Fsm.CreateState(EMonsterState::PRESS_DOWN, std::bind(&AHoopGhost::PressingDown, this, std::placeholders::_1), std::bind(&AHoopGhost::OnPressDown, this));
 	Fsm.CreateState(EMonsterState::DAMAGED, std::bind(&AHoopGhost::Damaging, this, std::placeholders::_1), std::bind(&AHoopGhost::OnDamage, this));
-	Fsm.CreateState(EMonsterState::DYING, std::bind(&AHoopGhost::Dying, this, std::placeholders::_1));
+	Fsm.CreateState(EMonsterState::DYING, std::bind(&AHoopGhost::Dying, this, std::placeholders::_1), std::bind(&AHoopGhost::OnDead, this));
 	Fsm.CreateState(EMonsterState::PASS_AWAY, std::bind(&AHoopGhost::PassAwaing, this, std::placeholders::_1), std::bind(&AHoopGhost::OnPassaway, this));
 
 	InitMoveEllipse();
@@ -248,6 +250,13 @@ void AHoopGhost::ChangeMoveAnim(const FVector2D& _direction)
 	SRBody->ChangeAnimation(ANIM_RUN_HOOP);
 }
 
+void AHoopGhost::toggleShadow()
+{
+	if (!SRShadowS || !SRShadowL) return;
+	SRShadowS->SetActive(!SRShadowS->IsActive());
+	SRShadowL->SetActive(!SRShadowL->IsActive());
+}
+
 void AHoopGhost::OnWalk()
 {
 	SRBody->ChangeAnimation(ANIM_START_HOOP);
@@ -265,16 +274,14 @@ void AHoopGhost::OnDamage()
 	SRBody->ChangeAnimation(ANIM_DAMAGED);
 }
 
+void AHoopGhost::OnDead()
+{
+	AGameUI::StopTimer();
+}
+
 void AHoopGhost::OnPassaway()
 {
 	GameData::GetInstance().AddPlayer1Score(GetScore());
-}
-
-void AHoopGhost::toggleShadow()
-{
-	if (!SRShadowS || !SRShadowL) return;
-	SRShadowS->SetActive(!SRShadowS->IsActive());
-	SRShadowL->SetActive(!SRShadowL->IsActive());
 }
 
 void AHoopGhost::Walking(float _deltaTime)
@@ -293,6 +300,8 @@ void AHoopGhost::Walking(float _deltaTime)
 		if (SRBody->GetCurAnimName() == ANIM_RUN_HOOP)
 		{
 			if (EllipsePtrSize < RoundingIdx) return;
+
+			UEngineSound::Play(SFXHoop);
 
 			int x = EllipseXPts[RoundingIdx];
 			int y = EllipseYPts[RoundingIdx];
@@ -431,6 +440,7 @@ void AHoopGhost::PressingDown(float _deltaTime)
 void AHoopGhost::Dying(float _deltaTime)
 {
 	static float blinkElapsedSecs = 0.f;
+	static float explosionSecs = 0.f;
 
 	ElapsedSesc += _deltaTime;
 
@@ -447,6 +457,13 @@ void AHoopGhost::Dying(float _deltaTime)
 			Fsm.ChangeState(EMonsterState::PASS_AWAY);
 			return;
 		}
+	}
+
+	explosionSecs += _deltaTime;
+	if (explosionSecs > .15f)
+	{
+		explosionSecs = 0.f;
+		UEngineSound::Play(SFXCrash, -1, 0, false);
 	}
 
 	blinkElapsedSecs += _deltaTime;

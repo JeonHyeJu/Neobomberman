@@ -73,9 +73,9 @@ public:
 	{
 		return Seconds < 0;
 	}
-	static bool IsHalfTime()
+	inline bool GetIsHalfTime() const
 	{
-		return Seconds == 60;
+		return IsHalfTime;
 	}
 
 protected:
@@ -111,4 +111,5 @@ private:
 
 	float ElapsedSecs = 0.f;
 	bool IsBrightPushStart = false;
+	bool IsHalfTime = false;
 };

@@ -42,4 +42,9 @@ private:
 	bool IsOver = false;
 
 	float TIME_CNT = 1.f;
+
+	/* Sounds */
+	const char* SFXContinue = "Continue.mp3";
+	const char* SFXGameOver = "GameOver.mp3";
+	const char* SFXBonusCount = "BonusCount.mp3";
 };

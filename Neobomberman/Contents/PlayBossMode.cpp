@@ -11,6 +11,7 @@
 
 #include <EngineCore/Level.h>
 #include <EnginePlatform/EngineInput.h>
+#include <EnginePlatform/EngineSound.h>
 
 APlayBossMode::APlayBossMode()
 {
@@ -50,6 +51,8 @@ void APlayBossMode::BeginPlay()
 	fade->FadeIn();
 
 	gameUI->StartTimer();
+
+	UEngineSound::Play(SFXBg, -1, 100);
 }
 
 void APlayBossMode::Tick(float _deltaTime)

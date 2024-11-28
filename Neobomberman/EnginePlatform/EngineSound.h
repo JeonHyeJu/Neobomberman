@@ -108,6 +108,7 @@ public:
 	static USoundPlayer Play(std::string_view _Name, int _posMs=-1, int _loopCnt=0, bool _isCheckOverlap=true);
 	static UEngineSound* Find(std::string_view _Name);
 	static void StopPlayer(std::string_view _Name);		// Temp
+	static bool IsPlaying(std::string_view _Name);	// Temp
 	static void Release();
 
 	static void Update();

@@ -154,6 +154,7 @@ void ATileMap::OpenPortal()
 {
 	if (AllTiles[PortalIdx.Y][PortalIdx.X].SpriteRenderer->GetCurAnimName() != "PortalOpened")
 	{
+		IsPortalOpened = true;
 		AllTiles[PortalIdx.Y][PortalIdx.X].SpriteRenderer->ChangeAnimation("PortalOpened");
 	}
 }
@@ -422,7 +423,6 @@ void ATileMap::OnEndCrumbling(const FIntPoint& _idx)
 
 void ATileMap::OnRunPortalMove()
 {
-	IsPortalOpened = true;
 	AllTiles[PortalIdx.Y][PortalIdx.X].SpriteRenderer->ChangeAnimation("PortalMove");
 }
 

@@ -5,7 +5,6 @@
 #include "GameData.h"
 #include "GameUI.h"
 #include "UtilFn.h"
-#include "HurryUp.h"
 #include <EngineCore/SpriteRenderer.h>
 #include <EnginePlatform/EngineInput.h>
 #include <EnginePlatform/EngineSound.h>
@@ -14,7 +13,8 @@
 bool AGameUI::IsStop = true;
 int AGameUI::Seconds = 0;
 //const int AGameUI::START_SECONDS = 5;
-const int AGameUI::START_SECONDS = 60 + 59;
+//const int AGameUI::START_SECONDS = 60 + 59;
+const int AGameUI::START_SECONDS = 35;
 
 /* AGameUI::StatusTopBarUI */
 void AGameUI::StatusTopBarUI::_SetVisibility(bool _isShow)
@@ -94,9 +94,9 @@ void AGameUI::CountDown(float _deltaTime)
 
 		if (!IsTimeOver())
 		{
-			if (IsHalfTime())
+			if (Seconds == 60)
 			{
-				AHurryUp* hurryUp = GetWorld()->SpawnActor<AHurryUp>();
+				IsHalfTime = true;
 			}
 
 			UpdateTimerUI(Seconds--);

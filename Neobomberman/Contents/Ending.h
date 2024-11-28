@@ -24,4 +24,7 @@ private:
 	const char* ANIM_RUN_NAME = "Closing_Run";
 
 	class USpriteRenderer* SpriteRenderer = nullptr;
+
+	/* Sounds */
+	const char* SFXBg = "Intermission.mp3";
 };

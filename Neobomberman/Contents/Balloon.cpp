@@ -6,6 +6,7 @@
 #include "BaseMap.h"
 #include <EngineCore/SpriteRenderer.h>
 #include <EngineCore/2DCollision.h>
+#include <EnginePlatform/EngineSound.h>
 
 ABalloon::ABalloon()
 {
@@ -223,11 +224,13 @@ void ABalloon::OnResume()
 /* FSM start callbacks */
 void ABalloon::OnDead()
 {
+	UEngineSound::Play(SFXDying);
 	CanHit = false;
 }
 
 void ABalloon::OnPassaway()
 {
+
 	SRCloud->ChangeAnimation(ANIM_CLOUD, true);
 	SRCloud->SetActive(true);
 

@@ -7,6 +7,7 @@
 #include <EngineCore/SpriteRenderer.h>
 #include <EngineCore/PathFindAStar.h>
 #include <EngineCore/2DCollision.h>
+#include <EnginePlatform/EngineSound.h>
 
 AMushroom::AMushroom()
 {
@@ -283,6 +284,7 @@ void AMushroom::OnResume()
 /* FSM start callbacks */
 void AMushroom::OnDead()
 {
+	UEngineSound::Play(SFXDying);
 	CanHit = false;
 }
 
