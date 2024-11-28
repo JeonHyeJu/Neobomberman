@@ -149,7 +149,15 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="BattleGameMode.h">
+    <ClInclude Include="BattlePlay.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="BattlePlayMode.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="BattleSelectMode.h">
       <SubType>
       </SubType>
     </ClInclude>
@@ -201,7 +209,7 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="SelectMap.h">
+    <ClInclude Include="BattleSelect.h">
       <SubType>
       </SubType>
     </ClInclude>
@@ -232,7 +240,15 @@
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="BattleGameMode.cpp">
+    <ClCompile Include="BattlePlay.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="BattlePlayMode.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="BattleSelectMode.cpp">
       <SubType>
       </SubType>
     </ClCompile>
@@ -281,7 +297,7 @@
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="SelectMap.cpp">
+    <ClCompile Include="BattleSelect.cpp">
       <SubType>
       </SubType>
     </ClCompile>

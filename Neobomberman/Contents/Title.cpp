@@ -535,7 +535,7 @@ void ATitle::OnEndFadeOut()
 		break;
 	case ETitleState::GO_TO_BATTLE_IDLE:
 		FSM.ChangeState(ETitleState::GO_TO_BATTLE);
-		UEngineAPICore::GetCore()->OpenLevel("Battle");
+		UEngineAPICore::GetCore()->OpenLevel("BattleSelect");
 		break;
 	case ETitleState::PREPARE_PLAY:
 		FSM.ChangeState(ETitleState::PREPARE_DISAPPEAR);
