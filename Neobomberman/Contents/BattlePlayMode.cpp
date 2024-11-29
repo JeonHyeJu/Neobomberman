@@ -5,6 +5,7 @@
 #include "Player.h"
 #include "GameUI.h"
 #include "StageTitle.h"
+#include "PlayerComputer.h"
 #include "Fade.h"
 
 #include <EnginePlatform/EngineSound.h>
@@ -25,7 +26,7 @@ void ABattlePlayMode::BeginPlay()
 
 	AGameUI* gameUI = pLevel->SpawnActor<AGameUI>();
 
-	std::vector<EItem> itemList = { EItem::BOMB, EItem::BOMB, EItem::SPEED };
+	std::vector<EItem> itemList = { EItem::BOMB, EItem::BOMB, EItem::SPEED, EItem::SPEED, EItem::POWER, EItem::POWER };
 
 	ABattleMap* mapPtr = pLevel->SpawnActor<ABattleMap>();
 	mapPtr->InitMap();
@@ -37,6 +38,10 @@ void ABattlePlayMode::BeginPlay()
 	Player->SetGameUI(gameUI);
 	Player->SetCurMap(mapPtr);
 	Player->SetStartLoc(mapPtr->MatrixIdxToLocation(StartPoint));
+
+	PlayerComputer = pLevel->SpawnActor<APlayerComputer>();
+	PlayerComputer->InitSprite("MainCharater_Black.png");		// Temp
+	PlayerComputer->SetStartLoc(mapPtr->MatrixIdxToLocation(StartPointComputer));
 
 	AStageTitle* stageTitle = pLevel->SpawnActor<AStageTitle>();
 	stageTitle->SetSubStage(1);
@@ -140,5 +145,17 @@ void ABattlePlayMode::CheckAfterExplosion(float _deltaTime)
 		}
 
 		executeCnt++;
+	}
+}
+
+void ABattlePlayMode::OnGameFinished()
+{
+	static bool temp = true;
+
+	if (temp)
+	{
+		temp = false;
+		UEngineSound::Play(SFXRing);
+		UEngineSound::StopPlayer(SFXBg);
 	}
 }

@@ -142,7 +142,7 @@ void ATileMap::SetItemsAfterLoad(const std::vector<EItem>& _items)
 		}
 		AllTiles[idx.Y][idx.X].SpriteRendererItem->SetSprite(ITEM_SPRITE_NAME);
 		AllTiles[idx.Y][idx.X].SpriteRendererItem->SetComponentScale(GlobalVar::BOMBERMAN_SIZE);
-		AllTiles[idx.Y][idx.X].SpriteRendererItem->SetComponentLocation(AllTiles[idx.Y][idx.X].SpriteRenderer->GetComponentLocation() - FVector2D{ 0.f, 1.f });
+		AllTiles[idx.Y][idx.X].SpriteRendererItem->SetComponentLocation(AllTiles[idx.Y][idx.X].SpriteRenderer->GetComponentLocation() - FVector2D{ 0.f, 3.f });
 		AllTiles[idx.Y][idx.X].SpriteRendererItem->CreateAnimation(GlobalPath::ANIM_ITEM, ITEM_SPRITE_NAME, ITEM_SIZE*itemSpriteIdx, ITEM_SIZE*itemSpriteIdx + 1, 0.5f);
 		AllTiles[idx.Y][idx.X].SpriteRendererItem->SetOrder(ERenderOrder::CRUMBLING_BOX);
 		AllTiles[idx.Y][idx.X].SpriteRendererItem->SetActive(false);
@@ -306,7 +306,7 @@ FIntPoint ATileMap::LocationToIndex(const FVector2D& _loc)
 }
 
 /* after loading */
-void ATileMap::SetTilesAnimAfterLoad(std::string_view _animName, std::string_view _spriteName)
+void ATileMap::SetTilesAnimAfterLoad(std::string_view _animName, std::string_view _spriteName, int _firstIdx, int _lastIdx)
 {
 	size_t ySize = AllTiles.size();
 	for (size_t y = 0; y < ySize; y++)
@@ -320,8 +320,8 @@ void ATileMap::SetTilesAnimAfterLoad(std::string_view _animName, std::string_vie
 			}
 
 			// Temp
-			AllTiles[y][x].SpriteRenderer->CreateAnimation(_animName, _spriteName, 0, 10, 0.15f, false);
-			AllTiles[y][x].SpriteRenderer->SetAnimationEvent(_animName, 10, 
+			AllTiles[y][x].SpriteRenderer->CreateAnimation(_animName, _spriteName, _firstIdx, _lastIdx, 0.15f, false);
+			AllTiles[y][x].SpriteRenderer->SetAnimationEvent(_animName, _lastIdx,
 				[=]()
 				{
 					OnEndCrumbling(FIntPoint({ static_cast<int>(x), static_cast<int>(y) }));

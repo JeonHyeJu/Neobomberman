@@ -18,19 +18,24 @@ protected:
 
 private:
 	void OnExplodeBomb();
+	void OnGameFinished();
+
 	void CheckAfterExplosion(float _deltaTime);
 
 	class APlayer* Player = nullptr;
+	class APlayerComputer* PlayerComputer = nullptr;
 	class ABaseMap* CurMapPtr = nullptr;
 
 	FIntPoint StartPoint = { 0, 0 };
-
-	/* Sounds */
-	const char* SFXBg = "BattleMusic.mp3";
-	const char* SFXReadyGo = "ReadyGo.mp3";
+	FIntPoint StartPointComputer = { 12, 0 };
 
 	bool IsStarted = false;
 
 	std::vector<FIntPoint> SplashTileIdxsBackup;
 	bool IsSplashCheck = false;
+
+	/* Sounds */
+	const char* SFXBg = "BattleMusic.mp3";
+	const char* SFXReadyGo = "ReadyGo.mp3";
+	const char* SFXRing = "Ring.mp3";
 };

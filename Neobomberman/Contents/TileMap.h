@@ -116,7 +116,7 @@ public:
 	bool IsEdge(FIntPoint _Index);
 
 	void SetItemsAfterLoad(const std::vector<EItem>& _items);
-	void SetTilesAnimAfterLoad(std::string_view _animName, std::string_view _spriteName);
+	void SetTilesAnimAfterLoad(std::string_view _animName, std::string_view _spriteName, int _firstIdx, int _lastIdx);
 	void LaunchTileAnimAfterLoad(const FIntPoint& _pt, std::string_view _animName);
 
 	void Serialize(UEngineSerializer& _Ser);

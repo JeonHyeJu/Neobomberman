@@ -97,6 +97,9 @@ void ContentsCore::InitResources()
 	/** Cutting **/
 	UImageManager& imgManager = UImageManager::GetInst();
 	imgManager.CuttingSprite("MainCharater_White.png", GlobalVar::BOMBERMAN_SIZE);
+	imgManager.CuttingSprite("MainCharater_Black.png", GlobalVar::BOMBERMAN_SIZE);
+	imgManager.CuttingSprite("MainCharater_Blue.png", GlobalVar::BOMBERMAN_SIZE);
+	imgManager.CuttingSprite("MainCharater_Red.png", GlobalVar::BOMBERMAN_SIZE);
 
 	imgManager.CuttingSprite("Mushroom.png", GlobalVar::BOMBERMAN_SIZE);
 	imgManager.CuttingSprite("Balloon.png", GlobalVar::BOMBERMAN_SIZE);
@@ -151,6 +154,7 @@ void ContentsCore::InitResources()
 	imgManager.CuttingSprite("SelectBlack.png", { 64, 64 });
 	imgManager.CuttingSprite("SelectRed.png", { 64, 64 });
 	imgManager.CuttingSprite("SelectBlue.png", { 64, 64 });
+	imgManager.CuttingSprite("CrumblingWoodBox.png", { 32, 32 });
 }
 
 void ContentsCore::LoadImages(std::string_view _path)

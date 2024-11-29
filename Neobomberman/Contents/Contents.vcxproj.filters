@@ -138,6 +138,9 @@
     <ClInclude Include="BattleMap.h">
       <Filter>Map</Filter>
     </ClInclude>
+    <ClInclude Include="PlayerComputer.h">
+      <Filter>Actor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Player.cpp">
@@ -232,6 +235,9 @@
     </ClCompile>
     <ClCompile Include="BattleMap.cpp">
       <Filter>Map</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerComputer.cpp">
+      <Filter>Actor</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

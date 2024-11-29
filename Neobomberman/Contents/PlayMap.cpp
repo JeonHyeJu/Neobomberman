@@ -110,7 +110,7 @@ void APlayMap::InitMap()
 	Deserialize(MapBox, tileDatPath, GlobalPath::MAP_BOX_DAT);
 	Deserialize(MapCover, tileDatPath, GlobalPath::MAP_COVER_DAT);
 
-	MapBox->SetTilesAnimAfterLoad(GlobalPath::ANIM_CRUMBLING_BOX, GlobalPath::ANIM_CRUMBLING_BOX);
+	MapBox->SetTilesAnimAfterLoad(GlobalPath::ANIM_CRUMBLING_BOX, GlobalPath::ANIM_CRUMBLING_BOX, 0, 10);
 
 	MapGround->SetPortal(PortalIdx, { 0, 0 }, GlobalVar::BOMB_SIZE, "ClosedPortal.png");	// Temp
 }

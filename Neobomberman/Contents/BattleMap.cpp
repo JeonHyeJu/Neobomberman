@@ -76,5 +76,5 @@ void ABattleMap::InitMap()
 	Deserialize(MapBox, tileDatPath, BATTLE + GlobalPath::MAP_BOX_DAT);
 	Deserialize(MapCover, tileDatPath, BATTLE + GlobalPath::MAP_COVER_DAT);
 
-	//MapBox->SetTilesAnimAfterLoad(GlobalPath::ANIM_CRUMBLING_BOX, GlobalPath::ANIM_CRUMBLING_BOX);
+	MapBox->SetTilesAnimAfterLoad(GlobalPath::ANIM_CRUMBLING_BOX, "CrumblingWoodBox.png", 0, 6);
 }

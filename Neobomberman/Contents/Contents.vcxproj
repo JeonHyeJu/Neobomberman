@@ -205,6 +205,10 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="PlayerComputer.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="Result.h">
       <SubType>
       </SubType>
@@ -294,6 +298,10 @@
       </SubType>
     </ClCompile>
     <ClCompile Include="PlayBossMode.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="PlayerComputer.cpp">
       <SubType>
       </SubType>
     </ClCompile>
