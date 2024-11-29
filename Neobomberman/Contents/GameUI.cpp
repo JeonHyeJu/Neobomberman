@@ -13,8 +13,8 @@
 bool AGameUI::IsStop = true;
 int AGameUI::Seconds = 0;
 //const int AGameUI::START_SECONDS = 5;
-//const int AGameUI::START_SECONDS = 60 + 59;
-const int AGameUI::START_SECONDS = 35;
+const int AGameUI::START_SECONDS = 60 + 59;
+//const int AGameUI::START_SECONDS = 35;
 
 /* AGameUI::StatusTopBarUI */
 void AGameUI::StatusTopBarUI::_SetVisibility(bool _isShow)

@@ -110,7 +110,7 @@ APlayer::APlayer()
 	Fsm.CreateState(EPlayerState::MOVE, std::bind(&APlayer::Moving, this, std::placeholders::_1), std::bind(&APlayer::OnMove, this));
 	Fsm.CreateState(EPlayerState::DEAD, std::bind(&APlayer::Dying, this, std::placeholders::_1), std::bind(&APlayer::OnDead, this));
 	Fsm.CreateState(EPlayerState::PORTAL, nullptr, std::bind(&APlayer::OnShift, this));
-	Fsm.CreateState(EPlayerState::END, nullptr, nullptr);
+	Fsm.CreateState(EPlayerState::END, nullptr, std::bind(&APlayer::OnEnd, this));
 
 	FsmH.CreateState(EPlayerBlinkAndColState::BLINK_ON_COL_OFF, std::bind(&APlayer::Blinking, this, std::placeholders::_1), std::bind(&APlayer::OnTurnOnBlink, this));
 	FsmH.CreateState(EPlayerBlinkAndColState::BLINK_OFF_COL_ON, nullptr, std::bind(&APlayer::OnTurnOffBlink, this));
@@ -464,6 +464,12 @@ void APlayer::OnShift()
 	}
 }
 
+void APlayer::OnEnd()
+{
+	SpriteRendererHead->ChangeAnimation("Idle_Down");
+	SpriteRendererBody->ChangeAnimation("Idle_Down");
+}
+
 /* FSM update functions */
 void APlayer::Blinking(float _deltaTime)
 {
@@ -516,6 +522,7 @@ void APlayer::_CheckItem(const FVector2D& _loc)
 	{
 		EItem item = CurMapPtr->PopItem(nextIdx);
 		AddItem(item);
+		UEngineSound::Play(SFXItem, -1, 0, false);
 	}
 }
 

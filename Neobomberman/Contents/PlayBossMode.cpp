@@ -7,6 +7,7 @@
 #include "Player.h"
 #include "Result.h"
 #include "GameData.h"
+#include "StageTitle.h"
 #include "Fade.h"
 
 #include <EngineCore/Level.h>
@@ -44,8 +45,11 @@ void APlayBossMode::BeginPlay()
 	AHoopGhost* boss = pLevel->SpawnActor<AHoopGhost>();
 	boss->SetCurMap(pBossMap);
 	boss->SetFirstDestination({ 0, 0 });
-	boss->SetActorLocation({ 256, 156 });	// Temp
+	boss->SetActorLocation({ 256, 126 });	// Temp
 	MonsterList.push_back(boss);
+
+	AStageTitle* stageTitle = pLevel->SpawnActor<AStageTitle>();
+	stageTitle->SetSubStage(2);
 
 	AFade* fade = GetWorld()->SpawnActor<AFade>();
 	fade->FadeIn();

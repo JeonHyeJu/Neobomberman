@@ -142,7 +142,7 @@ void ATileMap::SetItemsAfterLoad(const std::vector<EItem>& _items)
 		}
 		AllTiles[idx.Y][idx.X].SpriteRendererItem->SetSprite(ITEM_SPRITE_NAME);
 		AllTiles[idx.Y][idx.X].SpriteRendererItem->SetComponentScale(GlobalVar::BOMBERMAN_SIZE);
-		AllTiles[idx.Y][idx.X].SpriteRendererItem->SetComponentLocation(AllTiles[idx.Y][idx.X].SpriteRenderer->GetComponentLocation());
+		AllTiles[idx.Y][idx.X].SpriteRendererItem->SetComponentLocation(AllTiles[idx.Y][idx.X].SpriteRenderer->GetComponentLocation() - FVector2D{ 0.f, 1.f });
 		AllTiles[idx.Y][idx.X].SpriteRendererItem->CreateAnimation(GlobalPath::ANIM_ITEM, ITEM_SPRITE_NAME, ITEM_SIZE*itemSpriteIdx, ITEM_SIZE*itemSpriteIdx + 1, 0.5f);
 		AllTiles[idx.Y][idx.X].SpriteRendererItem->SetOrder(ERenderOrder::CRUMBLING_BOX);
 		AllTiles[idx.Y][idx.X].SpriteRendererItem->SetActive(false);
@@ -339,6 +339,21 @@ bool ATileMap::HasItem(const FIntPoint& _idx)
 	}
 
 	return (AllTiles[_idx.Y][_idx.X].Item != EItem::NONE);
+}
+
+bool ATileMap::IsShowingItem(const FIntPoint& _idx)
+{
+	if (IsIndexOver(_idx))
+	{
+		return false;
+	}
+
+	if (AllTiles[_idx.Y][_idx.X].SpriteRendererItem == nullptr)
+	{
+		return false;
+	}
+
+	return AllTiles[_idx.Y][_idx.X].SpriteRendererItem->IsActive();
 }
 
 EItem ATileMap::GetItem(const FIntPoint& _idx)

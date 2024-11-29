@@ -116,7 +116,7 @@ void AResult::BeginPlay()
 
 	FSM.ChangeState(EResultState::MOVE);
 
-	UEngineSound::AllSoundStop();
+	UEngineSound::AllSoundStopWithExcept(SFXWin);
 	UEngineSound::Play(SFXClear);
 }
 
@@ -224,14 +224,17 @@ void AResult::OnShowRImage()
 	if (LastSecsInit > 60)
 	{
 		UEngineSound::Play(SFXResultGreat);
+		CurSound = SFXResultGreat;
 	}
 	else if (LastSecsInit > 30)
 	{
 		UEngineSound::Play(SFXResultGood);
+		CurSound = SFXResultGood;
 	}
 	else
 	{
 		UEngineSound::Play(SFXResultBad);
+		CurSound = SFXResultBad;
 	}
 }
 
@@ -345,6 +348,11 @@ void AResult::ShakingRImage(float _deltaTime)
 
 		if (allEpalsedTime > 5.f)
 		{
+			if (UEngineSound::IsPlaying(CurSound))
+			{
+				return;
+			}
+
 			// TODO: GO TO THE NEXT
 			FSM.ChangeState(EResultState::INIT);
 

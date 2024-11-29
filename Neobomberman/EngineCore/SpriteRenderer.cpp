@@ -272,6 +272,24 @@ void USpriteRenderer::ChangeAnimation(std::string_view _AnimationName, bool _For
 	Sprite = CurAnimation->Sprite;
 }
 
+void USpriteRenderer::ChangeAnimFrameTime(std::string_view _AnimationName, std::string_view _SpriteName, std::vector<float> _Frame)
+{
+	std::string UpperName = UEngineString::ToUpper(_AnimationName);
+
+	if (!FrameAnimations.contains(UpperName))
+	{
+		return;
+	}
+
+	if (_Frame.size() != FrameAnimations[UpperName].FrameIndex.size())
+	{
+		MSGASSERT(UpperName + "을 수정하다가 에러가 났습니다. 프레임과 타임의 카운트가 서로 다릅니다.");
+		return;
+	}
+
+	FrameAnimations[UpperName].FrameTime = _Frame;
+}
+
 void USpriteRenderer::SetAnimationEvent(std::string_view _AnimationName, int _Frame, std::function<void()> _Function)
 {
 	std::string UpperName = UEngineString::ToUpper(_AnimationName);

@@ -10,6 +10,7 @@
 #include "Balloon.h"
 #include "Result.h"
 #include "HurryUp.h"
+#include "StageTitle.h"
 #include "Fade.h"
 
 #include <EngineCore/Level.h>
@@ -103,6 +104,9 @@ void APlayGameMode::BeginPlay()
 	}
 	
 	//pStage2->SetPortalIdx(FIntPoint(6, 10));	// temp
+
+	AStageTitle* stageTitle = pLevel->SpawnActor<AStageTitle>();
+	stageTitle->SetSubStage(1);
 
 	AFade* fade = pLevel->SpawnActor<AFade>();
 	fade->FadeIn();
@@ -418,6 +422,16 @@ void APlayGameMode::CheckAfterExplosion(float _deltaTime)
 		if (isInSplashLT || isInSplashRT || isInSplashLB || isInSplashRB)
 		{
 			Player->Kill();
+		}
+
+		// Check item
+		for (size_t i = 0, size = SplashTileIdxsBackup.size(); i < size; ++i)
+		{
+			FIntPoint pt = SplashTileIdxsBackup[i];
+			if (CurMapPtr->HasShowingItem(pt))
+			{
+				EItem item = CurMapPtr->PopItem(pt);	// Remove
+			}
 		}
 
 		executeCnt++;

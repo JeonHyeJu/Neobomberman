@@ -102,6 +102,7 @@ public:
 		return IsPortalOpened;
 	}
 	bool HasItem(const FIntPoint& _idx);
+	bool IsShowingItem(const FIntPoint& _idx);
 	EItem GetItem(const FIntPoint& _idx);
 	EItem PopItem(const FIntPoint& _idx);
 	bool GetIsMovable(const FVector2D& _loc);

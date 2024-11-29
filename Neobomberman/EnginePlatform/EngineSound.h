@@ -113,6 +113,7 @@ public:
 
 	static void Update();
 
+	static void AllSoundStopWithExcept(std::string_view _name);	// Temp
 	static void AllSoundStop();
 	static void AllSoundOff();
 	static void AllSoundOn();

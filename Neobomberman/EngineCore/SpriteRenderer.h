@@ -82,8 +82,8 @@ public:
 	void CreateAnimation(std::string_view _AnimationName, std::string_view _SpriteName, int _Start, int _End, float Time = 0.1f, bool _Loop = true, int _Round = -1);
 	void CreateAnimation(std::string_view _AnimationName, std::string_view _SpriteName, std::vector<int> _Indexs, std::vector<float> _Frame, bool _Loop = true, int _Round=-1);
 
+	void ChangeAnimFrameTime(std::string_view _AnimationName, std::string_view _SpriteName, std::vector<float> _Frame);	// Temp
 	void CreateAnimation(std::string_view _AnimationName, std::string_view _SpriteName, std::vector<int> _Indexs, float _Frame, bool _Loop = true, int _Round = -1);
-
 	void ChangeAnimation(std::string_view _AnimationName, bool _Force = false);
 	void SetAnimationEvent(std::string_view _AnimationName, int _Frame, std::function<void()> _Function);
 

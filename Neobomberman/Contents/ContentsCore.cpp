@@ -98,8 +98,7 @@ void ContentsCore::InitResources()
 	imgManager.CuttingSprite("MainCharater_White.png", GlobalVar::BOMBERMAN_SIZE);
 
 	imgManager.CuttingSprite("Mushroom.png", GlobalVar::BOMBERMAN_SIZE);
-	imgManager.CuttingSprite("Balloon_long.png", GlobalVar::BOMBERMAN_SIZE);
-	imgManager.CuttingSprite("Cookie.png", GlobalVar::BOMBERMAN_SIZE);
+	imgManager.CuttingSprite("Balloon.png", GlobalVar::BOMBERMAN_SIZE);
 
 	imgManager.CuttingSprite("ExplodeCenter.png", GlobalVar::BOMB_SIZE);
 
@@ -146,6 +145,7 @@ void ContentsCore::InitResources()
 	imgManager.CuttingSprite("Explanation.png", { 360, 360 });
 	imgManager.CuttingSprite("CharacterNames.png", { 128, 16 });
 	imgManager.CuttingSprite("BalloonBomberman.png", { 156, 156 });
+	imgManager.CuttingSprite("StageTitle.png", { 150, 64 });
 }
 
 void ContentsCore::LoadImages(std::string_view _path)

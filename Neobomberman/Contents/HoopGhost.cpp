@@ -37,14 +37,26 @@ void AHoopGhost::BeginPlay()
 	InitCollision();
 
 	CenterLoc = GetActorLocation();
-	Fsm.ChangeState(EMonsterState::WALKING);
 
-	DelaySecs = WAIT_DELAY;
+	DelaySecs = WaitDelay;
 }
 
 void AHoopGhost::Tick(float _deltaTime)
 {
 	AMonster::Tick(_deltaTime);
+
+	if (!IsInited)
+	{
+		ElapsedSesc += _deltaTime;
+		if (ElapsedSesc > INITIAL_WAIT)
+		{
+			ElapsedSesc = 0.f;
+			IsInited = true;
+			Fsm.ChangeState(EMonsterState::WALKING);
+		}
+
+		return;
+	}
 
 	Fsm.Update(_deltaTime);
 }
@@ -107,7 +119,7 @@ void AHoopGhost::InitSprite()
 			idxs.push_back(idx);
 		}
 
-		SRBody->CreateAnimation(ANIM_DAMAGED, SPRITE_NAME, idxs, times, false, 3);
+		SRBody->CreateAnimation(ANIM_DAMAGED, SPRITE_NAME, idxs, times, false, 5);
 		SRBody->CreateAnimation(ANIM_DYING, SPRITE_NAME, 20, 20, 1.f, true);
 	}
 
@@ -124,6 +136,8 @@ void AHoopGhost::InitSprite()
 
 		SRBody->CreateAnimation(ANIM_RUN_PRESS, SPRITE_NAME, idxs, times, false);
 	}
+
+	SRBody->CreateAnimation(ANIM_AFTER_PRESS, SPRITE_NAME, { 16, 17, 18, 19 }, { .25f, .25f, .25f, .25f }, false);	// Temp
 
 	{
 		FVector2D size{ 128, 64 };	// Temp
@@ -170,6 +184,7 @@ void AHoopGhost::InitSprite()
 
 	SetScore(EMonsterScore::S1600);
 	PadToBottomSize = SRBody->GetComponentScale().Y * .4f;
+	MoveSize = round(PadToBottomSize * .5f);
 
 	DebugOn();
 }
@@ -181,7 +196,7 @@ void AHoopGhost::InitCollision()
 	float marginX = std::fabs(shadowSize.X - DetectShape.X) * .5f;
 
 	Collision = CreateDefaultSubObject<U2DCollision>();
-	Collision->SetComponentLocation(SRShadowL->GetComponentLocation() - FVector2D{ marginX, 8.f });
+	Collision->SetComponentLocation(SRShadowL->GetComponentLocation() - FVector2D{ -marginX, 8.f });
 	Collision->SetComponentScale(colSize);
 	Collision->SetCollisionGroup(ECollisionGroup::MonsterBody);
 	Collision->SetCollisionType(ECollisionType::Rect);
@@ -257,6 +272,26 @@ void AHoopGhost::toggleShadow()
 	SRShadowL->SetActive(!SRShadowL->IsActive());
 }
 
+void AHoopGhost::GoingUp()
+{
+	Collision->SetActive(false);
+	CanHit = false;
+
+	if (GetActorLocation().Y > SavedLoc.Y)
+	{
+		AddActorLocation(FVector2D{ 0.f, -MoveSize });
+		//OutputDebugString(("Up: " + std::to_string(Collision->GetComponentLocation().Y) + " -> ").c_str());
+		Collision->AddComponentLocation(FVector2D{ 0.f, MoveSize });
+		SRShadowL->AddComponentLocation(FVector2D{ 0.f, MoveSize });
+		//OutputDebugString((std::to_string(Collision->GetComponentLocation().Y) + "\n").c_str());
+	}
+	else
+	{
+		DelaySecs = WaitDelay;
+		Fsm.ChangeState(EMonsterState::WALKING);
+	}
+}
+
 void AHoopGhost::OnWalk()
 {
 	SRBody->ChangeAnimation(ANIM_START_HOOP);
@@ -271,6 +306,16 @@ void AHoopGhost::OnPressDown()
 
 void AHoopGhost::OnDamage()
 {
+	if (Health == 2)
+	{
+		WaitDelay *= .5f;
+		WalkingDelay -= .01f;
+
+		const int MAX_FRAME = 5;
+		std::vector<float> times(MAX_FRAME, .25f);
+		times[1] = 1.f;
+		SRBody->ChangeAnimFrameTime(ANIM_RUN_PRESS, SPRITE_NAME, times);
+	}
 	SRBody->ChangeAnimation(ANIM_DAMAGED);
 }
 
@@ -293,7 +338,7 @@ void AHoopGhost::Walking(float _deltaTime)
 		SRBody->ChangeAnimation(ANIM_RUN_HOOP);
 	}
 
-	if (ElapsedSesc >= WALKING_DELAY)
+	if (ElapsedSesc >= WalkingDelay)
 	{
 		ElapsedSesc = 0.f;
 
@@ -347,11 +392,14 @@ void AHoopGhost::Damaging(float _deltaTime)
 {
 	ElapsedSesc += _deltaTime;
 
-	if (ElapsedSesc > .25f)
+	if (ElapsedSesc > .1f)
 	{
 		ElapsedSesc = 0.f;
 
-		if (SRBody->GetCurAnimName() == ANIM_DAMAGED && SRBody->IsCurAnimationEnd())
+		if (!SRBody->IsCurAnimationEnd()) return;
+
+		const std::string& curAnimName = SRBody->GetCurAnimName();
+		if (curAnimName == ANIM_DAMAGED)
 		{
 			if (Health <= 0)
 			{
@@ -359,8 +407,12 @@ void AHoopGhost::Damaging(float _deltaTime)
 			}
 			else
 			{
-				Fsm.ChangeState(EMonsterState::WALKING);
+				SRBody->ChangeAnimation(ANIM_AFTER_PRESS);
 			}
+		}
+		else if (curAnimName == ANIM_AFTER_PRESS)
+		{
+			GoingUp();
 		}
 	}
 }
@@ -369,7 +421,7 @@ void AHoopGhost::PressingDown(float _deltaTime)
 {
 	ElapsedSesc += _deltaTime;
 
-	if (ElapsedSesc > .25f)
+	if (ElapsedSesc > .1f)
 	{
 		ElapsedSesc = 0.f;
 
@@ -382,48 +434,28 @@ void AHoopGhost::PressingDown(float _deltaTime)
 			}
 		}
 
-		static const float MOVE_SIZE = PadToBottomSize * .5f;
 		if (SRBody->GetCurAnimName() == ANIM_RUN_PRESS)
 		{
+			OutputDebugString("#################\n");
 			if (isAnimEnd)
 			{
-				Collision->SetActive(false);
-				CanHit = false;
-
-				if (GetActorLocation().Y > SavedLoc.Y)
-				{
-					AddActorLocation(FVector2D{ 0.f, -MOVE_SIZE });
-					Collision->AddComponentLocation(FVector2D{ 0.f, MOVE_SIZE });
-					SRShadowL->AddComponentLocation(FVector2D{ 0.f, MOVE_SIZE });
-				}
-				else
-				{
-					DelaySecs = WAIT_DELAY;
-					Fsm.ChangeState(EMonsterState::WALKING);
-				}
+				GoingUp();
 			}
 		}
 		else
 		{
 			if (GetActorLocation().Y < BottomLoc.Y - BodyHHY)
 			{
-				AddActorLocation(FVector2D{ 0.f, MOVE_SIZE });
-				Collision->AddComponentLocation(FVector2D{ 0.f, -MOVE_SIZE });
-				SRShadowL->AddComponentLocation(FVector2D{ 0.f, -MOVE_SIZE });
+				AddActorLocation(FVector2D{ 0.f, MoveSize });
+				//OutputDebugString(("Down: " + std::to_string(Collision->GetComponentLocation().Y) + " -> ").c_str());
+				Collision->AddComponentLocation(FVector2D{ 0.f, -MoveSize });
+				SRShadowL->AddComponentLocation(FVector2D{ 0.f, -MoveSize });
+				//OutputDebugString((std::to_string(Collision->GetComponentLocation().Y) + "\n").c_str());
 			}
 			else
 			{
-				FVector2D shadowSize = SRShadowL->GetComponentScale();
-				//shadowSize.X -= 16.f * 2.f;		// left and right margin
-				//shadowSize.Y -= 6.f * 2.f;		// top and bottom margin
-				FVector2D shadowLoc = SRShadowL->GetComponentLocation();
-				
-				FVector2D leftTop{ shadowLoc.X - shadowSize.hX(), shadowLoc.Y - shadowSize.hY() };
-				FVector2D rightTop{ shadowLoc.X + shadowSize.hX(), shadowLoc.Y - shadowSize.hY() };
-				FVector2D leftBottom{ shadowLoc.X - shadowSize.hX(), shadowLoc.Y + shadowSize.hY() };
-				FVector2D rightBottom{ shadowLoc.X + shadowSize.hX(), shadowLoc.Y + shadowSize.hY() };
-
-				// Temp
+				//FVector2D shadowSize = SRShadowL->GetComponentScale();
+				//FVector2D shadowLoc = SRShadowL->GetComponentLocation();
 				/*DebugRenderer->SetComponentLocation(shadowLoc);
 				DebugRenderer->SetComponentScale(shadowSize);*/
 

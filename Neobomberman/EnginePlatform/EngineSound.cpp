@@ -71,6 +71,21 @@ bool UEngineSound::IsPlaying(std::string_view _Name)
 	return isExists;
 }
 
+void UEngineSound::AllSoundStopWithExcept(std::string_view _name)
+{
+	std::list<USoundPlayer>::iterator StartIter = Players.begin();
+	std::list<USoundPlayer>::iterator EndIter = Players.end();
+
+	for (; StartIter != EndIter; ++StartIter)
+	{
+		USoundPlayer& CurSoundPlayer = *StartIter;
+		if (CurSoundPlayer.GetName() != _name)
+		{
+			CurSoundPlayer.Stop();
+		}
+	}
+}
+
 void UEngineSound::AllSoundStop()
 {
 	std::list<USoundPlayer>::iterator StartIter = Players.begin();

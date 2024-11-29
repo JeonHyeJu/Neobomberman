@@ -293,6 +293,14 @@ bool ABaseMap::HasItem(const FIntPoint& _idx)
 	return MapBox->HasItem(_idx);
 }
 
+bool ABaseMap::HasShowingItem(const FIntPoint& _idx)
+{
+	if (MapBox == nullptr) return false;
+	bool hasItem = MapBox->HasItem(_idx);
+	bool isShowingItem = MapBox->IsShowingItem(_idx);
+	return hasItem && isShowingItem;
+}
+
 EItem ABaseMap::PopItem(const FIntPoint& _idx)
 {
 	if (MapBox == nullptr) return EItem::NONE;

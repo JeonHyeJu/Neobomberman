@@ -96,4 +96,6 @@ private:
 	const char* SFXResultGood = "Result_Good.mp3";
 	const char* SFXResultBad = "Result_Bad.mp3";
 	const char* SFXBonusCount = "BonusCount.mp3";
+	const char* SFXWin = "Win.mp3";
+	std::string CurSound = "";
 };

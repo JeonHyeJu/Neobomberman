@@ -84,6 +84,7 @@ public:
 	}
 
 	void RemoveItem(const FIntPoint& _idx);
+	bool HasShowingItem(const FIntPoint& _idx);
 	bool HasItem(const FIntPoint& _idx);
 	EItem PopItem(const FIntPoint& _idx);
 

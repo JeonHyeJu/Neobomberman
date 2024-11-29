@@ -46,7 +46,7 @@ private:
 	void OnDead();
 	void OnPassaway();
 
-	const char* SPRITE_NAME = "Balloon_long.png";
+	const char* SPRITE_NAME = "Balloon.png";
 
 	const char* ANIM_RUN_UP = "Run_Up";
 	const char* ANIM_RUN_DOWN = "Run_Down";

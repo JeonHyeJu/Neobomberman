@@ -30,6 +30,7 @@ private:
 	void ChangeMoveAnim(const FVector2D& _direction);
 
 	void toggleShadow();
+	void GoingUp();
 
 	/* Fsm update functions */
 	void Walking(float _deltaTime);
@@ -59,6 +60,7 @@ private:
 	const char* ANIM_RUN_HOOP = "Run_Hoop";
 	const char* ANIM_START_PRESS = "Start_Press";
 	const char* ANIM_RUN_PRESS = "Run_Press";
+	const char* ANIM_AFTER_PRESS = "After_Press";
 	const char* ANIM_DAMAGED = "Damaged";
 	const char* ANIM_DYING = "Dying";
 	const char* ANIM_DESTROY = "Destroy";
@@ -73,14 +75,17 @@ private:
 	FVector2D SavedLoc;
 	FVector2D SavedShadowLoc;
 
-	float PadToBottomSize = 0.f;
 	float ElapsedSesc = 0.f;
+	float PadToBottomSize = 0.f;
+	float MoveSize = 0.f;
 
 	FVector2D DetectShape = { 120, 64 };
 
-	const float WALKING_DELAY = .03f;
-	const float WAIT_DELAY = WALKING_DELAY * 200;
-	float DelaySecs = WAIT_DELAY;
+	const float INITIAL_WAIT = 3.f;
+	float WalkingDelay = .03f;
+	float WaitDelay = WalkingDelay * 200;
+	float DelaySecs = WaitDelay;
+	bool IsInited = false;
 
 	USpriteRenderer* SRBody = nullptr;
 	USpriteRenderer* SRShadowS = nullptr;
@@ -93,7 +98,7 @@ private:
 	float BodyHHY = 0.f;	// Body Half Half Y
 	const float SHADOW_MARGIN = 8.f;
 
-	const int MAX_HEALTH = 1;	// Temp
+	const int MAX_HEALTH = 3;
 
 	const FVector2D MONSTER_SIZE{ 256, 256 };
 

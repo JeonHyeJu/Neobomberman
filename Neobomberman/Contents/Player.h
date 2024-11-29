@@ -103,6 +103,7 @@ private:
 	void OnMove();
 	void OnDead();
 	void OnShift();
+	void OnEnd();
 
 	void OnTurnOnBlink();
 	void OnTurnOffBlink();
@@ -158,4 +159,5 @@ private:
 	const char* SFXWalking = "Walking.mp3";
 	const char* SFXRidePortal = "RidePortal.mp3";
 	const char* SFXWin = "Win.mp3";
+	const char* SFXItem = "Item.mp3";
 };

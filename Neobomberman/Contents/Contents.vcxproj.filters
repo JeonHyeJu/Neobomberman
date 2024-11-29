@@ -96,12 +96,6 @@
     <ClInclude Include="GameUI.h">
       <Filter>Actor\UI</Filter>
     </ClInclude>
-    <ClInclude Include="GameOver.h">
-      <Filter>Actor\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="Result.h">
-      <Filter>Actor\UI</Filter>
-    </ClInclude>
     <ClInclude Include="EndingGameMode.h">
       <Filter>GameMode</Filter>
     </ClInclude>
@@ -120,9 +114,6 @@
     <ClInclude Include="GameData.h">
       <Filter>Util</Filter>
     </ClInclude>
-    <ClInclude Include="HurryUp.h">
-      <Filter>Actor\UI</Filter>
-    </ClInclude>
     <ClInclude Include="BattleSelectMode.h">
       <Filter>GameMode</Filter>
     </ClInclude>
@@ -133,6 +124,18 @@
       <Filter>GameMode</Filter>
     </ClInclude>
     <ClInclude Include="BattlePlay.h">
+      <Filter>Actor\NotGame</Filter>
+    </ClInclude>
+    <ClInclude Include="Result.h">
+      <Filter>Actor\NotGame</Filter>
+    </ClInclude>
+    <ClInclude Include="HurryUp.h">
+      <Filter>Actor\NotGame</Filter>
+    </ClInclude>
+    <ClInclude Include="GameOver.h">
+      <Filter>Actor\NotGame</Filter>
+    </ClInclude>
+    <ClInclude Include="StageTitle.h">
       <Filter>Actor\NotGame</Filter>
     </ClInclude>
   </ItemGroup>
@@ -191,12 +194,6 @@
     <ClCompile Include="GameUI.cpp">
       <Filter>Actor\UI</Filter>
     </ClCompile>
-    <ClCompile Include="GameOver.cpp">
-      <Filter>Actor\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="Result.cpp">
-      <Filter>Actor\UI</Filter>
-    </ClCompile>
     <ClCompile Include="EndingGameMode.cpp">
       <Filter>GameMode</Filter>
     </ClCompile>
@@ -212,9 +209,6 @@
     <ClCompile Include="Mushroom.cpp">
       <Filter>Actor\Monsters</Filter>
     </ClCompile>
-    <ClCompile Include="HurryUp.cpp">
-      <Filter>Actor\UI</Filter>
-    </ClCompile>
     <ClCompile Include="BattleSelectMode.cpp">
       <Filter>GameMode</Filter>
     </ClCompile>
@@ -225,6 +219,18 @@
       <Filter>GameMode</Filter>
     </ClCompile>
     <ClCompile Include="BattlePlay.cpp">
+      <Filter>Actor\NotGame</Filter>
+    </ClCompile>
+    <ClCompile Include="HurryUp.cpp">
+      <Filter>Actor\NotGame</Filter>
+    </ClCompile>
+    <ClCompile Include="Result.cpp">
+      <Filter>Actor\NotGame</Filter>
+    </ClCompile>
+    <ClCompile Include="GameOver.cpp">
+      <Filter>Actor\NotGame</Filter>
+    </ClCompile>
+    <ClCompile Include="StageTitle.cpp">
       <Filter>Actor\NotGame</Filter>
     </ClCompile>
   </ItemGroup>
