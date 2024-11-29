@@ -30,6 +30,7 @@ const char* GlobalPath::CHARACTER = "Character_32x64";
 const char* GlobalPath::RIDING = "Riding_32x32";
 const char* GlobalPath::ENEMY = "Enemies_32x32";
 
+const char* GlobalPath::MAP_GROUND_DAT = "GroundData.dat";
 const char* GlobalPath::MAP_WALL_DAT = "WallData.dat";
 const char* GlobalPath::MAP_BOX_DAT = "BoxData.dat";
 const char* GlobalPath::MAP_COVER_DAT = "CoverData.dat";

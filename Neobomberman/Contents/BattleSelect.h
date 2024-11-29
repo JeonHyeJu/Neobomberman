@@ -11,7 +11,8 @@ public:
 		SELECT_MAP = 0,
 		WAITING_MAP_FADE,
 		SELECT_CHARACTER,
-		WAITING_CHARACTER_FADE
+		WAITING_CHARACTER_FADE,
+		COMPLETE_SELECT,
 	};
 
 	ABattleSelect();
@@ -37,6 +38,7 @@ private:
 
 	void SelectingMap(float _deltaTime);
 	void SelectingCharacter(float _deltaTime);
+	void CompletingSelect(float _deltaTime);
 
 	USpriteRenderer* SRBackground = nullptr;
 	USpriteRenderer* SRSirenL = nullptr;
@@ -51,6 +53,9 @@ private:
 
 	USpriteRenderer* SRBalloonBBM = nullptr;
 
+	USpriteRenderer* SRPlayer1Name = nullptr;
+	USpriteRenderer* SRPlayer1Sign = nullptr;
+
 	const char* SPRITE_SELECT_MAP = "SelectMap.png";
 	const char* SPRITE_SELECT_CHARACTER = "SelectCharacter.png";
 	const char* SPRITE_BALLOON_BBM = "BalloonBomberman.png";
@@ -64,9 +69,26 @@ private:
 	const char* SPRITE_CHARACTER_RED = "SelectRed.png";
 	const char* SPRITE_CHARACTER_BLUE = "SelectBlue.png";
 
+	const char* SPRITE_CHARACTER_NAMES = "CharacterNames.png";
+	const char* SPRITE_SIGN_1P = "Sign1p.png";
+
+	const char* ANIM_HEAD_UP = "HeadUp";
+	const char* ANIM_HEAD_DOWN = "HeadDown";
+	const char* ANIM_TELEPORT_FORWARD = "Teleport_Forward";
+	const char* ANIM_TELEPORT_BACKWARD = "Teleport_Backward";
+
 	const int START_SECONDS = 30;
 	int Seconds = START_SECONDS;
 
 	UFSMStateManager Fsm;
 	const int STRIDE = 96;
+
+	int CurIdx = 0;
+	int PreIdx = 0;
+
+	/* Sounds */
+	const char* SFXMenuSelect = "MenuSelect.mp3";
+	const char* SFXMoveBBM = "MoveBBM.mp3";
+
+	std::vector<USpriteRenderer*> Characters;
 };

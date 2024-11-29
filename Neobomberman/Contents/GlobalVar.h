@@ -39,6 +39,7 @@ public:
 	static const char* BOMB_ORG;
 	static const char* BOMB_RED;
 
+	static const char* MAP_GROUND_DAT;
 	static const char* MAP_WALL_DAT;
 	static const char* MAP_BOX_DAT;
 	static const char* MAP_COVER_DAT;

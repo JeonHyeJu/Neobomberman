@@ -45,13 +45,14 @@ void ContentsCore::BeginPlay()
 	pCore->CreateLevel<APlayGameMode, APlayer>("Play");
 	pCore->CreateLevel<APlayBossMode, APlayer>("Boss_Stage1");
 	pCore->CreateLevel<ABattleSelectMode, AActor>("BattleSelect");
-	pCore->CreateLevel<ABattlePlayMode, AActor>("BattlePlay");
+	pCore->CreateLevel<ABattlePlayMode, APlayer>("BattlePlay");
 
 	//pCore->OpenLevel("Title");
 	//pCore->OpenLevel("Play");
-	pCore->OpenLevel("Boss_Stage1");
+	//pCore->OpenLevel("Boss_Stage1");
 	//pCore->OpenLevel("Ending");
 	//pCore->OpenLevel("BattleSelect");
+	pCore->OpenLevel("BattlePlay");
 }
 
 void ContentsCore::Tick()
@@ -146,6 +147,10 @@ void ContentsCore::InitResources()
 	imgManager.CuttingSprite("CharacterNames.png", { 128, 16 });
 	imgManager.CuttingSprite("BalloonBomberman.png", { 156, 156 });
 	imgManager.CuttingSprite("StageTitle.png", { 150, 64 });
+	imgManager.CuttingSprite("SelectWhite.png", { 64, 64 });
+	imgManager.CuttingSprite("SelectBlack.png", { 64, 64 });
+	imgManager.CuttingSprite("SelectRed.png", { 64, 64 });
+	imgManager.CuttingSprite("SelectBlue.png", { 64, 64 });
 }
 
 void ContentsCore::LoadImages(std::string_view _path)

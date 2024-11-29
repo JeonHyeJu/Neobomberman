@@ -85,7 +85,7 @@ void ABossMap::InitMap()
 	{
 		for (int x = 0; x < shape.X; x++)
 		{
-			MapGround->SetTile({ x, y }, 4, true);
+			MapGround->SetTile({ x, y }, 1, true);
 		}
 	}
 	MapGround->SetActorLocation(moveLoc);

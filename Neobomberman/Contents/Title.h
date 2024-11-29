@@ -128,6 +128,7 @@ private:
 	const char* SFXOpening = "Opening.mp3";
 	const char* SFXTitle = "Title.mp3";
 	const char* SFXSelect = "SelectMusic.mp3";
+	const char* SFXMenuSelect = "MenuSelect.mp3";
 	const char* SFXCountDown = "CountDown.mp3";
 	const char* SFXCutScene = "CutScene.mp3";
 };

@@ -15,4 +15,9 @@ public:
 protected:
 	void BeginPlay() override;
 	void Tick(float _deltaTime) override;
+
+private:
+	const char* SPRITE_BATTLE_BG = "BattleBg.png";
+
+	class USpriteRenderer* SRBg = nullptr;
 };

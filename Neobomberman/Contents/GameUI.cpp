@@ -108,7 +108,7 @@ void AGameUI::LevelChangeStart()
 {
 	std::string curName = GetWorld()->GetName();
 
-	if (curName == UEngineString::ToUpper("Title"))		// Temp
+	if (curName == UEngineString::ToUpper("Title") || curName == UEngineString::ToUpper("BattleSelect"))		// Temp
 	{
 		StatusTopBar.Hide();
 	}

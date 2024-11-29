@@ -184,6 +184,11 @@ void APlayer::LevelChangeStart()
 	IsDead = false;
 }
 
+void APlayer::ReleaseMove()
+{
+	Fsm.ChangeState(EPlayerState::IDLE);
+}
+
 void APlayer::BlockMove()
 {
 	Fsm.ChangeState(EPlayerState::END);

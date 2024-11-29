@@ -149,7 +149,7 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="BattlePlay.h">
+    <ClInclude Include="BattleMap.h">
       <SubType>
       </SubType>
     </ClInclude>
@@ -244,7 +244,7 @@
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="BattlePlay.cpp">
+    <ClCompile Include="BattleMap.cpp">
       <SubType>
       </SubType>
     </ClCompile>

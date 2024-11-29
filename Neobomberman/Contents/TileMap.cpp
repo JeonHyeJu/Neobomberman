@@ -124,8 +124,8 @@ void ATileMap::SetItemsAfterLoad(const std::vector<EItem>& _items)
 	UEngineRandom Random;
 
 	size_t itemSize = _items.size();
-	//std::vector<int> vals = Random.RandomIntMultiple(0, static_cast<int>(TileIdxs.size())-1, static_cast<int>(itemSize));
-	std::vector<int> vals = { 0, 1, 2 };
+	std::vector<int> vals = Random.RandomIntMultiple(0, static_cast<int>(TileIdxs.size())-1, static_cast<int>(itemSize));
+	//std::vector<int> vals = { 0, 1, 2 };
 
 	HavingItemTileIdxs.clear();
 	const int ITEM_SIZE = 2;	// Temp

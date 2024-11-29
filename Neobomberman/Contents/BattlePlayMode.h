@@ -14,4 +14,23 @@ public:
 
 protected:
 	void BeginPlay() override;
+	void Tick(float _deltaTime) override;
+
+private:
+	void OnExplodeBomb();
+	void CheckAfterExplosion(float _deltaTime);
+
+	class APlayer* Player = nullptr;
+	class ABaseMap* CurMapPtr = nullptr;
+
+	FIntPoint StartPoint = { 0, 0 };
+
+	/* Sounds */
+	const char* SFXBg = "BattleMusic.mp3";
+	const char* SFXReadyGo = "ReadyGo.mp3";
+
+	bool IsStarted = false;
+
+	std::vector<FIntPoint> SplashTileIdxsBackup;
+	bool IsSplashCheck = false;
 };

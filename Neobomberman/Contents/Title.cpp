@@ -464,6 +464,8 @@ void ATitle::DrawCircle()
 
 	FVector2D painterLoc = SRSelectPainter->GetComponentLocation();
 	SRSelectCircle->SetComponentLocation(painterLoc + FVector2D{ 77.f, 0.f });
+	
+	UEngineSound::Play(SFXMenuSelect);
 }
 
 void ATitle::ChangeToBattle()
@@ -606,7 +608,6 @@ void ATitle::OnRunCutScene()
 
 void ATitle::OnGoToBattleIdle()
 {
-	UEngineSound::StopPlayer(SFXSelect);
 }
 
 void ATitle::WaitingToStart(float _deltaTime)

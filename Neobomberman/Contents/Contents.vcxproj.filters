@@ -123,9 +123,6 @@
     <ClInclude Include="BattlePlayMode.h">
       <Filter>GameMode</Filter>
     </ClInclude>
-    <ClInclude Include="BattlePlay.h">
-      <Filter>Actor\NotGame</Filter>
-    </ClInclude>
     <ClInclude Include="Result.h">
       <Filter>Actor\NotGame</Filter>
     </ClInclude>
@@ -137,6 +134,9 @@
     </ClInclude>
     <ClInclude Include="StageTitle.h">
       <Filter>Actor\NotGame</Filter>
+    </ClInclude>
+    <ClInclude Include="BattleMap.h">
+      <Filter>Map</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -218,9 +218,6 @@
     <ClCompile Include="BattlePlayMode.cpp">
       <Filter>GameMode</Filter>
     </ClCompile>
-    <ClCompile Include="BattlePlay.cpp">
-      <Filter>Actor\NotGame</Filter>
-    </ClCompile>
     <ClCompile Include="HurryUp.cpp">
       <Filter>Actor\NotGame</Filter>
     </ClCompile>
@@ -232,6 +229,9 @@
     </ClCompile>
     <ClCompile Include="StageTitle.cpp">
       <Filter>Actor\NotGame</Filter>
+    </ClCompile>
+    <ClCompile Include="BattleMap.cpp">
+      <Filter>Map</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -91,10 +91,13 @@ void ATileMapGameMode::InitMap()
 			for (int x = 0; x < titleIdxs.X; x++)
 			{
 				// Stage1. temp
-				GroundTileMap->SetTile({ x, y }, static_cast<int>(TileType::Ground), true);
+				//GroundTileMap->SetTile({ x, y }, 0, true);
 
-				// Boss1. emp
-				//GroundTileMap->SetTile({ x, y }, 4, true);
+				// Boss1. temp
+				//GroundTileMap->SetTile({ x, y }, 1, true);
+
+				// Battle. temp
+				GroundTileMap->SetTile({ x, y }, 16, true);
 			}
 		}
 
@@ -135,25 +138,25 @@ void ATileMapGameMode::InitMap()
 			EditorData data;
 
 			// Temp
-			if (i == 2)
+			if (i <= 16)
 			{
-				data.Type = TileType::Box;
-				data.Container = BoxTileMap;
+				data.Type = TileType::Ground;
+				data.Container = GroundTileMap;
 			}
-			else if (i == 3)
-			{
-				data.Type = TileType::Cover;
-				data.Container = CoverTileMap;
-			}
-			else if (i == 1 || i == 5)
+			else if (i <= 22)
 			{
 				data.Type = TileType::Wall;
 				data.Container = WallTileMap;
 			}
-			else // i == 0 || i == 4
+			else if (i <= 24)
 			{
-				data.Type = TileType::Ground;
-				data.Container = GroundTileMap;
+				data.Type = TileType::Box;
+				data.Container = BoxTileMap;
+			}
+			else
+			{
+				data.Type = TileType::Cover;
+				data.Container = CoverTileMap;
 			}
 
 			EditorDatas.push_back(data);
@@ -190,23 +193,17 @@ void ATileMapGameMode::AddTile(ATileMap* _curMapPtr, const FVector2D& _mousePos)
 {
 	TileType tileType = _curMapPtr->GetType();
 
-	if (tileType != TileType::Cover)
+	// Remove existing tile has same type
+	for (int i = 0; i < EditorDatas.size(); i++)
 	{
-		// Remove existing tile except ground
-		for (int i = 1; i < EditorDatas.size(); i++)
+		if (tileType == EditorDatas[i].Type)
 		{
-			if (EditorDatas[i].Type == TileType::Ground) continue;
-
-			ATileMap* otherMapPtr = EditorDatas[i].Container;
-			if (_curMapPtr != otherMapPtr)
+			Tile* tile = EditorDatas[i].Container->GetTileRef(_mousePos);
+			if (tile != nullptr && tile->SpriteRenderer != nullptr && tile->SpriteIndex != -1)
 			{
-				Tile* tile = otherMapPtr->GetTileRef(_mousePos);
-				if (tile != nullptr && tile->SpriteRenderer != nullptr && tile->SpriteIndex != -1)
-				{
-					tile->SpriteRenderer->Destroy();
-					tile->SpriteRenderer = nullptr;
-					tile->SpriteIndex = -1;
-				}
+				tile->SpriteRenderer->Destroy();
+				tile->SpriteRenderer = nullptr;
+				tile->SpriteIndex = -1;
 			}
 		}
 	}
@@ -232,6 +229,7 @@ void ATileMapGameMode::RemoveTile(ATileMap* _curMapPtr, const FVector2D& _mouseP
 
 void ATileMapGameMode::SaveTileMap()
 {
+	Serialize(GroundTileMap, TileDataPath, GlobalPath::MAP_GROUND_DAT);
 	Serialize(WallTileMap, TileDataPath, GlobalPath::MAP_WALL_DAT);
 	Serialize(BoxTileMap, TileDataPath, GlobalPath::MAP_BOX_DAT);
 	Serialize(CoverTileMap, TileDataPath, GlobalPath::MAP_COVER_DAT);
@@ -240,6 +238,7 @@ void ATileMapGameMode::SaveTileMap()
 
 void ATileMapGameMode::LoadTileMap()
 {
+	Deserialize(GroundTileMap, TileDataPath, GlobalPath::MAP_GROUND_DAT);
 	Deserialize(WallTileMap, TileDataPath, GlobalPath::MAP_WALL_DAT);
 	Deserialize(BoxTileMap, TileDataPath, GlobalPath::MAP_BOX_DAT);
 	Deserialize(CoverTileMap, TileDataPath, GlobalPath::MAP_COVER_DAT);

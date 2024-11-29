@@ -77,6 +77,7 @@ public:
 	}
 	void AddItem(EItem _item);
 	void ShowWinnerPose();
+	void ReleaseMove();
 	void BlockMove();
 
 	void Kill();

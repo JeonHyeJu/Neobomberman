@@ -436,7 +436,6 @@ void AHoopGhost::PressingDown(float _deltaTime)
 
 		if (SRBody->GetCurAnimName() == ANIM_RUN_PRESS)
 		{
-			OutputDebugString("#################\n");
 			if (isAnimEnd)
 			{
 				GoingUp();
