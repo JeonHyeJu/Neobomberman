@@ -12,16 +12,14 @@ public:
 	ABattleMap& operator=(const ABattleMap& _other) = delete;
 	ABattleMap& operator=(ABattleMap&& _other) noexcept = delete;
 
-	void InitMap();
-
 protected:
 	void BeginPlay() override;
 	void Tick(float _deltaTime) override;
 
-private:
-	const char* SPRITE_BATTLE_BG = "BattleBg.png";
-	const char* SPRITE_BATTLE_BUILDING = "BattleBuilding.png";
+	void InitSprite() override;
+	void InitTileMap() override;
 
+private:
 	class USpriteRenderer* SRBackground = nullptr;
 	class USpriteRenderer* SRBgBuilding = nullptr;
 };

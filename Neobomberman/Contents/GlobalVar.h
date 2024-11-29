@@ -10,12 +10,17 @@ public:
 	static const FVector2D BOMB_SIZE;
 	static const FVector2D TIME_COUNT_SIZE;
 	static const FVector2D TITLE_TIME_COUNT_SIZE;
+	static const FVector2D SELECT_TIME_COUNT_SIZE;
 	static const FVector2D BAR_SCORE_NUMBER;
+	static const FVector2D BRUSH_CIRCLE;
+	static const FVector2D HOOPGHOST_SIZE;
+
 	static const int STAGE_H_MARGIN;
 	static const int MAX_BOMB_CNT;
 	static const int MAX_SPEED;
 	static const int ORG_BOMB_POWER;
 	static const int MAX_BOMB_POWER;
+	static const int MAX_MAP_ITEM_CNT;
 };
 
 class GlobalPath
@@ -25,19 +30,11 @@ public:
 	static const char* TILE;
 	static const char* DATA;
 	static const char* OPENING;
-	static const char* EXPLODE;
+	static const char* UI;
 	static const char* TILE_STAGE_1;
 	static const char* TILE_STAGE_1_GUIDE;
 	static const char* ANIM_CRUMBLING_BOX;
 	static const char* ANIM_ITEM;
-
-	static const char* BACKGROUND;
-	static const char* CHARACTER;
-	static const char* RIDING;
-	static const char* ENEMY;
-
-	static const char* BOMB_ORG;
-	static const char* BOMB_RED;
 
 	static const char* MAP_GROUND_DAT;
 	static const char* MAP_WALL_DAT;

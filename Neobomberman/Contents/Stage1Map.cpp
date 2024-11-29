@@ -1,5 +1,5 @@
 #include "PreCompile.h"
-#include "PlayMap.h"
+#include "Stage1Map.h"
 #include "TileMap.h"
 #include "ContentsEnum.h"
 #include "GlobalVar.h"
@@ -10,8 +10,26 @@
 #include <EngineCore/SpriteRenderer.h>
 #include <EngineCore/ImageManager.h>
 
-APlayMap::APlayMap()
+AStage1Map::AStage1Map()
 : ABaseMap()
+{
+}
+
+AStage1Map::~AStage1Map()
+{
+}
+
+void AStage1Map::BeginPlay()
+{
+	ABaseMap::BeginPlay();
+}
+
+void AStage1Map::Tick(float _deltaTime)
+{
+	ABaseMap::Tick(_deltaTime);
+}
+
+void AStage1Map::InitSprite()
 {
 	FVector2D winSize = GlobalVar::WINDOW_SIZE;
 	{
@@ -44,36 +62,21 @@ APlayMap::APlayMap()
 
 		SRRightBear = CreateDefaultSubObject<USpriteRenderer>();
 		SRRightBear->SetSprite("RightBears.png");
-		SRRightBear->SetComponentLocation(size.Half() + FVector2D{ winSize.X - size.X + 2, 150.f});
+		SRRightBear->SetComponentLocation(size.Half() + FVector2D{ winSize.X - size.X + 2, 150.f });
 		SRRightBear->SetComponentScale(size);
 		SRRightBear->SetOrder(ERenderOrder::BACKGROUND_OVER);
 		SRRightBear->CreateAnimation("Run", "RightBears.png", 0, 7, 1.f);
 	}
-}
-
-APlayMap::~APlayMap()
-{
-}
-
-void APlayMap::BeginPlay()
-{
-	ABaseMap::BeginPlay();
 
 	SRBackground->ChangeAnimation("Run");
 	SRLeftBear->ChangeAnimation("Run");
 	SRRightBear->ChangeAnimation("Run");
 }
 
-void APlayMap::Tick(float _deltaTime)
-{
-	ABaseMap::Tick(_deltaTime);
-}
-
-void APlayMap::InitMap()
+void AStage1Map::InitTileMap()
 {
 	FIntPoint shape = GlobalVar::BATTLE_GROUND_COUNT;
 	FVector2D tileSize = GlobalVar::BOMB_SIZE;
-
 	FVector2D winSize = GlobalVar::WINDOW_SIZE;
 	FVector2D mapSize = { shape.X * tileSize.X, shape.Y * tileSize.Y };
 	FVector2D subSize = winSize - mapSize;
@@ -111,7 +114,7 @@ void APlayMap::InitMap()
 	Deserialize(MapCover, tileDatPath, GlobalPath::MAP_COVER_DAT);
 
 	MapBox->SetTilesAnimAfterLoad(GlobalPath::ANIM_CRUMBLING_BOX, GlobalPath::ANIM_CRUMBLING_BOX, 0, 10);
-
 	MapGround->SetPortal(PortalIdx, { 0, 0 }, GlobalVar::BOMB_SIZE, "ClosedPortal.png");	// Temp
+	MapBox->SetItemsAfterLoad(Items);
 }
 

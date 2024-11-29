@@ -8,22 +8,6 @@
 ABattleMap::ABattleMap()
 : ABaseMap()
 {
-	FVector2D winSize = GlobalVar::WINDOW_SIZE;
-	{
-		SRBackground = CreateDefaultSubObject<USpriteRenderer>();
-		SRBackground->SetSprite(SPRITE_BATTLE_BG);
-		SRBackground->SetComponentLocation(winSize.Half());
-		SRBackground->SetComponentScale(winSize);
-		SRBackground->SetOrder(ERenderOrder::BACKGROUND);
-	}
-	{
-		FVector2D size{ 160, 96 };
-		SRBgBuilding = CreateDefaultSubObject<USpriteRenderer>();
-		SRBgBuilding->SetSprite(SPRITE_BATTLE_BUILDING);
-		SRBgBuilding->SetComponentLocation(FVector2D{ winSize.hX(), size.hY()+32.f});
-		SRBgBuilding->SetComponentScale(size);
-		SRBgBuilding->SetOrder(ERenderOrder::CRUMBLING_BOX);
-	}
 }
 
 ABattleMap::~ABattleMap()
@@ -40,7 +24,30 @@ void ABattleMap::Tick(float _deltaTime)
 	ABaseMap::Tick(_deltaTime);
 }
 
-void ABattleMap::InitMap()
+void ABattleMap::InitSprite()
+{
+	FVector2D winSize = GlobalVar::WINDOW_SIZE;
+	{
+		const char* SPRITE_BATTLE_BG = "BattleBg.png";
+		SRBackground = CreateDefaultSubObject<USpriteRenderer>();
+		SRBackground->SetSprite(SPRITE_BATTLE_BG);
+		SRBackground->SetComponentLocation(winSize.Half());
+		SRBackground->SetComponentScale(winSize);
+		SRBackground->SetOrder(ERenderOrder::BACKGROUND);
+	}
+	{
+		const char* SPRITE_BATTLE_BUILDING = "BattleBuilding.png";
+
+		FVector2D size{ 160, 96 };
+		SRBgBuilding = CreateDefaultSubObject<USpriteRenderer>();
+		SRBgBuilding->SetSprite(SPRITE_BATTLE_BUILDING);
+		SRBgBuilding->SetComponentLocation(FVector2D{ winSize.hX(), size.hY() + 32.f });
+		SRBgBuilding->SetComponentScale(size);
+		SRBgBuilding->SetOrder(ERenderOrder::CRUMBLING_BOX);
+	}
+}
+
+void ABattleMap::InitTileMap()
 {
 	FIntPoint shape = GlobalVar::BATTLE_GROUND_COUNT;
 	FVector2D tileSize = GlobalVar::BOMB_SIZE;
@@ -70,11 +77,13 @@ void ABattleMap::InitMap()
 	GlobalPath path;
 	std::string tileDatPath = path.GetTileDataPath();
 
-	const std::string BATTLE = "Battle";	// Temp
+	const std::string BATTLE = "Battle";
 	Deserialize(MapGround, tileDatPath, BATTLE + GlobalPath::MAP_GROUND_DAT);
 	Deserialize(MapWall, tileDatPath, BATTLE + GlobalPath::MAP_WALL_DAT);
 	Deserialize(MapBox, tileDatPath, BATTLE + GlobalPath::MAP_BOX_DAT);
 	Deserialize(MapCover, tileDatPath, BATTLE + GlobalPath::MAP_COVER_DAT);
 
-	MapBox->SetTilesAnimAfterLoad(GlobalPath::ANIM_CRUMBLING_BOX, "CrumblingWoodBox.png", 0, 6);
+	const char* SPRITE_CURMBLING_WOODBOX = "CrumblingWoodBox.png";
+	MapBox->SetTilesAnimAfterLoad(GlobalPath::ANIM_CRUMBLING_BOX, SPRITE_CURMBLING_WOODBOX, 0, 6);
+	MapBox->SetItemsAfterLoad(Items);
 }

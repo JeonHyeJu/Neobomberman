@@ -231,11 +231,10 @@
     <ClInclude Include="Monster.h" />
     <ClInclude Include="GlobalVar.h" />
     <ClInclude Include="Player.h" />
-    <ClInclude Include="PlayGameMode.h" />
-    <ClInclude Include="PlayMap.h" />
+    <ClInclude Include="PlayStage1Mode.h" />
+    <ClInclude Include="Stage1Map.h" />
     <ClInclude Include="PreCompile.h" />
     <ClInclude Include="TileMapGameMode.h" />
-    <ClInclude Include="Timer.h" />
     <ClInclude Include="TitleGameMode.h" />
     <ClInclude Include="Title.h" />
     <ClInclude Include="UtilFn.h">
@@ -326,8 +325,8 @@
     <ClCompile Include="Monster.cpp" />
     <ClCompile Include="GlobalVar.cpp" />
     <ClCompile Include="Player.cpp" />
-    <ClCompile Include="PlayGameMode.cpp" />
-    <ClCompile Include="PlayMap.cpp" />
+    <ClCompile Include="PlayStage1Mode.cpp" />
+    <ClCompile Include="Stage1Map.cpp" />
     <ClCompile Include="PreCompile.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>

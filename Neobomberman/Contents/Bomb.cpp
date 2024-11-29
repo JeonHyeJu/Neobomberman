@@ -83,13 +83,12 @@ void ABomb::Init(const FVector2D& _loc, EBombType _bombType, int _power, ABaseMa
 	if (ABomb::BombList.size() >= GlobalVar::MAX_BOMB_CNT) return;
 
 	SetCurMap(_curMap);
-	ATileMap* pMap = CurMapPtr->GetGroundMap();
-	FIntPoint matIdx = pMap->LocationToMatrixIdx(_loc);
+	FIntPoint matIdx = CurMapPtr->LocationToMatrixIdx(_loc);
 
 	if (!CanSetBombThisIdx(matIdx)) return;
 
-	FIntPoint realIdx = pMap->LocationToIndex(_loc);
-	FVector2D orderedLoc = pMap->IndexToLocation(realIdx);
+	FIntPoint realIdx = CurMapPtr->LocationToIndex(_loc);
+	FVector2D orderedLoc = CurMapPtr->IndexToLocation(realIdx);
 	SBombTailTypes bombTailTypes = GetBombTailTypes(matIdx, _bombType, _power);
 	std::vector<FIntPoint> explodeIdxs = GetBombRange(matIdx, bombTailTypes);
 
@@ -121,11 +120,11 @@ void ABomb::InitSpriteAndAnim(const SBombTailTypes& _tailInfo)
 {
 	if (BombType == EBombType::PLAIN)
 	{
-		InitSpriteCenter(GlobalPath::BOMB_ORG, ANIM_BOMB_RUNNING, IMG_EXPLOSION_CENTER);
+		InitSpriteCenter(SPRITE_BOMB_ORG, ANIM_BOMB_RUNNING, IMG_EXPLOSION_CENTER);
 	}
 	else  // EBombType::RED
 	{
-		InitSpriteCenter(GlobalPath::BOMB_RED, ANIM_BOMB_RUNNING, IMG_EXPLOSION_CENTER);
+		InitSpriteCenter(SPRITE_BOMB_RED, ANIM_BOMB_RUNNING, IMG_EXPLOSION_CENTER);
 	}
 
 	/* Create explosion animations */

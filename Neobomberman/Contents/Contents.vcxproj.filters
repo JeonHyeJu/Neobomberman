@@ -33,19 +33,16 @@
     <ClInclude Include="Player.h">
       <Filter>Actor</Filter>
     </ClInclude>
-    <ClInclude Include="Timer.h">
-      <Filter>Util</Filter>
-    </ClInclude>
     <ClInclude Include="PreCompile.h">
       <Filter>PreCompile</Filter>
     </ClInclude>
     <ClInclude Include="ContentsCore.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="PlayGameMode.h">
+    <ClInclude Include="PlayStage1Mode.h">
       <Filter>GameMode</Filter>
     </ClInclude>
-    <ClInclude Include="PlayMap.h">
+    <ClInclude Include="Stage1Map.h">
       <Filter>Map</Filter>
     </ClInclude>
     <ClInclude Include="GlobalVar.h">
@@ -152,10 +149,10 @@
     <ClCompile Include="ContentsCore.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="PlayGameMode.cpp">
+    <ClCompile Include="PlayStage1Mode.cpp">
       <Filter>GameMode</Filter>
     </ClCompile>
-    <ClCompile Include="PlayMap.cpp">
+    <ClCompile Include="Stage1Map.cpp">
       <Filter>Map</Filter>
     </ClCompile>
     <ClCompile Include="GlobalVar.cpp">

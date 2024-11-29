@@ -6,14 +6,13 @@
 #include <EngineBase/EngineFile.h>
 
 ABaseMap::ABaseMap()
-: AActor(), Temp({})
+: AActor()
 {
-
+	Items.reserve(GlobalVar::MAX_MAP_ITEM_CNT);
 }
 
 ABaseMap::~ABaseMap()
 {
-
 }
 
 void ABaseMap::BeginPlay()
@@ -31,10 +30,12 @@ void ABaseMap::Tick(float _deltaTime)
 	CheckLaunchedBomb();
 	RemoveExplodedBomb();
 	CheckExplodedBox();
+
 	if (SplashTileIdxs.size() > 0 && ExplodeEvent != nullptr)
 	{
 		ExplodeEvent();
 	}
+
 	ClearSplashArray();
 }
 
@@ -95,50 +96,7 @@ bool ABaseMap::CanMove(const FVector2D& _loc, bool _isPlayer /*= false*/)
 			return false;
 		}
 	}
-	
-	return true;
-}
 
-bool ABaseMap::CanMove(const FIntPoint& _idx, bool _isPlayer /*= false*/)
-{
-	std::list<ABomb*>::iterator it = ABomb::BombList.begin();
-	std::list<ABomb*>::iterator itEnd = ABomb::BombList.end();
-	for (; it != itEnd; ++it)
-	{
-		ABomb* pBomb = *it;
-
-		if (_idx == pBomb->GetMatrixIdx())
-		{
-			if (_isPlayer)
-			{
-				if (!pBomb->GetIsMovableForPlayer())
-				{
-					return false;
-				}
-			}
-			else
-			{
-				return false;
-			}
-		}
-	}
-
-	if (MapWall)
-	{
-		if (MapWall->GetIsMovable(_idx))
-		{
-			return false;
-		}
-	}
-	
-	if (MapBox)
-	{
-		if (MapBox->GetIsMovable(_idx))
-		{
-			return false;
-		}
-	}
-	
 	return true;
 }
 
@@ -181,18 +139,9 @@ bool ABaseMap::IsMove(const FIntPoint& _idx)
 	return true;
 }
 
-bool ABaseMap::GetIsPortalOpened() const
-{
-	if (MapGround)
-	{
-		return MapGround->GetIsPortalOpened();
-	}
-	return false;
-}
-
 void ABaseMap::OpenPortal()
 {
-	// Don't have any portal.
+	// It dosen't have any portal.
 	if (PortalIdx != FIntPoint::NEGATIVE_ONE)
 	{
 		if (MapGround)
@@ -200,6 +149,15 @@ void ABaseMap::OpenPortal()
 			MapGround->OpenPortal();
 		}
 	}
+}
+
+bool ABaseMap::GetIsPortalOpened() const
+{
+	if (MapGround)
+	{
+		return MapGround->GetIsPortalOpened();
+	}
+	return false;
 }
 
 FVector2D ABaseMap::GetPortalLoc() const
@@ -213,6 +171,18 @@ FVector2D ABaseMap::GetPortalLoc() const
 	return realLoc;
 }
 
+FIntPoint ABaseMap::LocationToIndex(const FVector2D& _loc)
+{
+	if (!MapGround) return FIntPoint::NEGATIVE_ONE;
+	return MapGround->LocationToIndex(_loc);
+}
+
+FVector2D ABaseMap::IndexToLocation(const FIntPoint& _idx)
+{
+	if (!MapGround) return FIntPoint::NEGATIVE_ONE;
+	return MapGround->IndexToLocation(_idx);
+}
+
 FIntPoint ABaseMap::LocationToMatrixIdx(const FVector2D& _loc)
 {
 	if (!MapGround) return FIntPoint::NEGATIVE_ONE;
@@ -224,7 +194,6 @@ FVector2D ABaseMap::MatrixIdxToLocation(const FIntPoint& _idx)
 	if (!MapGround) return FIntPoint::NEGATIVE_ONE;
 	return MapGround->MatrixIdxToLocation(_idx);
 }
-
 FVector2D ABaseMap::GetOrganizedLoc(const FVector2D& _loc)
 {
 	FVector2D ret;
@@ -233,6 +202,24 @@ FVector2D ABaseMap::GetOrganizedLoc(const FVector2D& _loc)
 	FIntPoint idx = MapGround->LocationToMatrixIdx(_loc);
 	ret = MapGround->MatrixIdxToLocation(idx);
 	return ret;
+}
+
+/* Bomb */
+bool ABaseMap::IsInSplash(const FIntPoint& _pt)
+{
+	return IsInSplashWithVector(_pt, SplashTileIdxs);
+}
+
+bool ABaseMap::IsInSplashWithVector(const FIntPoint& _pt, const std::vector<FIntPoint>& _vec)
+{
+	for (size_t i = 0, size = _vec.size(); i < size; ++i)
+	{
+		if (_pt == _vec[i])
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 void ABaseMap::CheckLaunchedBomb()
@@ -268,79 +255,6 @@ void ABaseMap::CheckLaunchedBomb()
 	}
 }
 
-void ABaseMap::RemoveExplodedBomb()
-{
-	std::list<ABomb*>::iterator it = ABomb::BombList.begin();
-	std::list<ABomb*>::iterator itEnd = ABomb::BombList.end();
-
-	for (; it != itEnd; ++it)
-	{
-		ABomb* pBomb = *it;
-		if (pBomb != nullptr && pBomb->GetState() == EBombState::Over)
-		{
-			pBomb->Destroy();
-			pBomb = nullptr;
-			*it = nullptr;
-		}
-	}
-	ABomb::BombList.remove(nullptr);
-}
-
-// TODO: organize
-bool ABaseMap::HasItem(const FIntPoint& _idx)
-{
-	if (MapBox == nullptr) return false;
-	return MapBox->HasItem(_idx);
-}
-
-bool ABaseMap::HasShowingItem(const FIntPoint& _idx)
-{
-	if (MapBox == nullptr) return false;
-	bool hasItem = MapBox->HasItem(_idx);
-	bool isShowingItem = MapBox->IsShowingItem(_idx);
-	return hasItem && isShowingItem;
-}
-
-EItem ABaseMap::PopItem(const FIntPoint& _idx)
-{
-	if (MapBox == nullptr) return EItem::NONE;
-	return MapBox->PopItem(_idx);
-}
-
-void ABaseMap::CheckExplodedBox()
-{
-	bool hasExploded = SplashTileIdxs.size() > 0;
-	if (hasExploded)
-	{
-		for (size_t i = 0; i < SplashTileIdxs.size(); ++i)
-		{
-			FIntPoint boxIdx = SplashTileIdxs[i];
-			MapBox->LaunchTileAnimAfterLoad(boxIdx, GlobalPath::ANIM_CRUMBLING_BOX);
-		}
-	}
-}
-
-void ABaseMap::SetItems(const std::vector<EItem>& _list)
-{
-	if (MapBox)
-	{
-		MapBox->SetItemsAfterLoad(_list);
-	}
-}
-
-void ABaseMap::RemoveItem(const FIntPoint& _idx)
-{
-	if (MapBox)
-	{
-		MapBox->DestroySpriteItem(_idx);
-	}
-}
-
-void ABaseMap::ClearSplashArray()
-{
-	SplashTileIdxs.clear();
-}
-
 void ABaseMap::AppendSplash(const std::vector<FIntPoint>& _appendIdxs)
 {
 	for (size_t i = 0; i < _appendIdxs.size(); ++i)
@@ -360,6 +274,63 @@ void ABaseMap::AppendSplash(const std::vector<FIntPoint>& _appendIdxs)
 
 		SplashTileIdxs.push_back(_appendIdxs[i]);
 	}
+}
+
+void ABaseMap::RemoveExplodedBomb()
+{
+	std::list<ABomb*>::iterator it = ABomb::BombList.begin();
+	std::list<ABomb*>::iterator itEnd = ABomb::BombList.end();
+
+	for (; it != itEnd; ++it)
+	{
+		ABomb* pBomb = *it;
+		if (pBomb != nullptr && pBomb->GetState() == EBombState::Over)
+		{
+			pBomb->Destroy();
+			pBomb = nullptr;
+			*it = nullptr;
+		}
+	}
+	ABomb::BombList.remove(nullptr);
+}
+
+void ABaseMap::CheckExplodedBox()
+{
+	bool hasExploded = SplashTileIdxs.size() > 0;
+	if (hasExploded)
+	{
+		for (size_t i = 0; i < SplashTileIdxs.size(); ++i)
+		{
+			FIntPoint boxIdx = SplashTileIdxs[i];
+			MapBox->LaunchTileAnimAfterLoad(boxIdx, GlobalPath::ANIM_CRUMBLING_BOX);
+		}
+	}
+}
+
+void ABaseMap::ClearSplashArray()
+{
+	SplashTileIdxs.clear();
+}
+
+/* Item */
+bool ABaseMap::HasItem(const FIntPoint& _idx)
+{
+	if (MapBox == nullptr) return false;
+	return MapBox->HasItem(_idx);
+}
+
+bool ABaseMap::HasShowingItem(const FIntPoint& _idx)
+{
+	if (MapBox == nullptr) return false;
+	bool hasItem = HasItem(_idx);
+	bool isShowingItem = MapBox->IsShowingItem(_idx);
+	return hasItem && isShowingItem;
+}
+
+EItem ABaseMap::PopItem(const FIntPoint& _idx)
+{
+	if (MapBox == nullptr) return EItem::NONE;
+	return MapBox->PopItem(_idx);
 }
 
 /* Cheats */

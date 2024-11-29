@@ -1,16 +1,16 @@
 #pragma once
 #include <EngineCore/GameMode.h>
 
-class APlayGameMode : public AGameMode
+class APlayStage1Mode : public AGameMode
 {
 public:
-	APlayGameMode();
-	~APlayGameMode();
+	APlayStage1Mode();
+	~APlayStage1Mode();
 
-	APlayGameMode(const APlayGameMode& _Other) = delete;
-	APlayGameMode(APlayGameMode&& _Other) noexcept = delete;
-	APlayGameMode& operator=(const APlayGameMode& _Other) = delete;
-	APlayGameMode& operator=(APlayGameMode&& _Other) noexcept = delete;
+	APlayStage1Mode(const APlayStage1Mode& _Other) = delete;
+	APlayStage1Mode(APlayStage1Mode&& _Other) noexcept = delete;
+	APlayStage1Mode& operator=(const APlayStage1Mode& _Other) = delete;
+	APlayStage1Mode& operator=(APlayStage1Mode&& _Other) noexcept = delete;
 
 	void BeginPlay() override;
 	void Tick(float _deltaTime) override;

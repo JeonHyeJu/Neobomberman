@@ -138,6 +138,9 @@ private:
 	std::vector<USpriteRenderer*> ExplodeSprites_Left;
 	std::vector<USpriteRenderer*> ExplodeSprites_Right;
 
+	const char* SPRITE_BOMB_ORG = "BombOrg";
+	const char* SPRITE_BOMB_RED = "BombRed";
+
 	const char* IMG_EXPLOSION_CENTER = "ExplodeCenter.png";
 	const char* IMG_EXPLOSION_UP = "ExplodeUp.png";
 	const char* IMG_EXPLOSION_DOWN = "ExplodeDown.png";

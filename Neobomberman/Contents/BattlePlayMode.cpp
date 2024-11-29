@@ -29,9 +29,8 @@ void ABattlePlayMode::BeginPlay()
 	std::vector<EItem> itemList = { EItem::BOMB, EItem::BOMB, EItem::SPEED, EItem::SPEED, EItem::POWER, EItem::POWER };
 
 	ABattleMap* mapPtr = pLevel->SpawnActor<ABattleMap>();
-	mapPtr->InitMap();
+	mapPtr->Initialize(itemList);
 	mapPtr->BindExplodeEvent(std::bind(&ABattlePlayMode::OnExplodeBomb, this));
-	mapPtr->SetItems(itemList);	// Must set after InitMap
 	CurMapPtr = mapPtr;
 
 	Player = pLevel->GetPawn<APlayer>();

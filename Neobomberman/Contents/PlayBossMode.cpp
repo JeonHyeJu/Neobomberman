@@ -35,7 +35,7 @@ void APlayBossMode::BeginPlay()
 
 	/* Stage 1-1 */
 	ABossMap* pBossMap = pLevel->SpawnActor<ABossMap>();
-	pBossMap->InitMap();
+	pBossMap->Initialize();
 	pBossMap->BindExplodeEvent(std::bind(&APlayBossMode::OnExplodeBomb, this));
 	CurMapPtr = pBossMap;
 

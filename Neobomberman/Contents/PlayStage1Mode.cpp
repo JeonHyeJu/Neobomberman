@@ -1,9 +1,9 @@
 #include "PreCompile.h"
-#include "PlayGameMode.h"
+#include "PlayStage1Mode.h"
 #include "GameData.h"
 #include "GameOver.h"
 #include "GameUI.h"
-#include "PlayMap.h"
+#include "Stage1Map.h"
 #include "Player.h"
 #include "Monster.h"
 #include "Mushroom.h"
@@ -18,15 +18,15 @@
 #include <EnginePlatform/EngineInput.h>
 #include <EnginePlatform/EngineSound.h>
 
-APlayGameMode::APlayGameMode()
+APlayStage1Mode::APlayStage1Mode()
 {
 }
 
-APlayGameMode::~APlayGameMode()
+APlayStage1Mode::~APlayStage1Mode()
 {
 }
 
-void APlayGameMode::BeginPlay()
+void APlayStage1Mode::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -44,13 +44,11 @@ void APlayGameMode::BeginPlay()
 	/* Stage 1-1 */
 	std::vector<EItem> itemList = { EItem::BOMB, EItem::BOMB, EItem::SPEED };
 
-	APlayMap* pStage1 = pLevel->SpawnActor<APlayMap>();
-	pStage1->SetPortalIdx(PORTAL_IDX_STAGE_1);
-	pStage1->BindExplodeEvent(std::bind(&APlayGameMode::OnExplodeBomb, this));
-	CurMapPtr = pStage1;
+	AStage1Map* pStage1 = pLevel->SpawnActor<AStage1Map>();
+	pStage1->Initialize(itemList, PORTAL_IDX_STAGE_1);
+	pStage1->BindExplodeEvent(std::bind(&APlayStage1Mode::OnExplodeBomb, this));
 
-	pStage1->InitMap();
-	pStage1->SetItems(itemList);	// Must set after InitMap
+	CurMapPtr = pStage1;
 
 	Player->SetCurMap(pStage1);
 	Player->SetStartLoc(pStage1->MatrixIdxToLocation(StartPoint));
@@ -115,7 +113,7 @@ void APlayGameMode::BeginPlay()
 	UEngineSound::Play(SFXBg);
 }
 
-void APlayGameMode::CheckAndPlayBgSound()
+void APlayStage1Mode::CheckAndPlayBgSound()
 {
 	if (isShowContinueScene) return;
 	if (isShowingResult) return;
@@ -142,7 +140,7 @@ void APlayGameMode::CheckAndPlayBgSound()
 	}
 }
 
-void APlayGameMode::Tick(float _deltaTime)
+void APlayStage1Mode::Tick(float _deltaTime)
 {
 	ElapsedSecs += _deltaTime;
 
@@ -176,13 +174,13 @@ void APlayGameMode::Tick(float _deltaTime)
 	CheckGameOver();
 }
 
-void APlayGameMode::LevelChangeStart()
+void APlayStage1Mode::LevelChangeStart()
 {
 	isShowContinueScene = false;
 	isShowingResult = false;
 }
 
-void APlayGameMode::GameOver()
+void APlayStage1Mode::GameOver()
 {
 	if (isShowContinueScene == false)
 	{
@@ -203,13 +201,13 @@ void APlayGameMode::GameOver()
 		{
 			AFade::MainFade->SetFadeMinMax(.5f, 1.f);
 			AFade::MainFade->SetFadeSpeed(.5f);
-			AFade::MainFade->BindEndEvent(std::bind(&APlayGameMode::OnEndGameOverFadeOut, this));
+			AFade::MainFade->BindEndEvent(std::bind(&APlayStage1Mode::OnEndGameOverFadeOut, this));
 			AFade::MainFade->FadeOut(.5f);
 		}
 	}
 }
 
-void APlayGameMode::CheckDeadMonster()
+void APlayStage1Mode::CheckDeadMonster()
 {
 	std::list<AMonster*>::iterator it = MonsterList.begin();
 	std::list<AMonster*>::iterator itEnd = MonsterList.end();
@@ -225,7 +223,7 @@ void APlayGameMode::CheckDeadMonster()
 	}
 }
 
-void APlayGameMode::CheckTimeOver()
+void APlayStage1Mode::CheckTimeOver()
 {
 	if (GameUiPtr->IsTimeOver())
 	{
@@ -233,7 +231,7 @@ void APlayGameMode::CheckTimeOver()
 	}
 }
 
-void APlayGameMode::CheckGameOver()
+void APlayStage1Mode::CheckGameOver()
 {
 	int p1Life = GameData::GetInstance().GetPlayer1Life();
 	if (p1Life >= 0) return;
@@ -277,7 +275,7 @@ void APlayGameMode::CheckGameOver()
 	}
 }
 
-void APlayGameMode::CheckCheat()
+void APlayStage1Mode::CheckCheat()
 {
 	if (UEngineInput::GetInst().IsDown('N'))
 	{
@@ -297,7 +295,7 @@ void APlayGameMode::CheckCheat()
 	}
 }
 
-void APlayGameMode::StartFromCoin()
+void APlayStage1Mode::StartFromCoin()
 {
 	GameData& gameData = GameData::GetInstance();
 	gameData.AddCoin(-1);
@@ -305,7 +303,7 @@ void APlayGameMode::StartFromCoin()
 	gameData.ResetScore();
 }
 
-void APlayGameMode::StopGame()
+void APlayStage1Mode::StopGame()
 {
 	GetWorld()->GetPawn<APlayer>()->Pause();
 	GameUiPtr->StopTimer();
@@ -318,7 +316,7 @@ void APlayGameMode::StopGame()
 	}
 }
 
-void APlayGameMode::RestartGame()
+void APlayStage1Mode::RestartGame()
 {
 	GetWorld()->GetPawn<APlayer>()->Resume();
 	GameUiPtr->ResetTimer();
@@ -332,13 +330,13 @@ void APlayGameMode::RestartGame()
 	}
 }
 
-bool APlayGameMode::IsAllMonstersDead() const
+bool APlayStage1Mode::IsAllMonstersDead() const
 {
 	return MonsterList.size() == 0;
 }
 
 // Hack code.. lasting explosion impact..
-void APlayGameMode::CheckAfterExplosion(float _deltaTime)
+void APlayStage1Mode::CheckAfterExplosion(float _deltaTime)
 {
 	if (CurMapPtr == nullptr) return;
 	if (!IsSplashCheck) return;
@@ -438,7 +436,7 @@ void APlayGameMode::CheckAfterExplosion(float _deltaTime)
 	}
 }
 
-void APlayGameMode::OnExplodeBomb()
+void APlayStage1Mode::OnExplodeBomb()
 {
 	if (CurMapPtr == nullptr) return;
 
@@ -448,22 +446,22 @@ void APlayGameMode::OnExplodeBomb()
 	CheckAfterExplosion(.4f);
 }
 
-void APlayGameMode::OnEndGameOverFadeOut()
+void APlayStage1Mode::OnEndGameOverFadeOut()
 {
 	UEngineSound::AllSoundStop();
 	UEngineAPICore::GetCore()->OpenLevel("Title");
 }
 
 // Temp
-void APlayGameMode::FadeOut()
+void APlayStage1Mode::FadeOut()
 {
-	AFade::MainFade->BindEndEvent(std::bind(&APlayGameMode::OnEndFadeOut, this));
+	AFade::MainFade->BindEndEvent(std::bind(&APlayStage1Mode::OnEndFadeOut, this));
 	AFade::MainFade->SetFadeMinMax(0.f, .5f);
 	AFade::MainFade->SetFadeSpeed(.5f);
 	AFade::MainFade->FadeOut();
 }
 
-void APlayGameMode::OnEndFadeOut()
+void APlayStage1Mode::OnEndFadeOut()
 {
 	ResultScene = GetWorld()->SpawnActor<AResult>();
 	ResultScene->SetNextLevel("Boss_Stage1");

@@ -13,7 +13,7 @@
 #include "TileMapGameMode.h"
 #include "BattleSelectMode.h"
 #include "BattlePlayMode.h"
-#include "PlayGameMode.h"
+#include "PlayStage1Mode.h"
 #include "PlayBossMode.h"
 #include "Player.h"
 #include "GlobalVar.h"
@@ -42,17 +42,17 @@ void ContentsCore::BeginPlay()
 
 	pCore->CreateLevel<ATitleGameMode, AActor>("Title");
 	pCore->CreateLevel<AEndingGameMode, AActor>("Ending");
-	pCore->CreateLevel<APlayGameMode, APlayer>("Play");
+	pCore->CreateLevel<APlayStage1Mode, APlayer>("Play");
 	pCore->CreateLevel<APlayBossMode, APlayer>("Boss_Stage1");
 	pCore->CreateLevel<ABattleSelectMode, AActor>("BattleSelect");
 	pCore->CreateLevel<ABattlePlayMode, APlayer>("BattlePlay");
 
 	//pCore->OpenLevel("Title");
-	//pCore->OpenLevel("Play");
+	pCore->OpenLevel("Play");
 	//pCore->OpenLevel("Boss_Stage1");
 	//pCore->OpenLevel("Ending");
 	//pCore->OpenLevel("BattleSelect");
-	pCore->OpenLevel("BattlePlay");
+	//pCore->OpenLevel("BattlePlay");
 }
 
 void ContentsCore::Tick()
@@ -66,33 +66,33 @@ void ContentsCore::InitResources()
 
 	/** Load images **/
 	LoadImages(GlobalPath::ROOT);
-	LoadImages(path.GetAppendedRootPath(GlobalPath::BACKGROUND));
-	LoadImages(path.GetAppendedRootPath(GlobalPath::CHARACTER));
-	LoadImages(path.GetAppendedRootPath(GlobalPath::RIDING));
-	LoadImages(path.GetAppendedRootPath(GlobalPath::ENEMY));
-	LoadImages(path.GetAppendedRootPath(GlobalPath::EXPLODE));
-	LoadImages("Resources\\UI\\Score");	// temp
-	LoadImages("Resources\\UI\\Title");	// temp
-	LoadImages("Resources\\UI\\SelectCount");	// temp
-	LoadImages("Resources\\Result");	// temp
-	LoadImages("Resources\\CutScene");	// temp
-	LoadImages("Resources\\Closing");	// temp
-	LoadImages("Resources\\Items");	// temp
+	LoadImages(path.GetAppendedRootPath("Background"));
+	LoadImages(path.GetAppendedRootPath("Character_32x64"));
+	LoadImages(path.GetAppendedRootPath("Riding_32x32"));
+	LoadImages(path.GetAppendedRootPath("Enemies_32x32"));
+	LoadImages(path.GetAppendedRootPath("Explode"));
+	LoadImages(path.GetAppendedRootPath("Result"));
+	LoadImages(path.GetAppendedRootPath("CutScene"));
+	LoadImages(path.GetAppendedRootPath("Closing"));
+	LoadImages(path.GetAppendedRootPath("Items"));
+	LoadImages(path.GetAppendedRootPath("UI\\Score"));
+	LoadImages(path.GetAppendedRootPath("UI\\Title"));
+	LoadImages(path.GetAppendedRootPath("UI\\SelectCount"));
 
-	LoadImageFolders(path.GetAppendedRootPath(GlobalPath::BOMB_ORG));
-	LoadImageFolders(path.GetAppendedRootPath(GlobalPath::BOMB_RED));
+	LoadImageFolders(path.GetAppendedRootPath("BombOrg"));
+	LoadImageFolders(path.GetAppendedRootPath("BombRed"));
 	LoadImageFolders(path.GetAppendedRootPath(GlobalPath::OPENING));
 	LoadImageFolders(path.GetTileStage1Path());
 	LoadImageFolders(path.GetTileStage1GuidePath());
 	LoadImageFolders(path.GetAppendedRootPath(GlobalPath::ANIM_CRUMBLING_BOX));
-	LoadImageFolders("Resources\\SayHi");
-	LoadImageFolders("Resources\\Result\\StageClear");
-	LoadImageFolders("Resources\\CutScene\\CutSceneStage1");
-	LoadImageFolders("Resources\\PlayBackground");
-	LoadImageFolders("Resources\\HoopGhostCloud");
+	LoadImageFolders(path.GetAppendedRootPath("SayHi"));
+	LoadImageFolders(path.GetAppendedRootPath("Result\\StageClear"));
+	LoadImageFolders(path.GetAppendedRootPath("CutScene\\CutSceneStage1"));
+	LoadImageFolders(path.GetAppendedRootPath("PlayBackground"));
+	LoadImageFolders(path.GetAppendedRootPath("HoopGhostCloud"));
 
 	/* Load sounds */
-	LoadSounds("Resources\\Sounds");
+	LoadSounds(path.GetAppendedRootPath("Sounds"));
 
 	/** Cutting **/
 	UImageManager& imgManager = UImageManager::GetInst();
@@ -118,13 +118,13 @@ void ContentsCore::InitResources()
 
 	imgManager.CuttingSprite("TimeCount.png", GlobalVar::TIME_COUNT_SIZE);
 	imgManager.CuttingSprite("Title_countdown_24x24.png", GlobalVar::TITLE_TIME_COUNT_SIZE);
-	imgManager.CuttingSprite("BlueCount.png", { 24, 48 });	// Temp
-	imgManager.CuttingSprite("PinkCount.png", { 24, 48 });	// Temp
-	imgManager.CuttingSprite("YellowCount.png", { 24, 48 });	// Temp
+	imgManager.CuttingSprite("BlueCount.png", GlobalVar::SELECT_TIME_COUNT_SIZE);
+	imgManager.CuttingSprite("PinkCount.png", GlobalVar::SELECT_TIME_COUNT_SIZE);
+	imgManager.CuttingSprite("YellowCount.png", GlobalVar::SELECT_TIME_COUNT_SIZE);
 
 	imgManager.CuttingSprite("SelectPainterUpDown.png", GlobalVar::BOMBERMAN_SIZE);
 	imgManager.CuttingSprite("SelectPainterCircle.png", GlobalVar::BOMBERMAN_SIZE);
-	imgManager.CuttingSprite("brushCircle.png", { 128, 128 });
+	imgManager.CuttingSprite("brushCircle.png", GlobalVar::BRUSH_CIRCLE);
 
 	imgManager.CuttingSprite("ClosedPortal.png", GlobalVar::BOMB_SIZE);
 	imgManager.CuttingSprite("OpenedPortal.png", GlobalVar::BOMB_SIZE);
@@ -141,20 +141,21 @@ void ContentsCore::InitResources()
 
 	imgManager.CuttingSprite("LeftBears.png", { 96, 196 });
 	imgManager.CuttingSprite("RightBears.png", { 96, 196 });
-	imgManager.CuttingSprite("HoopGhost.png", { 256, 256 });
+	imgManager.CuttingSprite("HoopGhost.png", GlobalVar::HOOPGHOST_SIZE);
 	imgManager.CuttingSprite("HurryUp.png", { 510, 64 });
-	imgManager.CuttingSprite("Items.png", { 64, 64 });
+	imgManager.CuttingSprite("Items.png", GlobalVar::BOMBERMAN_SIZE);
 	imgManager.CuttingSprite("BgBottom.png", { 416, 32 });
-	imgManager.CuttingSprite("Siren.png", { 32, 32 });
+	imgManager.CuttingSprite("Siren.png", GlobalVar::BOMB_SIZE);
 	imgManager.CuttingSprite("Explanation.png", { 360, 360 });
 	imgManager.CuttingSprite("CharacterNames.png", { 128, 16 });
 	imgManager.CuttingSprite("BalloonBomberman.png", { 156, 156 });
 	imgManager.CuttingSprite("StageTitle.png", { 150, 64 });
-	imgManager.CuttingSprite("SelectWhite.png", { 64, 64 });
-	imgManager.CuttingSprite("SelectBlack.png", { 64, 64 });
-	imgManager.CuttingSprite("SelectRed.png", { 64, 64 });
-	imgManager.CuttingSprite("SelectBlue.png", { 64, 64 });
-	imgManager.CuttingSprite("CrumblingWoodBox.png", { 32, 32 });
+	imgManager.CuttingSprite("SelectWhite.png", GlobalVar::BOMBERMAN_SIZE);
+	imgManager.CuttingSprite("SelectBlack.png", GlobalVar::BOMBERMAN_SIZE);
+	imgManager.CuttingSprite("SelectRed.png", GlobalVar::BOMBERMAN_SIZE);
+	imgManager.CuttingSprite("SelectBlue.png", GlobalVar::BOMBERMAN_SIZE);
+
+	imgManager.CuttingSprite("CrumblingWoodBox.png", GlobalVar::BOMB_SIZE);
 }
 
 void ContentsCore::LoadImages(std::string_view _path)
@@ -168,11 +169,13 @@ void ContentsCore::LoadImages(std::string_view _path)
 		return;
 	}
 
+	UImageManager& imgManager = UImageManager::GetInst();
+
 	std::vector<UEngineFile> files = dir.GetAllFile(false);
 	for (size_t i = 0; i < files.size(); i++)
 	{
 		std::string&& filePath = files[i].GetPathToString();
-		UImageManager::GetInst().Load(filePath);
+		imgManager.Load(filePath);
 	}
 }
 

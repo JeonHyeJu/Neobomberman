@@ -1,19 +1,17 @@
 #pragma once
 #include "BaseMap.h"
-#include <EngineCore/PathFindAStar.h>
 #include "ContentsStruct.h"
 
-class ATileMap;
-class ABossMap : public ABaseMap
+class AStage1Map : public ABaseMap
 {
 public:
-	ABossMap();
-	~ABossMap();
+	AStage1Map();
+	~AStage1Map();
 
-	ABossMap(const ABossMap& _other) = delete;
-	ABossMap(ABossMap&& _other) noexcept = delete;
-	ABossMap& operator=(const ABossMap& _other) = delete;
-	ABossMap& operator=(ABossMap&& _other) noexcept = delete;
+	AStage1Map(const AStage1Map& _Other) = delete;
+	AStage1Map(AStage1Map&& _Other) noexcept = delete;
+	AStage1Map& operator=(const AStage1Map& _Other) = delete;
+	AStage1Map& operator=(AStage1Map&& _Other) noexcept = delete;
 
 protected:
 	void BeginPlay() override;
@@ -23,8 +21,6 @@ protected:
 	void InitTileMap() override;
 
 private:
-	const char* ANIM_RUN_BG = "Run";
-
 	class USpriteRenderer* SRBackground = nullptr;
 	class USpriteRenderer* SRBackgroundBottom = nullptr;
 	class USpriteRenderer* SRLeftBear = nullptr;
