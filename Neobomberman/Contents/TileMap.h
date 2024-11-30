@@ -106,6 +106,7 @@ public:
 	EItem GetItem(const FIntPoint& _idx);
 	EItem PopItem(const FIntPoint& _idx);
 	bool GetIsMovable(const FVector2D& _loc);
+	bool GetIsMovable(const FIntPoint& _idx);
 
 	Tile* GetTileRef(FIntPoint _idx);
 	Tile* GetTileRef(FVector2D _loc);

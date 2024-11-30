@@ -48,11 +48,11 @@ void ContentsCore::BeginPlay()
 	pCore->CreateLevel<ABattlePlayMode, APlayer>("BattlePlay");
 
 	//pCore->OpenLevel("Title");
-	//pCore->OpenLevel("Play");
+	pCore->OpenLevel("Play");
 	//pCore->OpenLevel("Boss_Stage1");
 	//pCore->OpenLevel("Ending");
 	//pCore->OpenLevel("BattleSelect");
-	pCore->OpenLevel("BattlePlay");
+	//pCore->OpenLevel("BattlePlay");
 }
 
 void ContentsCore::Tick()

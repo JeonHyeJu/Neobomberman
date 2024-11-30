@@ -2,6 +2,7 @@
 #include "GlobalVar.h"
 #include "Monster.h"
 #include "BaseMap.h"
+//#include "DebugLog.h"
 
 int AMonster::MonsterCount = 0;
 UPathFindAStar AMonster::PathFinder;

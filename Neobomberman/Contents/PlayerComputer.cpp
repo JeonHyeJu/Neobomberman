@@ -251,100 +251,11 @@ void APlayerComputer::Idling(float _deltaTime)
 
 void APlayerComputer::Moving(float _deltaTime)
 {
-	if (Direction == FIntPoint::ZERO)
-	{
-		Fsm.ChangeState(EPlayerComputerState::THINKING);
-		return;
-	}
-
-	FVector2D curLoc = GetActorLocation();
-	FVector2D posLT = curLoc + FVector2D{ 2, 2 };
-	FVector2D posRT = curLoc + FVector2D{ 28, 2 };
-	FVector2D posLB = curLoc + FVector2D{ 2, 24 };
-	FVector2D posRB = curLoc + FVector2D{ 28, 24 };
-
-	FIntPoint curIdxLT = MapPtr->LocationToMatrixIdx(posLT);
-	FIntPoint curIdxRT = MapPtr->LocationToMatrixIdx(posRT);
-	FIntPoint curIdxLB = MapPtr->LocationToMatrixIdx(posLB);
-	FIntPoint curIdxRB = MapPtr->LocationToMatrixIdx(posRB);
-
-	FTransform TransLT, TransRT, TransLB, TransRB;
-
-	TransLT.Location = posLT;
-	TransRT.Location = posRT;
-	TransLB.Location = posLB;
-	TransRB.Location = posRB;
-
-	TransLT.Scale = { 6, 6 };
-	TransRT.Scale = { 6, 6 };
-	TransLB.Scale = { 6, 6 };
-	TransRB.Scale = { 6, 6 };
-
-	/*UEngineDebug::CoreDebugRender(TransLT, UEngineDebug::EDebugPosType::Circle);
-	UEngineDebug::CoreDebugRender(TransRT, UEngineDebug::EDebugPosType::Circle);
-	UEngineDebug::CoreDebugRender(TransLB, UEngineDebug::EDebugPosType::Circle);
-	UEngineDebug::CoreDebugRender(TransRB, UEngineDebug::EDebugPosType::Circle);*/
-
-	OutputDebugString(("curIdxLT: " + std::to_string(curIdxLT.X) + ", " + std::to_string(curIdxLT.Y) + "\n").c_str());
-	OutputDebugString(("curIdxRT: " + std::to_string(curIdxRT.X) + ", " + std::to_string(curIdxRT.Y) + "\n").c_str());
-	OutputDebugString(("curIdxLB: " + std::to_string(curIdxLB.X) + ", " + std::to_string(curIdxLB.Y) + "\n").c_str());
-	OutputDebugString(("curIdxRB: " + std::to_string(curIdxRB.X) + ", " + std::to_string(curIdxRB.Y) + "\n").c_str());
-	OutputDebugString(("Destination: " + std::to_string(Destination.X) + ", " + std::to_string(Destination.Y) + "\n").c_str());
-	OutputDebugString("-------------------------------------\n");
-
-	if (curIdxLT == Destination && curIdxRT == Destination && curIdxLB == Destination && curIdxRB == Destination)
-	{
-		FVector2D destLoc = MapPtr->MatrixIdxToLocation(Destination);
-		bool isStop = false;
-
-		if (Direction == FVector2D::UP)
-		{
-			if (curLoc.Y <= destLoc.Y)
-			{
-				isStop = true;
-			}
-		}
-		else if (Direction == FVector2D::DOWN)
-		{
-			if (curLoc.Y >= destLoc.Y)
-			{
-				isStop = true;
-			}
-		}
-		else if (Direction == FVector2D::LEFT)
-		{
-			if (curLoc.X <= destLoc.X)
-			{
-				isStop = true;
-			}
-		}
-		else if (Direction == FVector2D::RIGHT)
-		{
-			if (curLoc.X >= destLoc.X)
-			{
-				isStop = true;
-			}
-		}
-		
-		if (isStop)
-		{
-			OutputDebugString("Arrived!!!!!!!!!!!!!!!\n");
-			PPrevRouteIdx = PrevRouteIdx;
-			PrevRouteIdx = Destination;
-			Fsm.ChangeState(EPlayerComputerState::THINKING);
-			return;
-		}
-	}
-
 	if (Direction != FIntPoint::ZERO)
 	{
 		float RealSpeed = DEFAULT_SPEED + Ability.Speed * 25.f;
 
 		FVector2D move = Direction* _deltaTime* RealSpeed;
-		OutputDebugString(("Direction: " + std::to_string(Direction.X) + ", " + std::to_string(Direction.Y) + "\n").c_str());
-		OutputDebugString(("Move: " + std::to_string(move.X) + ", " + std::to_string(move.Y) + "\n").c_str());
-		OutputDebugString("-------------------------------------\n");
-		
 
 		std::string suffixStr = GetDirectionStr();
 		SpriteRendererHead->ChangeAnimation("Run_" + suffixStr);

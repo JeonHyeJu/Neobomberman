@@ -40,7 +40,7 @@ void ATileMap::SetTileWithLoc(FVector2D _Location, int _SpriteIndex, bool _isMov
 	FVector2D TilePos = _Location - GetActorLocation();
 	FIntPoint Point = LocationToIndex(TilePos);
 
-	if (true == IsIndexOver(Point))
+	if (IsIndexOver(Point))
 	{
 		return;
 	}
@@ -273,6 +273,17 @@ void ATileMap::DeSerialize(UEngineSerializer& _Ser)
 bool ATileMap::GetIsMovable(const FVector2D& _loc)
 {
 	Tile* tile = GetTileRef(_loc);
+	if (tile != nullptr)
+	{
+		return tile->IsMove;
+	}
+
+	return false;
+}
+
+bool ATileMap::GetIsMovable(const FIntPoint& _idx)
+{
+	Tile* tile = GetTileRef(_idx);
 	if (tile != nullptr)
 	{
 		return tile->IsMove;

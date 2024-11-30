@@ -135,7 +135,7 @@ void APlayer::Tick(float _deltaTime)
 {
 	Super::Tick(_deltaTime);
 
-	UEngineDebug::CoreOutPutString("FPS : " + std::to_string(1.0f / _deltaTime));
+	//UEngineDebug::CoreOutPutString("FPS : " + std::to_string(1.0f / _deltaTime));
 	//UEngineDebug::CoreOutPutString("PlayerPos : " + GetActorLocation().ToString());
 
 	Fsm.Update(_deltaTime);

@@ -16,7 +16,9 @@
 #include <EnginePlatform/EngineInput.h>
 #include <EnginePlatform/EngineSound.h>
 
-#include <EngineCore/EngineCoreDebug.h>		// for debug
+#if defined(DEBUG) || defined(_DEBUG)
+#include <EngineCore/EngineCoreDebug.h>
+#endif
 
 ABaseGameMode::ABaseGameMode()
 {
@@ -59,7 +61,10 @@ void ABaseGameMode::Tick(float _deltaTime)
 	Fsm.Update(_deltaTime);
 
 	CheckCheat();
+
+#if defined(DEBUG) || defined(_DEBUG)
 	DebugExlosionEdge();
+#endif
 }
 
 void ABaseGameMode::InitResultScene(std::string_view _nextLevel, std::string_view _rImage)

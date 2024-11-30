@@ -121,16 +121,16 @@ bool ABaseMap::IsMove(const FIntPoint& _idx)
 
 	if (MapWall)
 	{
-		//if (!MapWall->GetIsMovable(_idx))
-		if (MapWall->HasTileSprite(_idx))
+		if (!MapWall->GetIsMovable(_idx))
+		//if (MapWall->HasTileSprite(_idx))
 		{
 			return false;
 		}
 	}
 	if (MapBox)
 	{
-		//if (!MapBox->GetIsMovable(_idx))
-		if (MapBox->HasTileSprite(_idx))
+		if (!MapBox->GetIsMovable(_idx))
+		//if (MapBox->HasTileSprite(_idx))
 		{
 			return false;
 		}
