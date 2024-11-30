@@ -114,8 +114,8 @@ APlayer::APlayer()
 	Fsm.CreateState(EPlayerState::PORTAL, nullptr, std::bind(&APlayer::OnShift, this));
 	Fsm.CreateState(EPlayerState::END, nullptr, std::bind(&APlayer::OnEnd, this));
 
-	FsmH.CreateState(EPlayerBlinkAndColState::BLINK_ON_COL_OFF, std::bind(&APlayer::Blinking, this, std::placeholders::_1), std::bind(&APlayer::OnTurnOnBlink, this));
-	FsmH.CreateState(EPlayerBlinkAndColState::BLINK_OFF_COL_ON, nullptr, std::bind(&APlayer::OnTurnOffBlink, this));
+	FsmH.CreateState(EBlinkAndColState::BLINK_ON_COL_OFF, std::bind(&APlayer::Blinking, this, std::placeholders::_1), std::bind(&APlayer::OnTurnOnBlink, this));
+	FsmH.CreateState(EBlinkAndColState::BLINK_OFF_COL_ON, nullptr, std::bind(&APlayer::OnTurnOffBlink, this));
 
 	//DebugOn();
 }
@@ -263,7 +263,7 @@ void APlayer::CheckItem(float _deltaTime)
 void APlayer::Reborn()
 {
 	Fsm.ChangeState(EPlayerState::REBORN);
-	FsmH.ChangeState(EPlayerBlinkAndColState::BLINK_ON_COL_OFF);
+	FsmH.ChangeState(EBlinkAndColState::BLINK_ON_COL_OFF);
 
 	ResetDroppedBombs();
 	SetActorLocation(StartLocation);
@@ -396,7 +396,7 @@ void APlayer::OnEndPortalAnim()
 	IsClear = true;
 }
 
-/* FSM2 start functions */
+/* FsmH start functions */
 void APlayer::OnTurnOnBlink()
 {
 	IsImmotal = true;
@@ -442,7 +442,6 @@ void APlayer::OnIdle()
 
 void APlayer::OnMove()
 {
-	
 }
 
 void APlayer::OnDead()
@@ -494,7 +493,7 @@ void APlayer::Blinking(float _deltaTime)
 		SpriteRendererHead->SetActive(true);
 		SpriteRendererBody->SetActive(true);
 
-		FsmH.ChangeState(EPlayerBlinkAndColState::BLINK_OFF_COL_ON);
+		FsmH.ChangeState(EBlinkAndColState::BLINK_OFF_COL_ON);
 		return;
 	}
 

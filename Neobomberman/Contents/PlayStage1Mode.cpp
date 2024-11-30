@@ -1,13 +1,10 @@
 #include "PreCompile.h"
 #include "PlayStage1Mode.h"
-#include "GameData.h"
-#include "GameUI.h"
 #include "Stage1Map.h"
 #include "Player.h"
 #include "Monster.h"
 #include "Mushroom.h"
 #include "Balloon.h"
-#include "HurryUp.h"
 #include "StageTitle.h"
 #include "Fade.h"
 
@@ -17,6 +14,9 @@
 APlayStage1Mode::APlayStage1Mode()
 {
 	InitResultScene("Boss_Stage1", "ResultImage1.png");
+	InitBgMusic("Stage1Music.mp3");
+
+	BGPositionWhenLoopStart = 7700;
 }
 
 APlayStage1Mode::~APlayStage1Mode()
@@ -29,10 +29,7 @@ void APlayStage1Mode::BeginPlay()
 
 	ULevel* pLevel = GetWorld();
 
-	GameUiPtr = pLevel->SpawnActor<AGameUI>();
-
 	Player = pLevel->GetPawn<APlayer>();
-	Player->SetGameUI(GameUiPtr);
 
 	/* Stage 1-1 */
 	std::vector<EItem> itemList = { EItem::BOMB, EItem::BOMB, EItem::SPEED };
@@ -42,8 +39,9 @@ void APlayStage1Mode::BeginPlay()
 	pStage1->BindExplodeEvent(std::bind(&APlayStage1Mode::OnExplodeBomb, this));
 	MapPtr = pStage1;
 
+	FIntPoint PlayerStartPoint{ 0, 0 };
 	Player->SetCurMap(pStage1);
-	Player->SetStartLoc(pStage1->MatrixIdxToLocation(StartPoint));
+	Player->SetStartLoc(pStage1->MatrixIdxToLocation(PlayerStartPoint));
 
 	// Temp. To test portal
 	//Player->SetActorLocation(pStage1->GetPortalLoc() + FVector2D({ 16.f, -16.f }));
@@ -62,59 +60,27 @@ void APlayStage1Mode::BeginPlay()
 
 	AFade* fade = pLevel->SpawnActor<AFade>();
 	fade->FadeIn();
-
-	GameUiPtr->StartTimer();
-	UEngineSound::Play(SFXBg);
 }
 
 void APlayStage1Mode::Tick(float _deltaTime)
 {
 	ABaseGameMode::Tick(_deltaTime);
-
-	ElapsedSecs += _deltaTime;
-
-	CheckAfterExplosion(_deltaTime);
-	CheckAndPlayBgSound();
 }
 
-void APlayStage1Mode::FinishGame()
+void APlayStage1Mode::OnFinishGame()
 {
-	if (MapPtr && !MapPtr->GetIsPortalOpened())
+	if (MapPtr)
 	{
 		MapPtr->OpenPortal();
 		UEngineSound::Play(SFXOpenPortal);
 		return;
 	}
-	if (!IsShowingResult && Player->GetIsClear())
-	{
-		IsShowingResult = true;
-		ShowResult();
-	}
 }
 
-void APlayStage1Mode::CheckAndPlayBgSound()
+void APlayStage1Mode::FinishingGame(float _deltaTime)
 {
-	if (IsShowContinueScene) return;
-	if (IsShowingResult) return;
-
-	if (GameUiPtr->GetIsHalfTime())
+	if (Player->GetIsClear())
 	{
-		// Temp
-		static bool onlyOnce = true;
-		if (onlyOnce)
-		{
-			onlyOnce = false;
-			AHurryUp* hurryUp = GetWorld()->SpawnActor<AHurryUp>();
-			UEngineSound::StopPlayer(SFXBg);
-			UEngineSound::Play(SFXAlertHurryUp);
-			UEngineSound::Play(SFXBgHurryUp, -1, 100);
-		}
-	}
-	else
-	{
-		if (!UEngineSound::IsPlaying(SFXBg))
-		{
-			UEngineSound::Play(SFXBg, 7700);
-		}
+		ShowResult();
 	}
 }

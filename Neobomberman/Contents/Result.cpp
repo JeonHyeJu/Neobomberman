@@ -275,7 +275,7 @@ void AResult::CalculatingTotal(float _deltaTime)
 {
 	ElapsedSecs += _deltaTime;
 
-	if (ElapsedSecs > 1.f)
+	if (ElapsedSecs > .5f)
 	{
 		ElapsedSecs = 0.f;
 
@@ -297,7 +297,7 @@ void AResult::Stamping(float _deltaTime)
 {
 	ElapsedSecs += _deltaTime;
 
-	if (ElapsedSecs > .75f)
+	if (ElapsedSecs > .5f)
 	{
 		ElapsedSecs = 0.f;
 

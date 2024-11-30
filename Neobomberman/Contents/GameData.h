@@ -34,6 +34,10 @@ public:
 	{
 		return Player1Life;
 	}
+	inline int GetPlayer2Life() const
+	{
+		return Player2Life;
+	}
 	int AddPlayer1Life(__int8 _val)
 	{
 		Player1Life += _val;
@@ -42,6 +46,15 @@ public:
 			Player1Life = MAX_PLAYER_LIFE;
 		}
 		return Player1Life;
+	}
+	int AddPlayer2Life(__int8 _val)
+	{
+		Player2Life += _val;
+		if (Player2Life > MAX_PLAYER_LIFE)
+		{
+			Player2Life = MAX_PLAYER_LIFE;
+		}
+		return Player2Life;
 	}
 
 	inline int GetPlayer1Score() const
@@ -70,5 +83,6 @@ public:
 private:
 	unsigned __int8 Coin = 0;
 	int Player1Life = MAX_PLAYER_LIFE;
+	int Player2Life = MAX_PLAYER_LIFE;
 	int Player1Score = 0;
 };

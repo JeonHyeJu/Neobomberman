@@ -73,3 +73,9 @@ enum class EItem
 	SPEED,
 	POWER,
 };
+
+enum class EBlinkAndColState
+{
+	BLINK_ON_COL_OFF = 0,	// Blink on, collision off
+	BLINK_OFF_COL_ON,
+};

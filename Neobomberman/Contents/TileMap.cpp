@@ -222,9 +222,9 @@ bool ATileMap::HasTileSprite(const FVector2D& _loc)
 
 bool ATileMap::HasTileSprite(const FIntPoint& _idx)
 {
-	if (IsIndexOver(_idx) == true)
+	if (IsIndexOver(_idx))
 	{
-		return true;
+		return false;
 	}
 
 	bool hasTile = AllTiles[_idx.Y][_idx.X].SpriteRenderer != nullptr;	// Temp

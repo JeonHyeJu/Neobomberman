@@ -4,12 +4,6 @@
 #include <vector>
 #include "ContentsEnum.h"
 
-enum class EPlayerBlinkAndColState
-{
-	BLINK_ON_COL_OFF = 0,	// Blink on, collision off
-	BLINK_OFF_COL_ON,
-};
-
 enum class EPlayerState
 {
 	REBORN = 0,

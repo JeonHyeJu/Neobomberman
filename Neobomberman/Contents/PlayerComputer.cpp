@@ -1,23 +1,34 @@
 #include "PreCompile.h"
+#include "PlayerComputer.h"
 #include "ContentsEnum.h"
 #include "GlobalVar.h"
-#include "PlayerComputer.h"
+#include "BaseMap.h"
+#include "GameData.h"
+#include "Player.h"
+#include "Bomb.h"
+#include "TileMap.h"
 #include <EngineCore/SpriteRenderer.h>
+#include <EnginePlatform/EngineSound.h>
+
+#include <EngineCore/EngineCoreDebug.h>		// for debug
 
 APlayerComputer::APlayerComputer()
 {
-	/*DyingAnimInfo.AnimSeconds = 1.5f;
+	DamageMargin = URect(10, 10, 10, 10);
+	DamageSize = GlobalVar::BOMB_SIZE;
+
+	DyingAnimInfo.AnimSeconds = 1.5f;
 	DyingAnimInfo.WaitSeconds = 3.0f;
 
-	Fsm.CreateState(EPlayerState::REBORN, nullptr, std::bind(&APlayer::OnReborn, this));
-	Fsm.CreateState(EPlayerState::IDLE, std::bind(&APlayer::Idling, this, std::placeholders::_1), std::bind(&APlayer::OnIdle, this));
-	Fsm.CreateState(EPlayerState::MOVE, std::bind(&APlayer::Moving, this, std::placeholders::_1), std::bind(&APlayer::OnMove, this));
-	Fsm.CreateState(EPlayerState::DEAD, std::bind(&APlayer::Dying, this, std::placeholders::_1), std::bind(&APlayer::OnDead, this));
-	Fsm.CreateState(EPlayerState::PORTAL, nullptr, std::bind(&APlayer::OnShift, this));
-	Fsm.CreateState(EPlayerState::END, nullptr, std::bind(&APlayer::OnEnd, this));
+	Fsm.CreateState(EPlayerComputerState::REBORN, nullptr, std::bind(&APlayerComputer::OnReborn, this));
+	Fsm.CreateState(EPlayerComputerState::IDLE, std::bind(&APlayerComputer::Idling, this, std::placeholders::_1), std::bind(&APlayerComputer::OnIdle, this));
+	Fsm.CreateState(EPlayerComputerState::THINKING, std::bind(&APlayerComputer::Thinking, this, std::placeholders::_1));
+	Fsm.CreateState(EPlayerComputerState::MOVE, std::bind(&APlayerComputer::Moving, this, std::placeholders::_1), std::bind(&APlayerComputer::OnMove, this));
+	Fsm.CreateState(EPlayerComputerState::DEAD, std::bind(&APlayerComputer::Dying, this, std::placeholders::_1), std::bind(&APlayerComputer::OnDead, this));
+	Fsm.CreateState(EPlayerComputerState::END, nullptr, std::bind(&APlayerComputer::OnEnd, this));
 
-	FsmH.CreateState(EPlayerBlinkAndColState::BLINK_ON_COL_OFF, std::bind(&APlayer::Blinking, this, std::placeholders::_1), std::bind(&APlayer::OnTurnOnBlink, this));
-	FsmH.CreateState(EPlayerBlinkAndColState::BLINK_OFF_COL_ON, nullptr, std::bind(&APlayer::OnTurnOffBlink, this));*/
+	FsmH.CreateState(EBlinkAndColState::BLINK_ON_COL_OFF, std::bind(&APlayerComputer::Blinking, this, std::placeholders::_1), std::bind(&APlayerComputer::OnTurnOnBlink, this));
+	FsmH.CreateState(EBlinkAndColState::BLINK_OFF_COL_ON, nullptr, std::bind(&APlayerComputer::OnTurnOffBlink, this));
 }
 
 APlayerComputer::~APlayerComputer()
@@ -28,12 +39,32 @@ void APlayerComputer::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SetActorLocation(StartLocation);
+	PrevRouteIdx = MapPtr->LocationToMatrixIdx(StartLocation);
+	Destination = PrevRouteIdx;
+	Reborn();
 }
 
 void APlayerComputer::Tick(float _deltaTime)
 {
 	Super::Tick(_deltaTime);
+
+	static float elpasedSecs = 0.f;	// Temp
+
+	elpasedSecs += _deltaTime;
+	if (elpasedSecs >= 3.f)
+	{
+		elpasedSecs = 0.f;
+		static bool temp = true;
+		if (temp)
+		{
+			temp = false;
+			Fsm.ChangeState(EPlayerComputerState::THINKING);	// Temp
+			return;
+		}
+	}
+
+	Fsm.Update(_deltaTime);
+	FsmH.Update(_deltaTime);
 }
 
 void APlayerComputer::InitSprite(std::string_view _sprite)
@@ -65,7 +96,7 @@ void APlayerComputer::InitSprite(std::string_view _sprite)
 		times[BLINK_CNT - 1] = 2.f;
 
 		SpriteRendererHead->CreateAnimation("BlinkingEyes", _sprite, idxs, times);
-		SpriteRendererHead->CreateAnimation("Dead", _sprite, 591, 600, 0.2f, false);
+		SpriteRendererHead->CreateAnimation("Dead", _sprite, 591, 598, 0.2f, false);
 		SpriteRendererHead->CreateAnimation("Ride_Portal", _sprite, 583, 589, 0.1f, false);
 		SpriteRendererHead->CreateAnimation("Victory", _sprite, 601, 604, 0.5f, false);
 	}
@@ -90,7 +121,7 @@ void APlayerComputer::InitSprite(std::string_view _sprite)
 		SpriteRendererBody->CreateAnimation("Run_Right", _sprite, 57, 62, 0.1f);
 
 		SpriteRendererBody->CreateAnimation("BlinkingEyes", _sprite, 612, 613, 1.f);
-		SpriteRendererBody->CreateAnimation("Dead", _sprite, 622, 631, 0.2f, false);
+		SpriteRendererBody->CreateAnimation("Dead", _sprite, 622, 629, 0.2f, false);
 		SpriteRendererBody->CreateAnimation("Ride_Portal", _sprite, 615, 621, 0.1f, false);
 
 		SpriteRendererBody->CreateAnimation("Victory", _sprite, 633, 636, 0.5f, false);
@@ -99,6 +130,320 @@ void APlayerComputer::InitSprite(std::string_view _sprite)
 	SpriteRendererHead->ChangeAnimation("Idle_Down");
 	SpriteRendererBody->ChangeAnimation("Idle_Down");
 
-	SpriteRendererHead->SetOrder(ERenderOrder::PLAYER);
-	SpriteRendererBody->SetOrder(ERenderOrder::PLAYER);
+	SpriteRendererHead->SetOrder(ERenderOrder::MONSTER);
+	SpriteRendererBody->SetOrder(ERenderOrder::MONSTER);
+}
+
+void APlayerComputer::SetCurMap(ABaseMap* _map)
+{
+	MapPtr = _map;
+	//PathFinder.SetData(CurMapPtr);
+}
+
+void APlayerComputer::Reborn()
+{
+	Fsm.ChangeState(EPlayerComputerState::REBORN);
+	FsmH.ChangeState(EBlinkAndColState::BLINK_ON_COL_OFF);
+
+	ResetDroppedBombs();
+}
+
+void APlayerComputer::ResetDroppedBombs()
+{
+	DroppedBombs.clear();
+}
+
+void APlayerComputer::Kill()
+{
+	if (!IsImmotal)
+	{
+		Fsm.ChangeState(EPlayerComputerState::DEAD);
+	}
+}
+
+std::string APlayerComputer::GetDirectionStr()
+{
+	std::string suffixStr = "";
+	if (Direction == FVector2D::LEFT)
+	{
+		suffixStr = "Left";
+	}
+	else if (Direction == FVector2D::RIGHT)
+	{
+		suffixStr = "Right";
+	}
+	else if (Direction == FVector2D::UP)
+	{
+		suffixStr = "Up";
+	}
+	else if (Direction == FVector2D::DOWN)
+	{
+		suffixStr = "Down";
+	}
+
+	return suffixStr;
+}
+
+/* Fsm start functions */
+void APlayerComputer::OnReborn()
+{
+	SpriteRendererHead->SetActive(true);
+	SpriteRendererBody->SetActive(true);
+
+	Direction = FVector2D::ZERO;
+	IsDead = false;
+
+	SpriteRendererHead->ChangeAnimation("Idle_Down");
+	SpriteRendererBody->ChangeAnimation("Idle_Down");
+}
+
+void APlayerComputer::OnIdle()
+{
+	std::string suffixStr = "";
+	if (Direction == FVector2D::ZERO)
+	{
+		suffixStr = "Down";
+	}
+	else
+	{
+		suffixStr = GetDirectionStr();
+	}
+
+	SpriteRendererHead->ChangeAnimation("Idle_" + suffixStr);
+	SpriteRendererBody->ChangeAnimation("Idle_" + suffixStr);
+}
+
+void APlayerComputer::OnMove()
+{
+}
+
+void APlayerComputer::OnDead()
+{
+	GameData::GetInstance().AddPlayer2Life(-1);
+	UEngineSound::Play(SFXDying);
+
+	SpriteRendererHead->ChangeAnimation("Dead");
+	SpriteRendererBody->ChangeAnimation("Dead");
+}
+
+void APlayerComputer::OnEnd()
+{
+	SpriteRendererHead->ChangeAnimation("Idle_Down");
+	SpriteRendererBody->ChangeAnimation("Idle_Down");
+}
+
+/* FSM update functions */
+void APlayerComputer::Idling(float _deltaTime)
+{
+	BlinkEyeAnimInfo.Seconds += _deltaTime;
+
+	if (!BlinkEyeAnimInfo.IsRunning)
+	{
+		if (BlinkEyeAnimInfo.Seconds >= BlinkEyeAnimInfo.WaitSeconds)
+		{
+			BlinkEyeAnimInfo.Seconds = 0.f;
+			BlinkEyeAnimInfo.IsRunning = true;
+			SpriteRendererHead->ChangeAnimation("BlinkingEyes");
+			SpriteRendererBody->ChangeAnimation("BlinkingEyes");
+		}
+	}
+}
+
+void APlayerComputer::Moving(float _deltaTime)
+{
+	if (Direction == FIntPoint::ZERO)
+	{
+		Fsm.ChangeState(EPlayerComputerState::THINKING);
+		return;
+	}
+
+	FVector2D curLoc = GetActorLocation();
+	FVector2D posLT = curLoc + FVector2D{ 2, 2 };
+	FVector2D posRT = curLoc + FVector2D{ 28, 2 };
+	FVector2D posLB = curLoc + FVector2D{ 2, 24 };
+	FVector2D posRB = curLoc + FVector2D{ 28, 24 };
+
+	FIntPoint curIdxLT = MapPtr->LocationToMatrixIdx(posLT);
+	FIntPoint curIdxRT = MapPtr->LocationToMatrixIdx(posRT);
+	FIntPoint curIdxLB = MapPtr->LocationToMatrixIdx(posLB);
+	FIntPoint curIdxRB = MapPtr->LocationToMatrixIdx(posRB);
+
+	FTransform TransLT, TransRT, TransLB, TransRB;
+
+	TransLT.Location = posLT;
+	TransRT.Location = posRT;
+	TransLB.Location = posLB;
+	TransRB.Location = posRB;
+
+	TransLT.Scale = { 6, 6 };
+	TransRT.Scale = { 6, 6 };
+	TransLB.Scale = { 6, 6 };
+	TransRB.Scale = { 6, 6 };
+
+	/*UEngineDebug::CoreDebugRender(TransLT, UEngineDebug::EDebugPosType::Circle);
+	UEngineDebug::CoreDebugRender(TransRT, UEngineDebug::EDebugPosType::Circle);
+	UEngineDebug::CoreDebugRender(TransLB, UEngineDebug::EDebugPosType::Circle);
+	UEngineDebug::CoreDebugRender(TransRB, UEngineDebug::EDebugPosType::Circle);*/
+
+	OutputDebugString(("curIdxLT: " + std::to_string(curIdxLT.X) + ", " + std::to_string(curIdxLT.Y) + "\n").c_str());
+	OutputDebugString(("curIdxRT: " + std::to_string(curIdxRT.X) + ", " + std::to_string(curIdxRT.Y) + "\n").c_str());
+	OutputDebugString(("curIdxLB: " + std::to_string(curIdxLB.X) + ", " + std::to_string(curIdxLB.Y) + "\n").c_str());
+	OutputDebugString(("curIdxRB: " + std::to_string(curIdxRB.X) + ", " + std::to_string(curIdxRB.Y) + "\n").c_str());
+	OutputDebugString(("Destination: " + std::to_string(Destination.X) + ", " + std::to_string(Destination.Y) + "\n").c_str());
+	OutputDebugString("-------------------------------------\n");
+
+	if (curIdxLT == Destination && curIdxRT == Destination && curIdxLB == Destination && curIdxRB == Destination)
+	{
+		FVector2D destLoc = MapPtr->MatrixIdxToLocation(Destination);
+		bool isStop = false;
+
+		if (Direction == FVector2D::UP)
+		{
+			if (curLoc.Y <= destLoc.Y)
+			{
+				isStop = true;
+			}
+		}
+		else if (Direction == FVector2D::DOWN)
+		{
+			if (curLoc.Y >= destLoc.Y)
+			{
+				isStop = true;
+			}
+		}
+		else if (Direction == FVector2D::LEFT)
+		{
+			if (curLoc.X <= destLoc.X)
+			{
+				isStop = true;
+			}
+		}
+		else if (Direction == FVector2D::RIGHT)
+		{
+			if (curLoc.X >= destLoc.X)
+			{
+				isStop = true;
+			}
+		}
+		
+		if (isStop)
+		{
+			OutputDebugString("Arrived!!!!!!!!!!!!!!!\n");
+			PPrevRouteIdx = PrevRouteIdx;
+			PrevRouteIdx = Destination;
+			Fsm.ChangeState(EPlayerComputerState::THINKING);
+			return;
+		}
+	}
+
+	if (Direction != FIntPoint::ZERO)
+	{
+		float RealSpeed = DEFAULT_SPEED + Ability.Speed * 25.f;
+
+		FVector2D move = Direction* _deltaTime* RealSpeed;
+		OutputDebugString(("Direction: " + std::to_string(Direction.X) + ", " + std::to_string(Direction.Y) + "\n").c_str());
+		OutputDebugString(("Move: " + std::to_string(move.X) + ", " + std::to_string(move.Y) + "\n").c_str());
+		OutputDebugString("-------------------------------------\n");
+		
+
+		std::string suffixStr = GetDirectionStr();
+		SpriteRendererHead->ChangeAnimation("Run_" + suffixStr);
+		SpriteRendererBody->ChangeAnimation("Run_" + suffixStr);
+
+		//AddActorLocation(Direction * 0.01f);
+		AddActorLocation(Direction * _deltaTime * RealSpeed);
+	}
+}
+
+void APlayerComputer::Thinking(float _deltaTime)
+{
+	//Fsm.ChangeState(EPlayerComputerState::MOVE);
+}
+
+void APlayerComputer::Dying(float _deltaTime)
+{
+	static bool isOff = false;
+	static float elapsedSecs = 0.f;		// TODO: change to local
+
+	if (SpriteRendererHead->IsCurAnimationEnd())
+	{
+		DyingAnimInfo.Seconds += _deltaTime;
+
+		if (DyingAnimInfo.Seconds >= DyingAnimInfo.AnimSeconds)
+		{
+			IsDead = true;
+
+			// only once
+			if (!isOff)
+			{
+				isOff = true;
+				SpriteRendererHead->SetActive(false);
+				SpriteRendererBody->SetActive(false);
+			}
+
+			int life = GameData::GetInstance().GetPlayer1Life();
+			if (life >= 0)
+			{
+				if (DyingAnimInfo.Seconds >= DyingAnimInfo.WaitSeconds)
+				{
+					isOff = false;
+					elapsedSecs = 0.f;
+					DyingAnimInfo.Seconds = 0.f;
+
+					Reborn();
+					return;
+				}
+			}
+		}
+		else
+		{
+			elapsedSecs += _deltaTime;
+			if (elapsedSecs >= 0.1f)
+			{
+				elapsedSecs = 0.f;
+				SpriteRendererHead->SetActiveSwitch();
+				SpriteRendererBody->SetActiveSwitch();
+			}
+		}
+	}
+}
+
+/* FsmH start functions */
+void APlayerComputer::OnTurnOnBlink()
+{
+	IsImmotal = true;
+}
+
+void APlayerComputer::OnTurnOffBlink()
+{
+	IsImmotal = false;
+}
+
+/* FsmH update functions */
+void APlayerComputer::Blinking(float _deltaTime)
+{
+	static float allElapsedSecs = 0.f;		// Temp
+	static float elapsedSecs = 0.f;		// TODO: change to local
+
+	allElapsedSecs += _deltaTime;
+	elapsedSecs += _deltaTime;
+
+	if (allElapsedSecs >= BLINK_SECS)
+	{
+		allElapsedSecs = 0.f;
+		elapsedSecs = 0.f;
+
+		SpriteRendererHead->SetActive(true);
+		SpriteRendererBody->SetActive(true);
+
+		FsmH.ChangeState(EBlinkAndColState::BLINK_OFF_COL_ON);
+		return;
+	}
+
+	if (elapsedSecs >= 0.1f)
+	{
+		elapsedSecs = 0.f;
+		SpriteRendererHead->SetActiveSwitch();
+		SpriteRendererBody->SetActiveSwitch();
+	}
 }

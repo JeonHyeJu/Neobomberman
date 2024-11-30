@@ -9,6 +9,7 @@
 #include "Fade.h"
 
 #include <EnginePlatform/EngineSound.h>
+#include <EnginePlatform/EngineInput.h>
 
 ABattlePlayMode::ABattlePlayMode()
 {
@@ -24,23 +25,23 @@ void ABattlePlayMode::BeginPlay()
 
 	ULevel* pLevel = GetWorld();
 
-	AGameUI* gameUI = pLevel->SpawnActor<AGameUI>();
-
 	std::vector<EItem> itemList = { EItem::BOMB, EItem::BOMB, EItem::SPEED, EItem::SPEED, EItem::POWER, EItem::POWER };
+
+	GameUIPtr = pLevel->SpawnActor<AGameUI>();
 
 	ABattleMap* mapPtr = pLevel->SpawnActor<ABattleMap>();
 	mapPtr->Initialize(itemList);
 	mapPtr->BindExplodeEvent(std::bind(&ABattlePlayMode::OnExplodeBomb, this));
-	CurMapPtr = mapPtr;
+	MapPtr = mapPtr;
 
 	Player = pLevel->GetPawn<APlayer>();
-	Player->SetGameUI(gameUI);
 	Player->SetCurMap(mapPtr);
 	Player->SetStartLoc(mapPtr->MatrixIdxToLocation(StartPoint));
 
-	PlayerComputer = pLevel->SpawnActor<APlayerComputer>();
-	PlayerComputer->InitSprite("MainCharater_Black.png");		// Temp
-	PlayerComputer->SetStartLoc(mapPtr->MatrixIdxToLocation(StartPointComputer));
+	FVector2D comStartLoc = mapPtr->MatrixIdxToLocation(StartPointComputer);
+	APlayerComputer* playerComputer = SpawnPlayerComputer<APlayerComputer>(mapPtr, comStartLoc);
+	playerComputer->SetStartLoc(comStartLoc);
+	playerComputer->InitSprite("MainCharater_Black.png");		// Temp
 
 	AStageTitle* stageTitle = pLevel->SpawnActor<AStageTitle>();
 	stageTitle->SetSubStage(1);
@@ -48,7 +49,7 @@ void ABattlePlayMode::BeginPlay()
 	AFade* fade = pLevel->SpawnActor<AFade>();
 	fade->FadeIn();
 
-	gameUI->StartTimer();
+	GameUIPtr->StartTimer();
 
 	UEngineSound::Play(SFXBg, -1, 100);
 }
@@ -69,23 +70,91 @@ void ABattlePlayMode::Tick(float _deltaTime)
 			IsStarted = true;
 			UEngineSound::Play(SFXReadyGo);
 		}
+
+		CheckDeadEnemy();
+
+		if (IsAllEnemiesDead())
+		{
+			static bool temp = true;
+			if (temp)
+			{
+				temp = false;
+				OnFinishGame();
+				FinishingGame(_deltaTime);
+			}
+		}
+	}
+	
+	CheckCheat();
+}
+
+
+bool ABattlePlayMode::IsAllEnemiesDead() const
+{
+	return ComputerList.size() == 0;
+}
+
+void ABattlePlayMode::CheckDeadEnemy()
+{
+	std::list<APlayerComputer*>::iterator it = ComputerList.begin();
+	std::list<APlayerComputer*>::iterator itEnd = ComputerList.end();
+	for (; it != itEnd; ++it)
+	{
+		APlayerComputer* computer = *it;
+		if (computer->GetIsDead())
+		{
+			it = ComputerList.erase(it);
+			if (it == itEnd) break;
+		}
 	}
 }
 
 void ABattlePlayMode::OnExplodeBomb()
 {
-	if (CurMapPtr == nullptr) return;
+	if (MapPtr == nullptr) return;
 
-	SplashTileIdxsBackup = CurMapPtr->GetSplashTileIdxs();
+	SplashTileIdxsBackup = MapPtr->GetSplashTileIdxs();
 	IsSplashCheck = true;
 
 	CheckAfterExplosion(.4f);
 }
 
+bool ABattlePlayMode::IsInExplosion4Edges(const FVector2D& _loc, const FVector2D& _bodySize, const URect& _margin)
+{
+	FVector2D nextPosLT = _loc + FVector2D{ _margin.Left, _margin.Top };
+	FVector2D nextPosRT = _loc + FVector2D{ _bodySize.X - _margin.Right, _margin.Top };;
+	FVector2D nextPosLB = _loc + FVector2D{ _margin.Left, _bodySize.Y - _margin.Bottom };
+	FVector2D nextPosRB = _loc + FVector2D{ _bodySize.X - _margin.Right, _bodySize.Y - _margin.Bottom };
+
+	FIntPoint nextIdxLT = MapPtr->LocationToMatrixIdx(nextPosLT);
+	FIntPoint nextIdxRT = MapPtr->LocationToMatrixIdx(nextPosRT);
+	FIntPoint nextIdxLB = MapPtr->LocationToMatrixIdx(nextPosLB);
+	FIntPoint nextIdxRB = MapPtr->LocationToMatrixIdx(nextPosRB);
+
+	int subX = nextIdxRB.X - nextIdxLT.X;
+	int subY = nextIdxRB.Y - nextIdxLT.Y;
+	for (int x = 0; x <= subX; ++x)
+	{
+		for (int y = 0; y <= subY; ++y)
+		{
+			FIntPoint point = { nextIdxLT.X + x, nextIdxLT.Y + y };
+
+			bool isInSplash = MapPtr->IsInSplashWithVector(point, SplashTileIdxsBackup);
+			//OutputDebugString(("interIdxs[" + std::to_string(x) + ", " + std::to_string(y) + "] : " + std::to_string(point.X) + ", " + std::to_string(point.Y) + "..." + (isInSplash ? "isInSplash O" : "isInSplash X") + "\n").c_str());
+			if (isInSplash)
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
 // Hack code.. lasting explosion impact..
 void ABattlePlayMode::CheckAfterExplosion(float _deltaTime)
 {
-	if (CurMapPtr == nullptr) return;
+	if (MapPtr == nullptr) return;
 	if (!IsSplashCheck) return;
 	if (SplashTileIdxsBackup.size() == 0) return;
 
@@ -104,42 +173,44 @@ void ABattlePlayMode::CheckAfterExplosion(float _deltaTime)
 			return;
 		}
 
-		// Check player
-		FVector2D playerLoc = Player->GetActorLocation();
-		FVector2D margin{ 10, 10 };
-
-		FVector2D nextPosLT = playerLoc + margin;
-		FVector2D nextPosRT = FVector2D{ nextPosLT.X + GlobalVar::BOMBERMAN_SIZE.hX() * .5f, nextPosLT.Y };
-		FVector2D nextPosLB = FVector2D{ nextPosLT.X, playerLoc.Y + GlobalVar::BOMBERMAN_SIZE.hY() * .4f + margin.Y };
-		FVector2D nextPosRB = FVector2D{ nextPosRT.X, nextPosLB.Y };
-
-		FIntPoint nextIdxLT = CurMapPtr->LocationToMatrixIdx(nextPosLT);
-		FIntPoint nextIdxRT = CurMapPtr->LocationToMatrixIdx(nextPosRT);
-		FIntPoint nextIdxLB = CurMapPtr->LocationToMatrixIdx(nextPosLB);
-		FIntPoint nextIdxRB = CurMapPtr->LocationToMatrixIdx(nextPosRB);
-
-		bool isInSplashLT = CurMapPtr->IsInSplashWithVector(nextIdxLT, SplashTileIdxsBackup);
-		bool isInSplashRT = CurMapPtr->IsInSplashWithVector(nextIdxRT, SplashTileIdxsBackup);
-		bool isInSplashLB = CurMapPtr->IsInSplashWithVector(nextIdxLB, SplashTileIdxsBackup);
-		bool isInSplashRB = CurMapPtr->IsInSplashWithVector(nextIdxRB, SplashTileIdxsBackup);
-
-		/*OutputDebugString(("nextIdxLT : " + std::to_string(nextIdxLT.X) + ", " + std::to_string(nextIdxLT.Y) + "\n").c_str());
-		OutputDebugString(("nextIdxRT : " + std::to_string(nextIdxRT.X) + ", " + std::to_string(nextIdxRT.Y) + "\n").c_str());
-		OutputDebugString(("nextIdxLB : " + std::to_string(nextIdxLB.X) + ", " + std::to_string(nextIdxLB.Y) + "\n").c_str());
-		OutputDebugString(("nextIdxRB : " + std::to_string(nextIdxRB.X) + ", " + std::to_string(nextIdxRB.Y) + "\n").c_str());
-		OutputDebugString("----------------------------------\n");*/
-		if (isInSplashLT || isInSplashRT || isInSplashLB || isInSplashRB)
+		// Check monsters
+		std::list<APlayerComputer*>::iterator it = ComputerList.begin();
+		std::list<APlayerComputer*>::iterator itEnd = ComputerList.end();
+		for (; it != itEnd; ++it)
 		{
-			Player->Kill();
+			APlayerComputer* computer = *it;
+			if (computer->GetCanHit())
+			{
+				const FVector2D& monsterLoc = computer->GetActorLocation();
+				const FVector2D& damageSize = computer->GetDamageSize();
+				const URect& damageMargin = computer->GetDamageMargin();
+
+				if (IsInExplosion4Edges(monsterLoc, damageSize, damageMargin))
+				{
+					computer->Kill();
+				}
+			}
+		}
+
+		// Check player
+		{
+			const FVector2D& playerLoc = Player->GetActorLocation();
+			const FVector2D& damageSize = Player->GetDamageSize();
+			const URect& damageMargin = Player->GetDamageMargin();
+
+			if (IsInExplosion4Edges(playerLoc, damageSize, damageMargin))
+			{
+				Player->Kill();
+			}
 		}
 
 		// Check item
 		for (size_t i = 0, size = SplashTileIdxsBackup.size(); i < size; ++i)
 		{
 			FIntPoint pt = SplashTileIdxsBackup[i];
-			if (CurMapPtr->HasShowingItem(pt))
+			if (MapPtr->HasShowingItem(pt))
 			{
-				EItem item = CurMapPtr->PopItem(pt);	// Remove
+				EItem item = MapPtr->PopItem(pt);	// Remove
 			}
 		}
 
@@ -147,14 +218,31 @@ void ABattlePlayMode::CheckAfterExplosion(float _deltaTime)
 	}
 }
 
-void ABattlePlayMode::OnGameFinished()
+void ABattlePlayMode::OnFinishGame()
 {
-	static bool temp = true;
+	UEngineSound::Play(SFXRing);
+	//UEngineSound::StopPlayer(SFXBg);
+}
 
-	if (temp)
+void ABattlePlayMode::FinishingGame(float _deltaTime)
+{
+}
+
+void ABattlePlayMode::CheckCheat()
+{
+	if (UEngineInput::GetInst().IsDown('N'))
 	{
-		temp = false;
-		UEngineSound::Play(SFXRing);
-		UEngineSound::StopPlayer(SFXBg);
+		std::list<APlayerComputer*>::iterator it = ComputerList.begin();
+		std::list<APlayerComputer*>::iterator itEnd = ComputerList.end();
+		for (; it != itEnd; ++it)
+		{
+			APlayerComputer* computer = *it;
+			computer->Kill();
+		}
+
+		if (MapPtr)
+		{
+			MapPtr->CheatDestoyAllBoxes();
+		}
 	}
 }

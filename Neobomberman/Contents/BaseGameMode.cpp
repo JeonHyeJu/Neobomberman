@@ -2,6 +2,7 @@
 #include "GlobalVar.h"
 #include "BaseGameMode.h"
 #include "Fade.h"
+#include "PlayerComputer.h"
 #include "Monster.h"
 #include "Result.h"
 #include "GameUI.h"
@@ -9,6 +10,7 @@
 #include "GameOver.h"
 #include "Player.h"
 #include "BaseMap.h"
+#include "HurryUp.h"
 
 #include <EngineCore/EngineAPICore.h>
 #include <EnginePlatform/EngineInput.h>
@@ -18,12 +20,17 @@
 
 ABaseGameMode::ABaseGameMode()
 {
+	Fsm.CreateState(ESceneState::RUNNING_GAME, std::bind(&ABaseGameMode::RunningGame, this, std::placeholders::_1));
+	Fsm.CreateState(ESceneState::FINISHING_GAME, std::bind(&ABaseGameMode::FinishingGame, this, std::placeholders::_1), std::bind(&ABaseGameMode::OnFinishGame, this));
+	Fsm.CreateState(ESceneState::SHOWING_RESULT, nullptr, std::bind(&ABaseGameMode::OnShowResult, this));
+	Fsm.CreateState(ESceneState::SHOWING_CONTINUE, std::bind(&ABaseGameMode::ShowingContinue, this, std::placeholders::_1), std::bind(&ABaseGameMode::OnShowContinue, this));
+	Fsm.CreateState(ESceneState::GAMEOVER, nullptr);
 
+	Fsm.ChangeState(ESceneState::RUNNING_GAME);
 }
 
 ABaseGameMode::~ABaseGameMode()
 {
-
 }
 
 void ABaseGameMode::BeginPlay()
@@ -32,43 +39,27 @@ void ABaseGameMode::BeginPlay()
 
 	ULevel* pLevel = GetWorld();
 
+	GameUIPtr = pLevel->SpawnActor<AGameUI>();
+	GameUIPtr->BindHalfTimeEvent(std::bind(&ABaseGameMode::OnHalfTime, this));
+
 	Player = pLevel->GetPawn<APlayer>();
+	Player->SetGameUI(GameUIPtr);
 
 	GameOverScenePtr = pLevel->SpawnActor<AGameOver>();
 	GameOverScenePtr->SetActive(false);
+
+	UEngineSound::Play(SFXBg);
+	GameUIPtr->StartTimer();
 }
 
 void ABaseGameMode::Tick(float _deltaTime)
 {
 	Super::Tick(_deltaTime);
 
+	Fsm.Update(_deltaTime);
+
 	CheckCheat();
-
-	ElapsedSecs += _deltaTime;
-	if (ElapsedSecs >= .5f)
-	{
-		ElapsedSecs = 0.f;
-
-		CheckTimeOver();
-		CheckDeadMonster();
-		if (IsAllMonstersDead())
-		{
-			FinishGame();
-		}
-	}
-
-	// This requires checking the F1 key input, so the delayed time is not suitable.
-	CheckGameOver();
-
 	DebugExlosionEdge();
-}
-
-void ABaseGameMode::LevelChangeStart()
-{
-	Super::LevelChangeStart();
-
-	IsShowContinueScene = false;
-	IsShowingResult = false;
 }
 
 void ABaseGameMode::InitResultScene(std::string_view _nextLevel, std::string_view _rImage)
@@ -111,50 +102,6 @@ void ABaseGameMode::CheckDeadMonster()
 	}
 }
 
-void ABaseGameMode::CheckGameOver()
-{
-	int p1Life = GameData::GetInstance().GetPlayer1Life();
-	if (p1Life >= 0) return;
-	if (!Player->GetIsDead()) return;
-
-	unsigned __int8 coin = GameData::GetInstance().GetCoin();
-	if (coin == 0)
-	{
-		if (UEngineInput::GetInst().IsDown(VK_RETURN))
-		{
-			UEngineSound::Play(SFXCoin, -1, 0, false);
-			GameData::GetInstance().AddCoin(1);
-			return;
-		}
-
-		GameOver();
-	}
-	else
-	{
-		if (IsShowContinueScene)
-		{
-			if (UEngineInput::GetInst().IsDown(VK_F1) || UEngineInput::GetInst().IsDown(VK_RETURN))
-			{
-				IsShowContinueScene = false;
-
-				AFade::MainFade->SetFadeMinMax(0.f, 1.f);
-				AFade::MainFade->SetFadeSpeed(1.f);
-				AFade::MainFade->FadeIn(.5f);
-
-				RevivalFromCoin();
-
-				GameOverScenePtr->SetActive(false);
-				GameOverScenePtr->Reset();
-				RestartGame();
-			}
-		}
-		else
-		{
-			RevivalFromCoin();
-		}
-	}
-}
-
 void ABaseGameMode::RevivalFromCoin()
 {
 	GameData& gameData = GameData::GetInstance();
@@ -163,37 +110,10 @@ void ABaseGameMode::RevivalFromCoin()
 	gameData.ResetScore();
 }
 
-void ABaseGameMode::GameOver()
+void ABaseGameMode::StopActorsAndMusic()
 {
-	if (IsShowContinueScene == false)
-	{
-		IsShowContinueScene = true;
-
-		StopGame();
-
-		AFade::MainFade->SetFadeMinMax(0.f, .5f);
-		AFade::MainFade->SetFadeSpeed(.5f);
-		AFade::MainFade->FadeOut();
-
-		UEngineSound::AllSoundStop();
-		GameOverScenePtr->ShowAndStart();
-	}
-	else
-	{
-		if (GameOverScenePtr->GetIsOver())
-		{
-			AFade::MainFade->SetFadeMinMax(.5f, 1.f);
-			AFade::MainFade->SetFadeSpeed(.5f);
-			AFade::MainFade->BindEndEvent(std::bind(&ABaseGameMode::_GoToTitle, this));
-			AFade::MainFade->FadeOut(.5f);
-		}
-	}
-}
-
-void ABaseGameMode::StopGame()
-{
-	Player->Pause();
 	AGameUI::StopTimer();
+	Player->Pause();
 
 	std::list<AMonster*>::iterator it = MonsterList.begin();
 	std::list<AMonster*>::iterator itEnd = MonsterList.end();
@@ -201,13 +121,16 @@ void ABaseGameMode::StopGame()
 	{
 		(*it)->Pause();
 	}
+
+	UEngineSound::AllSoundStop();
 }
 
-void ABaseGameMode::RestartGame()
+void ABaseGameMode::RestartActorsAndMusic()
 {
-	Player->Resume();
 	AGameUI::ResetTimer();
 	AGameUI::StartTimer();
+
+	Player->Resume();
 
 	std::list<AMonster*>::iterator it = MonsterList.begin();
 	std::list<AMonster*>::iterator itEnd = MonsterList.end();
@@ -215,14 +138,13 @@ void ABaseGameMode::RestartGame()
 	{
 		(*it)->Resume();
 	}
+
+	PlayBgMusic();
 }
 
 void ABaseGameMode::ShowResult()
 {
-	AFade::MainFade->BindEndEvent(std::bind(&ABaseGameMode::_ShowResultScene, this));
-	AFade::MainFade->SetFadeMinMax(0.f, .5f);
-	AFade::MainFade->SetFadeSpeed(.5f);
-	AFade::MainFade->FadeOut();
+	Fsm.ChangeState(ESceneState::SHOWING_RESULT);
 }
 
 void ABaseGameMode::_ShowResultScene()
@@ -239,6 +161,14 @@ void ABaseGameMode::_GoToTitle()
 {
 	UEngineSound::AllSoundStop();
 	UEngineAPICore::GetCore()->OpenLevel("Title");
+}
+
+void ABaseGameMode::OnHalfTime()
+{
+	GetWorld()->SpawnActor<AHurryUp>();
+	UEngineSound::StopPlayer(SFXBg);
+	UEngineSound::Play(SFXAlertHurryUp);
+	UEngineSound::Play(SFXBgHurryUp, -1, 100);
 }
 
 void ABaseGameMode::OnExplodeBomb()
@@ -350,6 +280,122 @@ void ABaseGameMode::CheckAfterExplosion(float _deltaTime)
 	}
 }
 
+void ABaseGameMode::PlayBgMusic()
+{
+	UEngineSound::StopPlayer(SFXBgHurryUp);
+
+	if (!UEngineSound::IsPlaying(SFXBg))
+	{
+		UEngineSound::Play(SFXBg, BGPositionWhenLoopStart);
+	}
+}
+
+/* Fsm start callbacks */
+void ABaseGameMode::OnShowResult()
+{
+	AFade::MainFade->BindEndEvent(std::bind(&ABaseGameMode::_ShowResultScene, this));
+	AFade::MainFade->SetFadeMinMax(0.f, .5f);
+	AFade::MainFade->SetFadeSpeed(.5f);
+	AFade::MainFade->FadeOut();
+}
+
+void ABaseGameMode::OnShowContinue()
+{
+	StopActorsAndMusic();
+
+	AFade::MainFade->SetFadeMinMax(0.f, .5f);
+	AFade::MainFade->SetFadeSpeed(.5f);
+	AFade::MainFade->FadeOut();
+
+	GameOverScenePtr->ShowAndStart();
+}
+
+/* Fsm update callbacks */
+void ABaseGameMode::RunningGame(float _deltaTime)
+{
+	CheckAfterExplosion(_deltaTime);
+
+	ElapsedSecs += _deltaTime;
+	if (ElapsedSecs >= .5f)
+	{
+		ElapsedSecs = 0.f;
+
+		CheckTimeOver();
+		CheckDeadMonster();
+
+		if (AGameUI::GetLastTime() > 60)
+		{
+			PlayBgMusic();
+		}
+	}
+
+	if (Player->GetIsDead())
+	{
+		// This requires checking the F1 key input, so the delayed time is not suitable.
+		if (GameData::GetInstance().GetPlayer1Life() >= 0)
+		{
+			return;
+		}
+
+		unsigned __int8 coin = GameData::GetInstance().GetCoin();
+		if (coin > 0)
+		{
+			RevivalFromCoin();
+		}
+		else
+		{
+			Fsm.ChangeState(ESceneState::SHOWING_CONTINUE);
+			return;
+		}
+	}
+
+	if (IsAllMonstersDead())
+	{
+		Fsm.ChangeState(ESceneState::FINISHING_GAME);
+		return;
+	}
+}
+
+void ABaseGameMode::ShowingContinue(float _deltaTime)
+{
+	bool isDownF1 = UEngineInput::GetInst().IsDown(VK_F1);
+	bool isDownEnter = UEngineInput::GetInst().IsDown(VK_RETURN);
+
+	if (isDownEnter)
+	{
+		UEngineSound::Play(SFXCoin, -1, 0, false);
+		GameData::GetInstance().AddCoin(1);
+	}
+
+	unsigned __int8 coin = GameData::GetInstance().GetCoin();
+	if (coin > 0)
+	{
+		if (isDownF1 || isDownEnter)
+		{
+			AFade::MainFade->SetFadeMinMax(0.f, 1.f);
+			AFade::MainFade->SetFadeSpeed(1.f);
+			AFade::MainFade->FadeIn(.5f);
+			RevivalFromCoin();
+
+			GameOverScenePtr->SetActive(false);
+			GameOverScenePtr->Reset();
+			RestartActorsAndMusic();
+
+			Fsm.ChangeState(ESceneState::RUNNING_GAME);
+			return;
+		}
+	}
+
+	if (GameOverScenePtr->GetIsOver())
+	{
+		AFade::MainFade->SetFadeMinMax(.5f, 1.f);
+		AFade::MainFade->SetFadeSpeed(.5f);
+		AFade::MainFade->BindEndEvent(std::bind(&ABaseGameMode::_GoToTitle, this));
+		AFade::MainFade->FadeOut(.5f);
+		Fsm.ChangeState(ESceneState::GAMEOVER);
+	}
+}
+
 /* Cheat */
 void ABaseGameMode::DebugExlosionEdge()
 {
@@ -419,7 +465,7 @@ void ABaseGameMode::CheckCheat()
 {
 	if (UEngineInput::GetInst().IsDown('N'))
 	{
-		if (!IsShowingResult && !IsAllMonstersDead())
+		if (!IsAllMonstersDead())
 		{
 			std::list<AMonster*>::iterator it = MonsterList.begin();
 			std::list<AMonster*>::iterator itEnd = MonsterList.end();

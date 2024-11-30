@@ -15,15 +15,9 @@ public:
 protected:
 	void BeginPlay() override;
 	void Tick(float _deltaTime) override;
-	void FinishGame() override;
+	void OnFinishGame() override;
+	void FinishingGame(float _deltaTime) override;
 
 private:
-	FIntPoint StartPoint = { 6, 8 };
-
-	class AGameUI* GameUiPtr = nullptr;
-
-	float ElapsedSecs = 0.f;
-
-	/* Sounds */
-	const char* SFXBg = "Stage1Boss.mp3";
+	FIntPoint PlayerStartPoint = { 6, 8 };
 };

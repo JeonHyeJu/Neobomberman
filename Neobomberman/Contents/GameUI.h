@@ -50,6 +50,11 @@ public:
 	AGameUI& operator=(const AGameUI& _other) = delete;
 	AGameUI& operator=(AGameUI&& _other) noexcept = delete;
 
+	void BindHalfTimeEvent(std::function<void()> _fn)
+	{
+		HalfTimeEvent = _fn;
+	}
+
 	void CheckInsertingCoin();
 	unsigned __int8 GetCoin() const;
 
@@ -73,10 +78,6 @@ public:
 	{
 		return Seconds < 0;
 	}
-	inline bool GetIsHalfTime() const
-	{
-		return IsHalfTime;
-	}
 
 protected:
 	void BeginPlay() override;
@@ -91,10 +92,9 @@ private:
 	void UpdateScoreUI();
 	void UpdatePlayer1LifeUI();
 	void UpdateTimerUI(int _seconds);
-	void CountDown(float _deltaTime);
-
 	void UpdatePushStartBlink();
-
+	void CountDown(float _deltaTime);
+	
 	StatusTopBarUI StatusTopBar;
 	USpriteRenderer* SRLevel_4 = nullptr;
 	USpriteRenderer* SRCredits = nullptr;
@@ -111,5 +111,6 @@ private:
 
 	float ElapsedSecs = 0.f;
 	bool IsBrightPushStart = false;
-	bool IsHalfTime = false;
+
+	std::function<void()> HalfTimeEvent;
 };
