@@ -3,9 +3,16 @@
 #include <EngineCore/PathFindAStar.h>
 #include <EngineBase/FSMStateManager.h>
 
+enum class EMonsterBlink
+{
+	OFF = 0,
+	ON
+};
+
 enum class EMonsterState
 {
-	BLINKING = 0,
+	WAIT_START_DELAY = 0,
+	WAIT_INTIALIZE,
 	INIT_WALKING,
 	THINKING,
 	WALKING,
@@ -28,6 +35,17 @@ enum class EMonsterScore
 class AMonster : public AActor
 {
 public:
+	struct SProperties
+	{
+		EMonsterScore Score = EMonsterScore::S100;
+		int Health = 1;
+		float Speed = 50.f;
+		bool CanHit = true;
+		bool IsDestroiable = false;
+		FVector2D DamageSize;
+		URect DamageMargin = URect{ 0, 0, 0, 0 };
+	};
+
 	AMonster();
 	virtual ~AMonster() {}
 
@@ -41,8 +59,6 @@ public:
 
 	virtual void Damaged(unsigned __int8 _power=1) = 0;
 	virtual void Kill() = 0;
-	virtual FVector2D GetMonsterSize() = 0;
-	virtual FIntPoint GetDamageRange() = 0;
 
 	virtual void OnPause() override;
 	virtual void OnResume() override;
@@ -62,31 +78,54 @@ public:
 	}
 
 	/* Getter */
+	inline bool GetCanHit() const
+	{
+		return Properties.CanHit;
+	}
 	inline int GetScore() const
 	{
-		return static_cast<int>(Score);
+		return static_cast<int>(Properties.Score);
 	}
 	inline bool GetIsDestroiable() const
 	{
-		return IsDestroiable;
+		return Properties.IsDestroiable;
 	}
-	inline float GetStartDelay() const
+	inline const FVector2D& GetDamageSize() const
 	{
-		return StartDelayMs;
+		return Properties.DamageSize;
 	}
-	bool GetCanHit()
+	inline const URect& GetDamageMargin() const
 	{
-		return CanHit;
+		return Properties.DamageMargin;
 	}
 
 	static int MonsterCount;
 
 protected:
 	FVector2D GetDirection(const FIntPoint& _vec);
-	void SetScore(EMonsterScore _score);
 	bool IsRouteEmpty();
 	bool IsArrivedAtOneBlock();
 	void FindPath(bool _force=false);
+	void SetScore(EMonsterScore _score)
+	{
+		Properties.Score = _score;
+	}
+	void SetCanHit(bool _val)
+	{
+		Properties.CanHit = _val;
+	}
+	void SetIsDestroiable(bool _val)
+	{
+		Properties.IsDestroiable = _val;
+	}
+	void SetDamageSize(const FVector2D& _val)
+	{
+		Properties.DamageSize = _val;
+	}
+	void SetDamageMargin(const URect& _val)
+	{
+		Properties.DamageMargin = _val;
+	}
 	void ClearRoute()
 	{
 		Route.clear();
@@ -94,33 +133,28 @@ protected:
 
 	ABaseMap* CurMapPtr = nullptr;
 
-	EMonsterScore Score = EMonsterScore::S100;
-	float Speed = 50.f;
-
 	const int MonsterIdx;
 
 	const int SCORE_ANIM_CNT = 7;
+
 	const float BLINK_SECONDS = 2.f;
+	const float BLINK_DELAY = .05f;
 
 	const char* CLOUD_SPRITE_PATH = "MonsterCloud.png";
 	const char* MONSTER_SCORE_PATH = "MonsterScore.png";
+	const char* SFXDying = "MonsterDying.mp3";
 
+	/* Initialization info */
 	float StartDelayMs = 0.f;
-
 	FIntPoint FirstIdx;
 
 	/* Path finder */
 	int PathFinderIdx = 0;
 	std::list<FIntPoint> Route;
 	FIntPoint Destination = FIntPoint::NEGATIVE_ONE;
-	FIntPoint PrevIdx;
+	FIntPoint PrevRouteIdx;
 
-	int Health = 1;
-
-	bool IsDestroiable = false;
-	bool CanHit = false;
-
-	const char* SFXDying = "MonsterDying.mp3";
+	SProperties Properties;
 	
 private:
 	/* Path finder */

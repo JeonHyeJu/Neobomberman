@@ -11,19 +11,26 @@
 
 AMushroom::AMushroom()
 {
-	Random.SetSeed(MonsterIdx);
-	CanHit = true;
-
 	SetName("Mushroom");
+	Random.SetSeed(MonsterIdx);
+	SetScore(EMonsterScore::S100);
+	SetDamageSize(GlobalVar::BOMB_SIZE);
+	SetDamageMargin(URect{ 5, 5, 5, 12 });
 
-	Fsm.CreateState(EMonsterState::BLINKING, std::bind(&AMushroom::Blinking, this, std::placeholders::_1));
+	Fsm.CreateState(EMonsterState::WAIT_START_DELAY, std::bind(&AMushroom::WaitingStartDelay, this, std::placeholders::_1));
+	Fsm.CreateState(EMonsterState::WAIT_INTIALIZE, std::bind(&AMushroom::WaitingBlinking, this, std::placeholders::_1));
 	Fsm.CreateState(EMonsterState::INIT_WALKING, std::bind(&AMushroom::WalkingForStart, this, std::placeholders::_1));
 	Fsm.CreateState(EMonsterState::THINKING, std::bind(&AMushroom::Thinking, this, std::placeholders::_1));
 	Fsm.CreateState(EMonsterState::WALKING, std::bind(&AMushroom::Walking, this, std::placeholders::_1));
-	Fsm.CreateState(EMonsterState::DAMAGED, std::bind(&AMushroom::Damaging, this, std::placeholders::_1));
-	Fsm.CreateState(EMonsterState::DYING, std::bind(&AMushroom::Dying, this, std::placeholders::_1), std::bind(&AMushroom::OnDead, this));
-	Fsm.CreateState(EMonsterState::PASS_AWAY, std::bind(&AMushroom::PassAwaing, this, std::placeholders::_1), std::bind(&AMushroom::OnPassaway, this));
 	Fsm.CreateState(EMonsterState::JUMPING, std::bind(&AMushroom::Jumping, this, std::placeholders::_1));
+	Fsm.CreateState(EMonsterState::DYING, std::bind(&AMushroom::WaitingBlinking, this, std::placeholders::_1), std::bind(&AMushroom::OnDead, this));
+	Fsm.CreateState(EMonsterState::PASS_AWAY, std::bind(&AMushroom::PassAwaing, this, std::placeholders::_1), std::bind(&AMushroom::OnPassaway, this));
+
+	FsmH.CreateState(EMonsterBlink::ON, std::bind(&AMushroom::Blinking, this, std::placeholders::_1));
+	FsmH.CreateState(EMonsterBlink::OFF, nullptr);
+
+	Fsm.ChangeState(EMonsterState::WAIT_START_DELAY);
+	FsmH.ChangeState(EMonsterBlink::OFF);
 }
 
 AMushroom::~AMushroom()
@@ -42,21 +49,8 @@ void AMushroom::Tick(float _deltaTime)
 {
 	AMonster::Tick(_deltaTime);
 
-	if (!IsInited)
-	{
-		static float accSecs = 0.f;
-		accSecs += _deltaTime;
-		if (accSecs >= StartDelayMs)
-		{
-			IsInited = true;
-			Fsm.ChangeState(EMonsterState::BLINKING);
-			SRBody->SetActive(true);
-		}
-
-		return;	// TODO
-	}
-
 	Fsm.Update(_deltaTime);
+	FsmH.Update(_deltaTime);
 }
 
 void AMushroom::InitSprite()
@@ -106,9 +100,7 @@ void AMushroom::InitSprite()
 		}
 		
 	}
-
 	SRBody->CreateAnimation(ANIM_JUMP, SPRITE_NAME, idxs, times, false);
-	SetScore(EMonsterScore::S100);
 
 	{
 		FVector2D size = GlobalVar::BOMBERMAN_SIZE;
@@ -132,7 +124,6 @@ void AMushroom::InitSprite()
 		std::vector<int> idxs;
 		std::vector<float> times(SCORE_ANIM_CNT, .2f);
 		idxs.reserve(SCORE_ANIM_CNT);
-		times.resize(SCORE_ANIM_CNT);
 		for (int i = 0; i < SCORE_ANIM_CNT; ++i)
 		{
 			idxs.push_back(i);
@@ -156,14 +147,42 @@ void AMushroom::InitCollision()
 	Collision->SetCollisionType(ECollisionType::CirCle);
 }
 
-FVector2D AMushroom::GetMonsterSize()
+void AMushroom::OnPause()
 {
-	return SRBody->GetComponentScale();
+	if (SRBody)
+	{
+		SRBody->PauseCurAnimation();
+	}
 }
 
-FIntPoint AMushroom::GetDamageRange()
+void AMushroom::OnResume()
 {
-	return FIntPoint{ 1, 1 };
+	if (SRBody)
+	{
+		SRBody->ResumeCurAnimation();
+	}
+}
+
+void AMushroom::Damaged(unsigned __int8 _power)
+{
+	Properties.Health -= _power;
+	if (Properties.Health <= 0)
+	{
+		Kill();
+	}
+}
+
+void AMushroom::Kill()
+{
+	if (Fsm.GetState() < static_cast<int>(EMonsterState::DYING))
+	{
+		if (Collision != nullptr)
+		{
+			Collision->SetActive(false);
+		}
+		Fsm.ChangeState(EMonsterState::DYING);
+		FsmH.ChangeState(EMonsterBlink::ON);
+	}
 }
 
 void AMushroom::ChangeMoveAnim(const FVector2D& _direction)
@@ -186,6 +205,41 @@ void AMushroom::ChangeMoveAnim(const FVector2D& _direction)
 	}
 }
 
+void AMushroom::Move(const FVector2D& _direction, float _deltaTime)
+{
+	bool isMove = false;
+
+	if (CurMapPtr != nullptr)
+	{
+		FVector2D curLoc = GetActorLocation();
+		FVector2D nextPosLT = curLoc + (_direction * _deltaTime * Properties.Speed) + FVector2D{ 1, 1 };
+		FVector2D nextPosRT = curLoc + (_direction * _deltaTime * Properties.Speed) + FVector2D{ 31, 1 };
+		FVector2D nextPosLB = curLoc + (_direction * _deltaTime * Properties.Speed) + FVector2D{ 1, 31 };
+		FVector2D nextPosRB = curLoc + (_direction * _deltaTime * Properties.Speed) + FVector2D{ 31, 31 };
+
+		bool canMoveMapLT = CurMapPtr->CanMove(nextPosLT);
+		bool canMoveMapRT = CurMapPtr->CanMove(nextPosRT);
+		bool canMoveMapLB = CurMapPtr->CanMove(nextPosLB);
+		bool canMoveMapRB = CurMapPtr->CanMove(nextPosRB);
+		isMove = canMoveMapLB && canMoveMapRB && canMoveMapLT && canMoveMapRT;
+	}
+
+	if (isMove)
+	{
+		ChangeMoveAnim(_direction);
+		AddActorLocation(_direction * _deltaTime * Properties.Speed);
+	}
+	else
+	{
+		if (PrevRouteIdx != FIntPoint::NEGATIVE_ONE)
+		{
+			ClearRoute();
+			Route.push_back(PrevRouteIdx);
+		}
+		Fsm.ChangeState(EMonsterState::THINKING);
+	}
+}
+
 bool AMushroom::IsJump()
 {
 	bool isJump = Random.RandomInt(0, 5) == 0;	// ~16%
@@ -199,97 +253,17 @@ bool AMushroom::IsJump()
 	return false;
 }
 
-void AMushroom::Jumping(float _deltaTime)
-{
-	SRBody->ChangeAnimation(ANIM_JUMP);
-
-	if (SRBody->IsCurAnimationEnd())
-	{
-		Fsm.ChangeState(EMonsterState::THINKING);
-	}
-}
-
-void AMushroom::Move(const FVector2D& _direction, float _deltaTime)
-{
-	bool isMove = false;
-
-	if (CurMapPtr != nullptr)
-	{
-		FVector2D curLoc = GetActorLocation();
-		FVector2D nextPosLT = curLoc + (_direction * _deltaTime * Speed) + FVector2D{ 1, 1 };
-		FVector2D nextPosRT = curLoc + (_direction * _deltaTime * Speed) + FVector2D{ 31, 1 };
-		FVector2D nextPosLB = curLoc + (_direction * _deltaTime * Speed) + FVector2D{ 1, 31 };
-		FVector2D nextPosRB = curLoc + (_direction * _deltaTime * Speed) + FVector2D{ 31, 31 };
-
-		bool canMoveMapLT = CurMapPtr->CanMove(nextPosLT);
-		bool canMoveMapRT = CurMapPtr->CanMove(nextPosRT);
-		bool canMoveMapLB = CurMapPtr->CanMove(nextPosLB);
-		bool canMoveMapRB = CurMapPtr->CanMove(nextPosRB);
-		isMove = canMoveMapLB && canMoveMapRB && canMoveMapLT && canMoveMapRT;
-	}
-
-	if (isMove)
-	{
-		ChangeMoveAnim(_direction);
-		AddActorLocation(_direction * _deltaTime * Speed);
-	}
-	else
-	{
-		if (PrevIdx != FIntPoint::NEGATIVE_ONE)
-		{
-			ClearRoute();
-			Route.push_back(PrevIdx);
-		}
-		Fsm.ChangeState(EMonsterState::THINKING);
-	}
-}
-
-void AMushroom::Damaged(unsigned __int8 _power)
-{
-	if (static_cast<EMonsterState>(Fsm.GetState()) != EMonsterState::DAMAGED)
-	{
-		Health -= _power;
-		Fsm.ChangeState(EMonsterState::DAMAGED);
-	}
-}
-
-void AMushroom::Kill()
-{
-	if (static_cast<EMonsterState>(Fsm.GetState()) != EMonsterState::DYING)
-	{
-		if (Collision != nullptr)
-		{
-			Collision->SetActive(false);
-		}
-		Fsm.ChangeState(EMonsterState::DYING);
-	}
-}
-
-void AMushroom::OnPause()
-{
-	if (SRBody)
-	{
-		SRBody->PauseCurAnimation();
-	}
-}
-
-void AMushroom::OnResume()
-{
-	if (SRBody)
-	{
-		SRBody->ResumeCurAnimation();
-	}
-}
-
 /* FSM start callbacks */
 void AMushroom::OnDead()
 {
 	UEngineSound::Play(SFXDying);
-	CanHit = false;
+	SetCanHit(false);
 }
 
 void AMushroom::OnPassaway()
 {
+	SRBody->SetActive(false);
+
 	SRCloud->ChangeAnimation(ANIM_CLOUD, true);
 	SRCloud->SetActive(true);
 
@@ -300,25 +274,38 @@ void AMushroom::OnPassaway()
 }
 
 /* FSM callbacks */
-void AMushroom::Blinking(float _deltaTime)
+void AMushroom::WaitingStartDelay(float _deltaTime)
 {
-	static float accumulatedSecs = 0.f;
-	static float blinkElapsedSecs = 0.f;
-
-	accumulatedSecs += _deltaTime;
-	if (accumulatedSecs >= BLINK_SECONDS)
+	ElapsedSesc += _deltaTime;
+	if (ElapsedSesc > StartDelayMs)
 	{
-		accumulatedSecs = 0.f;
-		SRBody->SetActive(true);
-		Fsm.ChangeState(EMonsterState::INIT_WALKING);
-		return;
+		ElapsedSesc = 0.f;
+		Fsm.ChangeState(EMonsterState::WAIT_INTIALIZE);
+		FsmH.ChangeState(EMonsterBlink::ON);
 	}
+}
 
-	blinkElapsedSecs += _deltaTime;
-	if (blinkElapsedSecs > 0.1f)
+void AMushroom::WaitingBlinking(float _deltaTime)
+{
+	ElapsedSesc += _deltaTime;
+	if (ElapsedSesc >= BLINK_SECONDS)
 	{
-		blinkElapsedSecs = 0.f;
-		SRBody->SetActiveSwitch();
+		ElapsedSesc = 0.f;
+		BlinkElapsedSecs = 0.f;
+		FsmH.ChangeState(EMonsterBlink::OFF);
+
+		EMonsterState curState = static_cast<EMonsterState>(Fsm.GetState());
+		switch (curState)
+		{
+		case EMonsterState::WAIT_INTIALIZE:
+			Fsm.ChangeState(EMonsterState::INIT_WALKING);
+			SRBody->SetActive(true);
+			break;
+		case EMonsterState::DYING:
+			Fsm.ChangeState(EMonsterState::PASS_AWAY);
+			SRBody->SetActive(false);
+			break;
+		}
 	}
 }
 
@@ -376,7 +363,7 @@ void AMushroom::Walking(float _deltaTime)
 
 	if (IsArrivedAtOneBlock())
 	{
-		PrevIdx = Destination;
+		PrevRouteIdx = Destination;
 		Destination = Route.front();
 		Route.pop_front();
 	}
@@ -409,44 +396,33 @@ void AMushroom::Walking(float _deltaTime)
 	Move(direction, _deltaTime);
 }
 
-void AMushroom::Damaging(float _deltaTime)
+void AMushroom::Jumping(float _deltaTime)
 {
-	// TODO: blinking..
+	SRBody->ChangeAnimation(ANIM_JUMP);
 
-	if (Health <= 0)
+	if (SRBody->IsCurAnimationEnd())
 	{
-		Kill();
-	}
-}
-
-void AMushroom::Dying(float _deltaTime)
-{
-	static float accumulatedSecs = 0.f;
-	static float blinkElapsedSecs = 0.f;
-
-	accumulatedSecs += _deltaTime;
-	if (accumulatedSecs >= BLINK_SECONDS)
-	{
-		accumulatedSecs = 0.f;
-		SRBody->SetActive(false);
-		Fsm.ChangeState(EMonsterState::PASS_AWAY);
-		return;
-	}
-
-	blinkElapsedSecs += _deltaTime;
-	if (blinkElapsedSecs > 0.1f)
-	{
-		blinkElapsedSecs = 0.f;
-		SRBody->SetActiveSwitch();
+		Fsm.ChangeState(EMonsterState::THINKING);
 	}
 }
 
 void AMushroom::PassAwaing(float _deltaTime)
 {
-	if (IsDestroiable) return;
+	if (GetIsDestroiable()) return;
 
 	if (SRCloud->IsCurAnimationEnd() && SRScore->IsCurAnimationEnd())
 	{
-		IsDestroiable = true;
+		SetIsDestroiable(true);
+	}
+}
+
+/* FsmH update callback */
+void AMushroom::Blinking(float _deltaTime)
+{
+	BlinkElapsedSecs += _deltaTime;
+	if (BlinkElapsedSecs >= BLINK_DELAY)
+	{
+		BlinkElapsedSecs = 0.f;
+		SRBody->SetActiveSwitch();
 	}
 }

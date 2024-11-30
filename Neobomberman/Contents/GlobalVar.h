@@ -47,6 +47,11 @@ public:
 		std::string ret = std::string(GlobalPath::ROOT) + "\\" + _appendedStr;
 		return ret;
 	}
+	inline std::string GetDataPath() const
+	{
+		std::string ret = std::string(GlobalPath::ROOT) + "\\" + GlobalPath::DATA;
+		return ret;
+	}
 	inline std::string GetTileDataPath() const
 	{
 		std::string ret = std::string(GlobalPath::ROOT) + "\\" + GlobalPath::TILE + "\\" + GlobalPath::DATA;

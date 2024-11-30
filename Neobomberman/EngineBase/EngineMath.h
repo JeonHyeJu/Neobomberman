@@ -420,6 +420,43 @@ struct URect
 	float Right = 0.f;
 	float Top = 0.f;
 	float Bottom = 0.f;
+
+	URect()
+	{
+		Left = 0.f;
+		Right = 0.f;
+		Top = 0.f;
+		Bottom = 0.f;
+	}
+
+	URect(float _val)
+	{
+		Left = _val;
+		Right = _val;
+		Top = _val;
+		Bottom = _val;
+	}
+
+	URect(int _val)
+	: URect(static_cast<float>(_val))
+	{
+	}
+
+	URect(float _left, float _right, float _top, float _bottom)
+	{
+		Left = _left;
+		Right = _right;
+		Top = _top;
+		Bottom = _bottom;
+	}
+
+	URect(int _left, int _right, int _top, int _bottom)
+	{
+		Left = static_cast<float>(_left);
+		Right = static_cast<float>(_right);
+		Top = static_cast<float>(_top);
+		Bottom = static_cast<float>(_bottom);
+	}
 };
 
 struct FVRect

@@ -19,13 +19,15 @@
 
 APlayer::APlayer()
 {
-	FVector2D playerSize = GlobalVar::BOMBERMAN_SIZE;
+	DamageMargin = URect(10, 10, 10, 10);
+	DamageSize = GlobalVar::BOMB_SIZE;
 
+	FVector2D size = GlobalVar::BOMBERMAN_SIZE;
 	{
 		SpriteRendererHead = CreateDefaultSubObject<USpriteRenderer>();
 		SpriteRendererHead->SetSprite(PLAYER_SPRITE_PATH);
-		SpriteRendererHead->SetComponentLocation(playerSize.Half().Half() + FVector2D{ -1.f, 6.f });
-		SpriteRendererHead->SetComponentScale(playerSize);
+		SpriteRendererHead->SetComponentLocation(size.Half().Half() + FVector2D{ -1.f, 6.f });
+		SpriteRendererHead->SetComponentScale(size);
 		SpriteRendererHead->SetPivotType(PivotType::Bot);
 
 		SpriteRendererHead->CreateAnimation("Idle_Up", PLAYER_SPRITE_PATH, 17, 17, 0.1f);
@@ -57,8 +59,8 @@ APlayer::APlayer()
 	{
 		SpriteRendererBody = CreateDefaultSubObject<USpriteRenderer>();
 		SpriteRendererBody->SetSprite(PLAYER_SPRITE_PATH);
-		SpriteRendererBody->SetComponentLocation(SpriteRendererHead->GetComponentLocation() + FVector2D{ 0.f, playerSize.hY() });
-		SpriteRendererBody->SetComponentScale(playerSize);
+		SpriteRendererBody->SetComponentLocation(SpriteRendererHead->GetComponentLocation() + FVector2D{ 0.f, size.hY() });
+		SpriteRendererBody->SetComponentScale(size);
 		SpriteRendererBody->SetPivotType(PivotType::Bot);
 
 		SpriteRendererBody->CreateAnimation("Idle_Up", PLAYER_SPRITE_PATH, 48, 48, 0.1f);

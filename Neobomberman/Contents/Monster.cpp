@@ -41,11 +41,6 @@ void AMonster::SetCurMap(ABaseMap* _map)
 	PathFinder.SetData(CurMapPtr);
 }
 
-void AMonster::SetScore(EMonsterScore _score)
-{
-	Score = _score;
-}
-
 bool AMonster::IsRouteEmpty()
 {
 	return Route.empty();

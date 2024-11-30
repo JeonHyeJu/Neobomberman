@@ -1,4 +1,5 @@
 #include "PreCompile.h"
+#include "GlobalVar.h"
 #include "ContentsEnum.h"
 #include "HoopGhost.h"
 #include "Player.h"
@@ -14,15 +15,22 @@ AHoopGhost::AHoopGhost()
 : AMonster()
 {
 	SetName("HoopGhost");
-	Health = MAX_HEALTH;
+	SetCanHit(false);
+	Properties.Health = MAX_HEALTH;
+	SetScore(EMonsterScore::S1600);
+	SetDamageSize(GlobalVar::BOMB_SIZE * 4);
+	SetDamageMargin(URect(0, 30, 40, 40));
 
+	InitMoveEllipse();
+
+	Fsm.CreateState(EMonsterState::WAIT_START_DELAY, std::bind(&AHoopGhost::WaitingStartDelay, this, std::placeholders::_1));
 	Fsm.CreateState(EMonsterState::WALKING, std::bind(&AHoopGhost::Walking, this, std::placeholders::_1), std::bind(&AHoopGhost::OnWalk, this));
 	Fsm.CreateState(EMonsterState::PRESS_DOWN, std::bind(&AHoopGhost::PressingDown, this, std::placeholders::_1), std::bind(&AHoopGhost::OnPressDown, this));
 	Fsm.CreateState(EMonsterState::DAMAGED, std::bind(&AHoopGhost::Damaging, this, std::placeholders::_1), std::bind(&AHoopGhost::OnDamage, this));
-	Fsm.CreateState(EMonsterState::DYING, std::bind(&AHoopGhost::Dying, this, std::placeholders::_1), std::bind(&AHoopGhost::OnDead, this));
+	Fsm.CreateState(EMonsterState::DYING, std::bind(&AHoopGhost::Dying, this, std::placeholders::_1));
 	Fsm.CreateState(EMonsterState::PASS_AWAY, std::bind(&AHoopGhost::PassAwaing, this, std::placeholders::_1), std::bind(&AHoopGhost::OnPassaway, this));
 
-	InitMoveEllipse();
+	Fsm.ChangeState(EMonsterState::WAIT_START_DELAY);
 }
 
 AHoopGhost::~AHoopGhost()
@@ -37,7 +45,6 @@ void AHoopGhost::BeginPlay()
 	InitCollision();
 
 	CenterLoc = GetActorLocation();
-
 	DelaySecs = WaitDelay;
 }
 
@@ -45,25 +52,12 @@ void AHoopGhost::Tick(float _deltaTime)
 {
 	AMonster::Tick(_deltaTime);
 
-	if (!IsInited)
-	{
-		ElapsedSesc += _deltaTime;
-		if (ElapsedSesc > INITIAL_WAIT)
-		{
-			ElapsedSesc = 0.f;
-			IsInited = true;
-			Fsm.ChangeState(EMonsterState::WALKING);
-		}
-
-		return;
-	}
-
 	Fsm.Update(_deltaTime);
 }
 
 void AHoopGhost::InitSprite()
 {
-	FVector2D size = MONSTER_SIZE;
+	FVector2D size = GlobalVar::HOOPGHOST_SIZE;
 	SRBody = CreateDefaultSubObject<USpriteRenderer>();
 	SRBody->SetSprite(SPRITE_NAME);
 	SRBody->SetComponentLocation({ size.X * .25f, size.Y * .5f });
@@ -77,7 +71,6 @@ void AHoopGhost::InitSprite()
 		const int MAX_FRAME = 4;
 		std::vector<int> idxs;
 		std::vector<float> times(MAX_FRAME, animSpeed);
-
 		idxs.reserve(MAX_FRAME);
 
 		for (int i = 0; i < MAX_FRAME; i++)
@@ -140,7 +133,10 @@ void AHoopGhost::InitSprite()
 	SRBody->CreateAnimation(ANIM_AFTER_PRESS, SPRITE_NAME, { 16, 17, 18, 19 }, { .25f, .25f, .25f, .25f }, false);	// Temp
 
 	{
-		FVector2D size{ 128, 64 };	// Temp
+		const char* SHADOW_S_SPRITE_NAME = "HoopGhostShadow_S.png";
+		const char* SHADOW_L_SPRITE_NAME = "HoopGhostShadow_L.png";
+
+		FVector2D size{ 128, 64 };
 		SRShadowS = CreateDefaultSubObject<USpriteRenderer>();
 		SRShadowS->SetSprite(SHADOW_S_SPRITE_NAME);
 		SRShadowS->SetComponentLocation({ size.hX() - 16.f, SRBody->GetComponentLocation().Y + SHADOW_MARGIN });
@@ -159,34 +155,23 @@ void AHoopGhost::InitSprite()
 	}
 
 	{
-		FVector2D size{ 256, 256 };
+		const char* SPRITE_DESTROY_PATH = "HoopGhostCloud";
+
+		FVector2D size = GlobalVar::HOOPGHOST_SIZE;
 		SRCloud = CreateDefaultSubObject<USpriteRenderer>();
-		SRCloud->SetSprite(DETROY_SPRITE_PATH);
+		SRCloud->SetSprite(SPRITE_DESTROY_PATH);
 		SRCloud->SetComponentLocation(size.Half().Half() - FVector2D{ 0.f, 32.f });
 		SRCloud->SetComponentScale(size);
-		SRCloud->CreateAnimation(ANIM_DESTROY, DETROY_SPRITE_PATH, 0, 189, .025f, false);
+		SRCloud->CreateAnimation(ANIM_DESTROY, SPRITE_DESTROY_PATH, 0, 189, .025f, false);
 		SRCloud->SetOrder(ERenderOrder::BOSS_CLOUD);
 		SRCloud->SetActive(false);
 	}
-
-	// for debug start
-	/*{
-		FVector2D size = DetectShape;
-		DebugRenderer = CreateDefaultSubObject<USpriteRenderer>();
-		DebugRenderer->SetSprite(DEBUG_IMG_PATH);
-		DebugRenderer->SetComponentLocation({ size.hX(), size.hY() });
-		DebugRenderer->SetComponentScale(size);
-		DebugRenderer->SetOrder(static_cast<int>(ERenderOrder::BOSS) + 1);
-		DebugRenderer->SetAlphafloat(.5f);
-	}*/
-	// for debug end
 	
 
-	SetScore(EMonsterScore::S1600);
 	PadToBottomSize = SRBody->GetComponentScale().Y * .4f;
 	MoveSize = round(PadToBottomSize * .5f);
 
-	DebugOn();
+	//DebugOn();
 }
 
 void AHoopGhost::InitCollision()
@@ -205,40 +190,29 @@ void AHoopGhost::InitCollision()
 
 void AHoopGhost::InitMoveEllipse()
 {
-	// It was already reserved in function.
-	EllipseXPts = UtilFn::LoadIntVecStr("Resources\\Data", "ellipse_x_pts.txt");	// Temp
-	EllipseYPts = UtilFn::LoadIntVecStr("Resources\\Data", "ellipse_y_pts.txt");	// Temp
-	EllipsePtrSize = static_cast<int>(EllipseYPts.size());
+	GlobalPath path;
+	const char* ELLIPSE_X_TXT = "ellipse_x_pts.txt";
+	const char* ELLIPSE_Y_TXT = "ellipse_y_pts.txt";
 
+	// It was already reserved in function.
+	EllipseXPts = UtilFn::LoadIntVecStr(path.GetDataPath(), ELLIPSE_X_TXT);
+	EllipseYPts = UtilFn::LoadIntVecStr(path.GetDataPath(), ELLIPSE_Y_TXT);
 	if (EllipseXPts.size() != EllipseYPts.size())
 	{
 		MSGASSERT("타원의 X, Y 사이즈가 다릅니다.");
 	}
 
-	InitRoundingIdx = static_cast<int>(EllipsePtrSize * .25f);
-	RoundingIdx = InitRoundingIdx;
-}
+	EllipsePtSize = static_cast<int>(EllipseYPts.size());
+	int initRoundingIdx = static_cast<int>(EllipsePtSize * .25f);
 
-bool AHoopGhost::IsDying()
-{
-	return (static_cast<EMonsterState>(Fsm.GetState()) == EMonsterState::DYING);
-}
-
-FVector2D AHoopGhost::GetMonsterSize()
-{
-	return MONSTER_SIZE;
-}
-
-FIntPoint AHoopGhost::GetDamageRange()
-{
-	return FIntPoint{ 3, 2 };
+	RoundingIdx = initRoundingIdx;
 }
 
 void AHoopGhost::Damaged(unsigned __int8 _power)
 {
 	if (static_cast<EMonsterState>(Fsm.GetState()) != EMonsterState::DAMAGED)
 	{
-		Health -= _power;
+		Properties.Health -= _power;
 		Fsm.ChangeState(EMonsterState::DAMAGED);
 	}
 }
@@ -260,6 +234,11 @@ void AHoopGhost::Kill()
 	}
 }
 
+bool AHoopGhost::IsDying()
+{
+	return (static_cast<EMonsterState>(Fsm.GetState()) == EMonsterState::DYING);
+}
+
 void AHoopGhost::ChangeMoveAnim(const FVector2D& _direction)
 {
 	SRBody->ChangeAnimation(ANIM_RUN_HOOP);
@@ -275,7 +254,7 @@ void AHoopGhost::toggleShadow()
 void AHoopGhost::GoingUp()
 {
 	Collision->SetActive(false);
-	CanHit = false;
+	SetCanHit(false);
 
 	if (GetActorLocation().Y > SavedLoc.Y)
 	{
@@ -292,6 +271,18 @@ void AHoopGhost::GoingUp()
 	}
 }
 
+void AHoopGhost::SetSpeed2x()
+{
+	WaitDelay *= .5f;
+	WalkingDelay -= .01f;
+
+	const int MAX_FRAME = 5;
+	std::vector<float> times(MAX_FRAME, .25f);
+	times[1] = 1.f;
+	SRBody->ChangeAnimFrameTime(ANIM_RUN_PRESS, SPRITE_NAME, times);
+}
+
+/* Fsm start function */
 void AHoopGhost::OnWalk()
 {
 	SRBody->ChangeAnimation(ANIM_START_HOOP);
@@ -306,64 +297,72 @@ void AHoopGhost::OnPressDown()
 
 void AHoopGhost::OnDamage()
 {
-	if (Health == 2)
+	if (Properties.Health == 2)
 	{
-		WaitDelay *= .5f;
-		WalkingDelay -= .01f;
-
-		const int MAX_FRAME = 5;
-		std::vector<float> times(MAX_FRAME, .25f);
-		times[1] = 1.f;
-		SRBody->ChangeAnimFrameTime(ANIM_RUN_PRESS, SPRITE_NAME, times);
+		SetSpeed2x();
 	}
 	SRBody->ChangeAnimation(ANIM_DAMAGED);
 }
 
-void AHoopGhost::OnDead()
-{
-	AGameUI::StopTimer();
-}
-
 void AHoopGhost::OnPassaway()
 {
+	SRBody->SetActive(false);
+	SRShadowS->SetActive(false);
+	SRShadowL->SetActive(false);
+	SRCloud->SetActive(false);
+
 	GameData::GetInstance().AddPlayer1Score(GetScore());
+}
+
+/* Fsm update function */
+void AHoopGhost::WaitingStartDelay(float _deltaTime)
+{
+	ElapsedSesc += _deltaTime;
+	if (ElapsedSesc > StartDelayMs)
+	{
+		ElapsedSesc = 0.f;
+		Fsm.ChangeState(EMonsterState::WALKING);
+	}
 }
 
 void AHoopGhost::Walking(float _deltaTime)
 {
-	ElapsedSesc += _deltaTime;
-
-	if (SRBody->IsCurAnimationEnd())	// START_HOOP
+	if (SRBody->GetCurAnimName() == ANIM_START_HOOP)
 	{
-		SRBody->ChangeAnimation(ANIM_RUN_HOOP);
+		if (SRBody->IsCurAnimationEnd())
+		{
+			SRBody->ChangeAnimation(ANIM_RUN_HOOP);
+		}
+		return;
 	}
 
+	ElapsedSesc += _deltaTime;
 	if (ElapsedSesc >= WalkingDelay)
 	{
 		ElapsedSesc = 0.f;
 
-		if (SRBody->GetCurAnimName() == ANIM_RUN_HOOP)
+		if (EllipsePtSize < RoundingIdx) return;
+
+		UEngineSound::Play(SFXHoop);
+
+		int x = EllipseXPts[RoundingIdx];
+		int y = EllipseYPts[RoundingIdx];
+
+		// TODO
+		FVector2D move;
+		CenterLoc += move;
+
+		FVector2D loc = CenterLoc + FVector2D{ x, -y };
+		RoundingIdx = (RoundingIdx + 1) % EllipsePtSize;
+
+		SetActorLocation(loc);
+
+		// Press down
+		if (DelaySecs-- <= 0)
 		{
-			if (EllipsePtrSize < RoundingIdx) return;
-
-			UEngineSound::Play(SFXHoop);
-
-			int x = EllipseXPts[RoundingIdx];
-			int y = EllipseYPts[RoundingIdx];
-
-			// TODO
-			FVector2D move;
-			CenterLoc += move;
-
-			FVector2D loc = CenterLoc + FVector2D{ x, -y };
-			RoundingIdx = (RoundingIdx + 1) % EllipsePtrSize;
-
-			SetActorLocation(loc);
 			SavedLoc = loc;
-			SavedShadowLoc = SRShadowL->GetComponentLocation();
 
-			// Temp
-			BottomLoc = loc + FVector2D{ DetectShape.hX(), PadToBottomSize + SHADOW_MARGIN};	// TODO: reset
+			BottomLoc = loc + FVector2D{ DetectShape.hX(), PadToBottomSize + SHADOW_MARGIN };
 			URect rect(
 				BottomLoc.X - DetectShape.hX(),
 				BottomLoc.X + DetectShape.hX(),
@@ -374,15 +373,10 @@ void AHoopGhost::Walking(float _deltaTime)
 			APlayer* player = GetWorld()->GetPawn<APlayer>();
 			FVector2D playerLoc = player->GetActorLocation();
 
-			//DebugRenderer->SetComponentLocation(BottomLoc - loc);
-
-			if (DelaySecs-- <= 0)
+			if (playerLoc.X >= rect.Left && playerLoc.X <= rect.Right
+				&& playerLoc.Y <= rect.Bottom && playerLoc.Y >= rect.Top)
 			{
-				if (playerLoc.X >= rect.Left && playerLoc.X <= rect.Right
-					&& playerLoc.Y <= rect.Bottom && playerLoc.Y >= rect.Top)
-				{
-					Fsm.ChangeState(EMonsterState::PRESS_DOWN);
-				}
+				Fsm.ChangeState(EMonsterState::PRESS_DOWN);
 			}
 		}
 	}
@@ -391,7 +385,6 @@ void AHoopGhost::Walking(float _deltaTime)
 void AHoopGhost::Damaging(float _deltaTime)
 {
 	ElapsedSesc += _deltaTime;
-
 	if (ElapsedSesc > .1f)
 	{
 		ElapsedSesc = 0.f;
@@ -401,7 +394,7 @@ void AHoopGhost::Damaging(float _deltaTime)
 		const std::string& curAnimName = SRBody->GetCurAnimName();
 		if (curAnimName == ANIM_DAMAGED)
 		{
-			if (Health <= 0)
+			if (Properties.Health <= 0)
 			{
 				Kill();
 			}
@@ -420,7 +413,6 @@ void AHoopGhost::Damaging(float _deltaTime)
 void AHoopGhost::PressingDown(float _deltaTime)
 {
 	ElapsedSesc += _deltaTime;
-
 	if (ElapsedSesc > .1f)
 	{
 		ElapsedSesc = 0.f;
@@ -453,16 +445,10 @@ void AHoopGhost::PressingDown(float _deltaTime)
 			}
 			else
 			{
-				//FVector2D shadowSize = SRShadowL->GetComponentScale();
-				//FVector2D shadowLoc = SRShadowL->GetComponentLocation();
-				/*DebugRenderer->SetComponentLocation(shadowLoc);
-				DebugRenderer->SetComponentScale(shadowSize);*/
-
 				Collision->SetActive(true);
-				CanHit = true;
+				SetCanHit(true);
 
 				SRBody->ChangeAnimation(ANIM_RUN_PRESS);
-				return;
 			}
 		}
 	}
@@ -470,44 +456,36 @@ void AHoopGhost::PressingDown(float _deltaTime)
 
 void AHoopGhost::Dying(float _deltaTime)
 {
-	static float blinkElapsedSecs = 0.f;
-	static float explosionSecs = 0.f;
-
 	ElapsedSesc += _deltaTime;
-
 	if (ElapsedSesc > .5f)
 	{
 		ElapsedSesc = 0.f;
 
 		if (SRCloud->IsCurAnimationEnd())
 		{
-			SRBody->SetActive(false);
-			SRShadowS->SetActive(false);
-			SRShadowL->SetActive(false);
-			SRCloud->SetActive(false);
 			Fsm.ChangeState(EMonsterState::PASS_AWAY);
 			return;
 		}
 	}
 
-	explosionSecs += _deltaTime;
-	if (explosionSecs > .15f)
+	ExplosionSecs += _deltaTime;
+	if (ExplosionSecs > .15f)
 	{
-		explosionSecs = 0.f;
+		ExplosionSecs = 0.f;
 		UEngineSound::Play(SFXCrash, -1, 0, false);
 	}
 
-	blinkElapsedSecs += _deltaTime;
-	if (blinkElapsedSecs > 0.05f)
+	BlinkElapsedSecs += _deltaTime;
+	if (BlinkElapsedSecs > 0.05f)
 	{
-		blinkElapsedSecs = 0.f;
+		BlinkElapsedSecs = 0.f;
 		SRBody->SetActiveSwitch();
 	}
 }
 
 void AHoopGhost::PassAwaing(float _deltaTime)
 {
-	if (IsDestroiable) return;
+	if (GetIsDestroiable()) return;
 
-	IsDestroiable = true;
+	SetIsDestroiable(true);
 }

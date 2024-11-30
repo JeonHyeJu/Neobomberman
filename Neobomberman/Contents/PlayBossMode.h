@@ -1,7 +1,7 @@
 #pragma once
-#include <EngineCore/GameMode.h>
+#include "BaseGameMode.h"
 
-class APlayBossMode : public AGameMode
+class APlayBossMode : public ABaseGameMode
 {
 public:
 	APlayBossMode();
@@ -12,28 +12,17 @@ public:
 	APlayBossMode& operator=(const APlayBossMode& _other) = delete;
 	APlayBossMode& operator=(APlayBossMode&& _other) noexcept = delete;
 
+protected:
 	void BeginPlay() override;
 	void Tick(float _deltaTime) override;
+	void FinishGame() override;
 
 private:
-	void CheckCheat();
-	void CheckDeadMonster();
-	void OnExplodeBomb();
-
-	void FadeOut();
-	void OnEndFadeOut();
-
-	bool IsAllMonstersDead() const;
-
-	std::list<class AMonster*> MonsterList;
-
 	FIntPoint StartPoint = { 6, 8 };
-	class AResult* ResultScene = nullptr;
-	class APlayer* Player = nullptr;
 
-	bool isShowingResult = false;
+	class AGameUI* GameUiPtr = nullptr;
 
-	class ABaseMap* CurMapPtr = nullptr;
+	float ElapsedSecs = 0.f;
 
 	/* Sounds */
 	const char* SFXBg = "Stage1Boss.mp3";

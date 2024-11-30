@@ -14,41 +14,38 @@ public:
 	AMushroom& operator=(const AMushroom& _other) = delete;
 	AMushroom& operator=(AMushroom&& _other) noexcept = delete;
 
+	void Damaged(unsigned __int8 _power) override;
+	void Kill() override;
+
 protected:
 	void BeginPlay() override;
 	void Tick(float _deltaTime) override;
-
-	void Kill() override;
-	void Damaged(unsigned __int8 _power) override;
-	FVector2D GetMonsterSize() override;
-	FIntPoint GetDamageRange() override;
-
-	void InitSprite();
-	void InitCollision();
-	void ChangeMoveAnim(const FVector2D& direction);
-
-private:
-	void Move(const FVector2D& direction, float _deltaTime);
-
-	/* FSM update callbacks */
-	/* You don't need to call Super::function()! */
-	void Blinking(float _deltaTime);
-	void WalkingForStart(float _deltaTime);
-	void Thinking(float _deltaTime);
-	void Walking(float _deltaTime);
-	void Damaging(float _deltaTime);
-	void Dying(float _deltaTime);
-	void PassAwaing(float _deltaTime);
-
 	void OnPause() override;
 	void OnResume() override;
+
+private:
+	void InitSprite();
+	void InitCollision();
+
+	void ChangeMoveAnim(const FVector2D& direction);
+	void Move(const FVector2D& direction, float _deltaTime);
+	bool IsJump();
 
 	/* FSM start callbacks */
 	void OnDead();
 	void OnPassaway();
 
-	bool IsJump();
+	/* FSM update callbacks */
+	void WaitingStartDelay(float _deltaTime);
+	void WaitingBlinking(float _deltaTime);
+	void WalkingForStart(float _deltaTime);
+	void Thinking(float _deltaTime);
+	void Walking(float _deltaTime);
 	void Jumping(float _deltaTime);
+	void PassAwaing(float _deltaTime);
+
+	/* FsmH update callback */
+	void Blinking(float _deltaTime);
 
 	const char* SPRITE_NAME = "Mushroom.png";
 
@@ -76,6 +73,8 @@ private:
 	class U2DCollision* Collision = nullptr;
 
 	UFSMStateManager Fsm;
+	UFSMStateManager FsmH;
 
-	bool IsInited = false;
+	float ElapsedSesc = 0.f;
+	float BlinkElapsedSecs = 0.f;
 };

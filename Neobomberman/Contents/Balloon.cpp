@@ -11,15 +11,23 @@
 ABalloon::ABalloon()
 {
 	SetName("Balloon");
-	CanHit = true;
+	SetScore(EMonsterScore::S200);
+	SetDamageSize(GlobalVar::BOMB_SIZE);
+	SetDamageMargin(URect{ 5, 5, 5, 12 });
 
-	Fsm.CreateState(EMonsterState::BLINKING, std::bind(&ABalloon::Blinking, this, std::placeholders::_1));
+	Fsm.CreateState(EMonsterState::WAIT_START_DELAY, std::bind(&ABalloon::WaitingStartDelay, this, std::placeholders::_1));
+	Fsm.CreateState(EMonsterState::WAIT_INTIALIZE, std::bind(&ABalloon::WaitingBlinking, this, std::placeholders::_1));
 	Fsm.CreateState(EMonsterState::INIT_WALKING, std::bind(&ABalloon::WalkingForStart, this, std::placeholders::_1));
 	Fsm.CreateState(EMonsterState::THINKING, std::bind(&ABalloon::Thinking, this, std::placeholders::_1));
 	Fsm.CreateState(EMonsterState::WALKING, std::bind(&ABalloon::Walking, this, std::placeholders::_1));
-	Fsm.CreateState(EMonsterState::DAMAGED, std::bind(&ABalloon::Damaging, this, std::placeholders::_1));
-	Fsm.CreateState(EMonsterState::DYING, std::bind(&ABalloon::Dying, this, std::placeholders::_1), std::bind(&ABalloon::OnDead, this));
+	Fsm.CreateState(EMonsterState::DYING, std::bind(&ABalloon::WaitingBlinking, this, std::placeholders::_1), std::bind(&ABalloon::OnDead, this));
 	Fsm.CreateState(EMonsterState::PASS_AWAY, std::bind(&ABalloon::PassAwaing, this, std::placeholders::_1), std::bind(&ABalloon::OnPassaway, this));
+
+	FsmH.CreateState(EMonsterBlink::ON, std::bind(&ABalloon::Blinking, this, std::placeholders::_1));
+	FsmH.CreateState(EMonsterBlink::OFF, nullptr);
+
+	Fsm.ChangeState(EMonsterState::WAIT_START_DELAY);
+	FsmH.ChangeState(EMonsterBlink::OFF);
 }
 
 ABalloon::~ABalloon()
@@ -38,21 +46,8 @@ void ABalloon::Tick(float _deltaTime)
 {
 	AMonster::Tick(_deltaTime);
 
-	if (!IsInited)
-	{
-		static float accSecs = 0.f;
-		accSecs += _deltaTime;
-		if (accSecs >= StartDelayMs)
-		{
-			IsInited = true;
-			Fsm.ChangeState(EMonsterState::BLINKING);
-			SRBody->SetActive(true);
-		}
-
-		return;	// TODO
-	}
-
 	Fsm.Update(_deltaTime);
+	FsmH.Update(_deltaTime);
 }
 
 void ABalloon::InitSprite()
@@ -70,8 +65,6 @@ void ABalloon::InitSprite()
 	SRBody->CreateAnimation(ANIM_RUN_DOWN, SPRITE_NAME, 0, 8, 0.5f);
 	SRBody->CreateAnimation(ANIM_RUN_LEFT, SPRITE_NAME, 0, 8, 0.5f);
 	SRBody->CreateAnimation(ANIM_RUN_RIGHT, SPRITE_NAME, 0, 8, 0.5f);
-
-	SetScore(EMonsterScore::S200);
 
 	{
 		FVector2D size = GlobalVar::BOMBERMAN_SIZE;
@@ -94,7 +87,6 @@ void ABalloon::InitSprite()
 		std::vector<int> idxs;
 		std::vector<float> times(SCORE_ANIM_CNT, .2f);
 		idxs.reserve(SCORE_ANIM_CNT);
-		times.resize(SCORE_ANIM_CNT);
 		for (int i = 0; i < SCORE_ANIM_CNT; ++i)
 		{
 			idxs.push_back(7+i);
@@ -118,14 +110,42 @@ void ABalloon::InitCollision()
 	Collision->SetCollisionType(ECollisionType::CirCle);
 }
 
-FVector2D ABalloon::GetMonsterSize()
+void ABalloon::OnPause()
 {
-	return SRBody->GetComponentScale();
+	if (SRBody)
+	{
+		SRBody->PauseCurAnimation();
+	}
 }
 
-FIntPoint ABalloon::GetDamageRange()
+void ABalloon::OnResume()
 {
-	return FIntPoint{ 1, 1 };
+	if (SRBody)
+	{
+		SRBody->ResumeCurAnimation();
+	}
+}
+
+void ABalloon::Damaged(unsigned __int8 _power)
+{
+	Properties.Health -= _power;
+	if (Properties.Health <= 0)
+	{
+		Kill();
+	}
+}
+
+void ABalloon::Kill()
+{
+	if (Fsm.GetState() < static_cast<int>(EMonsterState::DYING))
+	{
+		if (Collision != nullptr)
+		{
+			Collision->SetActive(false);
+		}
+		Fsm.ChangeState(EMonsterState::DYING);
+		FsmH.ChangeState(EMonsterBlink::ON);
+	}
 }
 
 void ABalloon::ChangeMoveAnim(const FVector2D& _direction)
@@ -155,10 +175,10 @@ void ABalloon::Move(const FVector2D& _direction, float _deltaTime)
 	if (CurMapPtr != nullptr)
 	{
 		FVector2D curLoc = GetActorLocation();
-		FVector2D nextPosLT = curLoc + (_direction * _deltaTime * Speed) + FVector2D{ 1, 1 };
-		FVector2D nextPosRT = curLoc + (_direction * _deltaTime * Speed) + FVector2D{ 31, 1 };
-		FVector2D nextPosLB = curLoc + (_direction * _deltaTime * Speed) + FVector2D{ 1, 31 };
-		FVector2D nextPosRB = curLoc + (_direction * _deltaTime * Speed) + FVector2D{ 31, 31 };
+		FVector2D nextPosLT = curLoc + (_direction * _deltaTime * Properties.Speed) + FVector2D{ 1, 1 };
+		FVector2D nextPosRT = curLoc + (_direction * _deltaTime * Properties.Speed) + FVector2D{ 31, 1 };
+		FVector2D nextPosLB = curLoc + (_direction * _deltaTime * Properties.Speed) + FVector2D{ 1, 31 };
+		FVector2D nextPosRB = curLoc + (_direction * _deltaTime * Properties.Speed) + FVector2D{ 31, 31 };
 
 		bool canMoveMapLT = CurMapPtr->CanMove(nextPosLT);
 		bool canMoveMapRT = CurMapPtr->CanMove(nextPosRT);
@@ -170,54 +190,17 @@ void ABalloon::Move(const FVector2D& _direction, float _deltaTime)
 	if (isMove)
 	{
 		ChangeMoveAnim(_direction);
-		AddActorLocation(_direction * _deltaTime * Speed);
+		AddActorLocation(_direction * _deltaTime * Properties.Speed);
 	}
 	else
 	{
-		if (PrevIdx != FIntPoint::NEGATIVE_ONE)
+		if (PrevRouteIdx != FIntPoint::NEGATIVE_ONE)
 		{
 			ClearRoute();
-			Route.push_back(PrevIdx);
+			Route.push_back(PrevRouteIdx);
 		}
 		
 		Fsm.ChangeState(EMonsterState::THINKING);
-	}
-}
-
-void ABalloon::Damaged(unsigned __int8 _power)
-{
-	if (static_cast<EMonsterState>(Fsm.GetState()) != EMonsterState::DAMAGED)
-	{
-		Health -= _power;
-		Fsm.ChangeState(EMonsterState::DAMAGED);
-	}
-}
-
-void ABalloon::Kill()
-{
-	if (Fsm.GetState() < static_cast<int>(EMonsterState::DYING))
-	{
-		if (Collision != nullptr)
-		{
-			Collision->SetActive(false);
-		}
-		Fsm.ChangeState(EMonsterState::DYING);
-	}
-}
-
-void ABalloon::OnPause()
-{
-	if (SRBody)
-	{
-		SRBody->PauseCurAnimation();
-	}
-}
-
-void ABalloon::OnResume()
-{
-	if (SRBody)
-	{
-		SRBody->ResumeCurAnimation();
 	}
 }
 
@@ -225,11 +208,12 @@ void ABalloon::OnResume()
 void ABalloon::OnDead()
 {
 	UEngineSound::Play(SFXDying);
-	CanHit = false;
+	SetCanHit(false);
 }
 
 void ABalloon::OnPassaway()
 {
+	SRBody->SetActive(false);
 
 	SRCloud->ChangeAnimation(ANIM_CLOUD, true);
 	SRCloud->SetActive(true);
@@ -241,25 +225,38 @@ void ABalloon::OnPassaway()
 }
 
 /* FSM callbacks */
-void ABalloon::Blinking(float _deltaTime)
+void ABalloon::WaitingStartDelay(float _deltaTime)
 {
-	static float accumulatedSecs = 0.f;
-	static float blinkElapsedSecs = 0.f;
-
-	accumulatedSecs += _deltaTime;
-	if (accumulatedSecs >= BLINK_SECONDS)
+	ElapsedSesc += _deltaTime;
+	if (ElapsedSesc > StartDelayMs)
 	{
-		accumulatedSecs = 0.f;
-		SRBody->SetActive(true);
-		Fsm.ChangeState(EMonsterState::INIT_WALKING);
-		return;
+		ElapsedSesc = 0.f;
+		Fsm.ChangeState(EMonsterState::WAIT_INTIALIZE);
+		FsmH.ChangeState(EMonsterBlink::ON);
 	}
+}
 
-	blinkElapsedSecs += _deltaTime;
-	if (blinkElapsedSecs > 0.1f)
+void ABalloon::WaitingBlinking(float _deltaTime)
+{
+	ElapsedSesc += _deltaTime;
+	if (ElapsedSesc >= BLINK_SECONDS)
 	{
-		blinkElapsedSecs = 0.f;
-		SRBody->SetActiveSwitch();
+		ElapsedSesc = 0.f;
+		BlinkElapsedSecs = 0.f;
+		FsmH.ChangeState(EMonsterBlink::OFF);
+
+		EMonsterState curState = static_cast<EMonsterState>(Fsm.GetState());
+		switch (curState)
+		{
+		case EMonsterState::WAIT_INTIALIZE:
+			Fsm.ChangeState(EMonsterState::INIT_WALKING);
+			SRBody->SetActive(true);
+			break;
+		case EMonsterState::DYING:
+			Fsm.ChangeState(EMonsterState::PASS_AWAY);
+			SRBody->SetActive(false);
+			break;
+		}
 	}
 }
 
@@ -311,7 +308,7 @@ void ABalloon::Walking(float _deltaTime)
 
 	if (IsArrivedAtOneBlock())
 	{
-		PrevIdx = Destination;
+		PrevRouteIdx = Destination;
 		Destination = Route.front();
 		Route.pop_front();
 	}
@@ -340,48 +337,26 @@ void ABalloon::Walking(float _deltaTime)
 	}
 
 	FVector2D direction = GetDirection(destRealLocInt - monsterRealLocInt);
-
 	Move(direction, _deltaTime);
-}
-
-void ABalloon::Damaging(float _deltaTime)
-{
-	// TODO: blinking..
-
-	if (Health <= 0)
-	{
-		Kill();
-	}
-}
-
-void ABalloon::Dying(float _deltaTime)
-{
-	static float accumulatedSecs = 0.f;
-	static float blinkElapsedSecs = 0.f;
-
-	accumulatedSecs += _deltaTime;
-	if (accumulatedSecs >= BLINK_SECONDS)
-	{
-		accumulatedSecs = 0.f;
-		SRBody->SetActive(false);
-		Fsm.ChangeState(EMonsterState::PASS_AWAY);
-		return;
-	}
-
-	blinkElapsedSecs += _deltaTime;
-	if (blinkElapsedSecs > 0.1f)
-	{
-		blinkElapsedSecs = 0.f;
-		SRBody->SetActiveSwitch();
-	}
 }
 
 void ABalloon::PassAwaing(float _deltaTime)
 {
-	if (IsDestroiable) return;
+	if (GetIsDestroiable()) return;
 
 	if (SRCloud->IsCurAnimationEnd() && SRScore->IsCurAnimationEnd())
 	{
-		IsDestroiable = true;
+		SetIsDestroiable(true);
+	}
+}
+
+/* FsmH update callback */
+void ABalloon::Blinking(float _deltaTime)
+{
+	BlinkElapsedSecs += _deltaTime;
+	if (BlinkElapsedSecs >= BLINK_DELAY)
+	{
+		BlinkElapsedSecs = 0.f;
+		SRBody->SetActiveSwitch();
 	}
 }

@@ -71,6 +71,14 @@ public:
 	{
 		return IsDead;
 	}
+	inline const FVector2D& GetDamageSize() const
+	{
+		return DamageSize;
+	}
+	inline const URect& GetDamageMargin() const
+	{
+		return DamageMargin;
+	}
 	void SetStartLoc(const FVector2D& _val)
 	{
 		StartLocation = _val;
@@ -153,6 +161,9 @@ private:
 
 	const float DEFAULT_SPEED = 75.f;
 	bool IsBossStage = false;	// Temp
+
+	FVector2D DamageSize;
+	URect DamageMargin = URect{ 0, 0, 0, 0 };
 
 	/* Sounds */
 	const char* SFXDropBomb = "CreateBomb.mp3";

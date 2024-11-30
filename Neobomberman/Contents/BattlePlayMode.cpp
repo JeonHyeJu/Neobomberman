@@ -60,7 +60,7 @@ void ABattlePlayMode::Tick(float _deltaTime)
 	static float elapsedSecs = 0.f;
 	elapsedSecs += _deltaTime;
 
-	if (elapsedSecs > 2.f)
+	if (elapsedSecs > .5f)
 	{
 		elapsedSecs = 0.f;
 
