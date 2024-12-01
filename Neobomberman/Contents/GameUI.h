@@ -78,6 +78,10 @@ public:
 	{
 		return Seconds < 0;
 	}
+	static void SetTimeForDebug(int _seconds)
+	{
+		Seconds = _seconds;
+	}
 
 protected:
 	void BeginPlay() override;

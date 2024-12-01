@@ -2,6 +2,10 @@
 #include "BattleSelect.h"
 #include "GlobalVar.h"
 #include "ContentsEnum.h"
+#include "PlayerComputer.h"
+#include "BattlePlayMode.h"
+#include "GameData.h"
+#include "Player.h"
 #include "Fade.h"
 #include <EngineCore/SpriteRenderer.h>
 #include <EnginePlatform/EngineInput.h>
@@ -249,6 +253,26 @@ void ABattleSelect::OnEndFadeOut()
 	case ABattleSelect::ESceneState::WAITING_CHARACTER_FADE:
 		AFade::MainFade->FadeIn();
 		UEngineSound::AllSoundStop();
+
+		if (CurIdx == 0)
+		{
+			APlayerComputer::SetSpritePath("MainCharater_White.png");
+		}
+		else if (CurIdx == 1)
+		{
+			APlayerComputer::SetSpritePath("MainCharater_Black.png");
+		}
+		else if (CurIdx == 2)
+		{
+			APlayerComputer::SetSpritePath("MainCharater_Red.png");
+		}
+		else if (CurIdx == 3)
+		{
+			APlayerComputer::SetSpritePath("MainCharater_Blue.png");
+		}
+
+		GameData::GetInstance().ResetScore();
+		UEngineAPICore::GetCore()->ResetLevel<ABattlePlayMode, APlayer>("BattlePlay");
 		UEngineAPICore::GetCore()->OpenLevel("BattlePlay");
 		break;
 	default:

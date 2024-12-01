@@ -10,7 +10,7 @@
 #include <EngineCore/SpriteRenderer.h>
 #include <EnginePlatform/EngineSound.h>
 
-#include <EngineCore/EngineCoreDebug.h>		// for debug
+std::string APlayerComputer::SpritePath = "MainCharater_Black.png";
 
 APlayerComputer::APlayerComputer()
 {
@@ -69,25 +69,30 @@ void APlayerComputer::Tick(float _deltaTime)
 
 void APlayerComputer::InitSprite(std::string_view _sprite)
 {
+	if (_sprite.size() > 0)
+	{
+		SpritePath = _sprite;
+	}
+
 	FVector2D playerSize = GlobalVar::BOMBERMAN_SIZE;
 	{
 		SpriteRendererHead = CreateDefaultSubObject<USpriteRenderer>();
-		SpriteRendererHead->SetSprite(_sprite);
+		SpriteRendererHead->SetSprite(SpritePath);
 		SpriteRendererHead->SetComponentLocation(playerSize.Half().Half() + FVector2D{ -1.f, 6.f });
 		SpriteRendererHead->SetComponentScale(playerSize);
 		SpriteRendererHead->SetPivotType(PivotType::Bot);
 
-		SpriteRendererHead->CreateAnimation("Idle_Up", _sprite, 17, 17, 0.1f);
-		SpriteRendererHead->CreateAnimation("Run_Up", _sprite, 18, 22, 0.1f);
+		SpriteRendererHead->CreateAnimation("Idle_Up", SpritePath, 17, 17, 0.1f);
+		SpriteRendererHead->CreateAnimation("Run_Up", SpritePath, 18, 22, 0.1f);
 
-		SpriteRendererHead->CreateAnimation("Idle_Down", _sprite, 0, 0, 0.1f);
-		SpriteRendererHead->CreateAnimation("Run_Down", _sprite, 1, 6, 0.1f);
+		SpriteRendererHead->CreateAnimation("Idle_Down", SpritePath, 0, 0, 0.1f);
+		SpriteRendererHead->CreateAnimation("Run_Down", SpritePath, 1, 6, 0.1f);
 
-		SpriteRendererHead->CreateAnimation("Idle_Left", _sprite, 9, 9, 0.1f);
-		SpriteRendererHead->CreateAnimation("Run_Left", _sprite, 10, 14, 0.1f);
+		SpriteRendererHead->CreateAnimation("Idle_Left", SpritePath, 9, 9, 0.1f);
+		SpriteRendererHead->CreateAnimation("Run_Left", SpritePath, 10, 14, 0.1f);
 
-		SpriteRendererHead->CreateAnimation("Idle_Right", _sprite, 24, 24, 0.1f);
-		SpriteRendererHead->CreateAnimation("Run_Right", _sprite, 25, 30, 0.1f);
+		SpriteRendererHead->CreateAnimation("Idle_Right", SpritePath, 24, 24, 0.1f);
+		SpriteRendererHead->CreateAnimation("Run_Right", SpritePath, 25, 30, 0.1f);
 
 		const int BLINK_CNT = 5;
 		std::vector<int> idxs{ 580, 581, 580, 581, 580 };
@@ -95,36 +100,36 @@ void APlayerComputer::InitSprite(std::string_view _sprite)
 		idxs.resize(5);
 		times[BLINK_CNT - 1] = 2.f;
 
-		SpriteRendererHead->CreateAnimation("BlinkingEyes", _sprite, idxs, times);
-		SpriteRendererHead->CreateAnimation("Dead", _sprite, 591, 598, 0.2f, false);
-		SpriteRendererHead->CreateAnimation("Ride_Portal", _sprite, 583, 589, 0.1f, false);
-		SpriteRendererHead->CreateAnimation("Victory", _sprite, 601, 604, 0.5f, false);
+		SpriteRendererHead->CreateAnimation("BlinkingEyes", SpritePath, idxs, times);
+		SpriteRendererHead->CreateAnimation("Dead", SpritePath, 591, 598, 0.2f, false);
+		SpriteRendererHead->CreateAnimation("Ride_Portal", SpritePath, 583, 589, 0.1f, false);
+		SpriteRendererHead->CreateAnimation("Victory", SpritePath, 601, 604, 0.5f, false);
 	}
 
 	{
 		SpriteRendererBody = CreateDefaultSubObject<USpriteRenderer>();
-		SpriteRendererBody->SetSprite(_sprite);
+		SpriteRendererBody->SetSprite(SpritePath);
 		SpriteRendererBody->SetComponentLocation(SpriteRendererHead->GetComponentLocation() + FVector2D{ 0.f, playerSize.hY() });
 		SpriteRendererBody->SetComponentScale(playerSize);
 		SpriteRendererBody->SetPivotType(PivotType::Bot);
 
-		SpriteRendererBody->CreateAnimation("Idle_Up", _sprite, 48, 48, 0.1f);
-		SpriteRendererBody->CreateAnimation("Run_Up", _sprite, 49, 54, 0.1f);
+		SpriteRendererBody->CreateAnimation("Idle_Up", SpritePath, 48, 48, 0.1f);
+		SpriteRendererBody->CreateAnimation("Run_Up", SpritePath, 49, 54, 0.1f);
 
-		SpriteRendererBody->CreateAnimation("Idle_Down", _sprite, 32, 32, 0.1f);
-		SpriteRendererBody->CreateAnimation("Run_Down", _sprite, 33, 38, 0.1f);
+		SpriteRendererBody->CreateAnimation("Idle_Down", SpritePath, 32, 32, 0.1f);
+		SpriteRendererBody->CreateAnimation("Run_Down", SpritePath, 33, 38, 0.1f);
 
-		SpriteRendererBody->CreateAnimation("Idle_Left", _sprite, 40, 40, 0.1f);
-		SpriteRendererBody->CreateAnimation("Run_Left", _sprite, 41, 46, 0.1f);
+		SpriteRendererBody->CreateAnimation("Idle_Left", SpritePath, 40, 40, 0.1f);
+		SpriteRendererBody->CreateAnimation("Run_Left", SpritePath, 41, 46, 0.1f);
 
-		SpriteRendererBody->CreateAnimation("Idle_Right", _sprite, 56, 56, 0.1f);
-		SpriteRendererBody->CreateAnimation("Run_Right", _sprite, 57, 62, 0.1f);
+		SpriteRendererBody->CreateAnimation("Idle_Right", SpritePath, 56, 56, 0.1f);
+		SpriteRendererBody->CreateAnimation("Run_Right", SpritePath, 57, 62, 0.1f);
 
-		SpriteRendererBody->CreateAnimation("BlinkingEyes", _sprite, 612, 613, 1.f);
-		SpriteRendererBody->CreateAnimation("Dead", _sprite, 622, 629, 0.2f, false);
-		SpriteRendererBody->CreateAnimation("Ride_Portal", _sprite, 615, 621, 0.1f, false);
+		SpriteRendererBody->CreateAnimation("BlinkingEyes", SpritePath, 612, 613, 1.f);
+		SpriteRendererBody->CreateAnimation("Dead", SpritePath, 622, 629, 0.2f, false);
+		SpriteRendererBody->CreateAnimation("Ride_Portal", SpritePath, 615, 621, 0.1f, false);
 
-		SpriteRendererBody->CreateAnimation("Victory", _sprite, 633, 636, 0.5f, false);
+		SpriteRendererBody->CreateAnimation("Victory", SpritePath, 633, 636, 0.5f, false);
 	}
 
 	SpriteRendererHead->ChangeAnimation("Idle_Down");

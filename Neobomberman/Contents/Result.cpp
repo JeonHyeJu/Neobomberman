@@ -5,6 +5,9 @@
 #include "GameUI.h"
 #include "UtilFn.h"
 #include "GameData.h"
+#include "EndingGameMode.h"
+#include "PlayBossMode.h"
+#include "Player.h"
 #include <EngineCore/Actor.h>
 #include <EngineCore/SpriteRenderer.h>
 #include <EngineCore/EngineAPICore.h>
@@ -254,7 +257,7 @@ void AResult::CalculatingBonus(float _deltaTime)
 {
 	ElapsedSecs += _deltaTime;
 
-	if (ElapsedSecs > .025f)
+	if (ElapsedSecs > .015f)
 	{
 		ElapsedSecs = 0.f;
 
@@ -358,6 +361,15 @@ void AResult::ShakingRImage(float _deltaTime)
 
 			if (NextLevel.size() > 0)
 			{
+				// Temp
+				if (NextLevel == "Boss_Stage1")
+				{
+					UEngineAPICore::GetCore()->ResetLevel<APlayBossMode, APlayer>(NextLevel);
+				}
+				else if (NextLevel == "Ending")
+				{
+					UEngineAPICore::GetCore()->ResetLevel<AEndingGameMode, AActor>(NextLevel);
+				}
 				UEngineAPICore::GetCore()->OpenLevel(NextLevel);
 			}
 		}

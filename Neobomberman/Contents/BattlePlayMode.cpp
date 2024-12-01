@@ -6,6 +6,7 @@
 #include "GameUI.h"
 #include "StageTitle.h"
 #include "PlayerComputer.h"
+#include "GameData.h"
 #include "Fade.h"
 
 #include <EnginePlatform/EngineSound.h>
@@ -35,13 +36,19 @@ void ABattlePlayMode::BeginPlay()
 	MapPtr = mapPtr;
 
 	Player = pLevel->GetPawn<APlayer>();
+	Player->InitSprite();
 	Player->SetCurMap(mapPtr);
 	Player->SetStartLoc(mapPtr->MatrixIdxToLocation(StartPoint));
+
+	GameData& gameData = GameData::GetInstance();
+	gameData.SetPlayer1BombPower(2);
+	gameData.SetPlayer1Speed(1.f);
+	gameData.SetPlayer1BombCnt(1);
 
 	FVector2D comStartLoc = mapPtr->MatrixIdxToLocation(StartPointComputer);
 	APlayerComputer* playerComputer = SpawnPlayerComputer<APlayerComputer>(mapPtr, comStartLoc);
 	playerComputer->SetStartLoc(comStartLoc);
-	playerComputer->InitSprite("MainCharater_Black.png");		// Temp
+	playerComputer->InitSprite();
 
 	AStageTitle* stageTitle = pLevel->SpawnActor<AStageTitle>();
 	stageTitle->SetSubStage(1);
@@ -84,7 +91,8 @@ void ABattlePlayMode::Tick(float _deltaTime)
 			}
 		}
 	}
-	
+
+	CheckAfterExplosion(_deltaTime);
 	CheckCheat();
 }
 
@@ -116,7 +124,7 @@ void ABattlePlayMode::OnExplodeBomb()
 	SplashTileIdxsBackup = MapPtr->GetSplashTileIdxs();
 	IsSplashCheck = true;
 
-	CheckAfterExplosion(.4f);
+	CheckAfterExplosion(0.f);
 }
 
 bool ABattlePlayMode::IsInExplosion4Edges(const FVector2D& _loc, const FVector2D& _bodySize, const URect& _margin)
@@ -159,62 +167,55 @@ void ABattlePlayMode::CheckAfterExplosion(float _deltaTime)
 	if (SplashTileIdxsBackup.size() == 0) return;
 
 	static float elapsedSecs = 0.f;
-	static int executeCnt = 0;
 
 	elapsedSecs += _deltaTime;
 
-	if (elapsedSecs >= .4f)	// match with explosion anim
+	if (elapsedSecs >= 1.29f)	// match with explosion anim
 	{
 		elapsedSecs = 0.f;
-		if (executeCnt > 3)
-		{
-			executeCnt = 0;
-			IsSplashCheck = false;
-			return;
-		}
+		IsSplashCheck = false;
+		return;
+	}
 
-		// Check monsters
-		std::list<APlayerComputer*>::iterator it = ComputerList.begin();
-		std::list<APlayerComputer*>::iterator itEnd = ComputerList.end();
-		for (; it != itEnd; ++it)
+	// Check monsters
+	std::list<APlayerComputer*>::iterator it = ComputerList.begin();
+	std::list<APlayerComputer*>::iterator itEnd = ComputerList.end();
+	for (; it != itEnd; ++it)
+	{
+		APlayerComputer* computer = *it;
+		if (computer->GetCanHit())
 		{
-			APlayerComputer* computer = *it;
-			if (computer->GetCanHit())
+			const FVector2D& monsterLoc = computer->GetActorLocation();
+			const FVector2D& damageSize = computer->GetDamageSize();
+			const URect& damageMargin = computer->GetDamageMargin();
+
+			if (IsInExplosion4Edges(monsterLoc, damageSize, damageMargin))
 			{
-				const FVector2D& monsterLoc = computer->GetActorLocation();
-				const FVector2D& damageSize = computer->GetDamageSize();
-				const URect& damageMargin = computer->GetDamageMargin();
-
-				if (IsInExplosion4Edges(monsterLoc, damageSize, damageMargin))
-				{
-					computer->Kill();
-				}
+				computer->Kill();
 			}
 		}
+	}
 
-		// Check player
+	// Check player
+	{
+		const FVector2D& playerLoc = Player->GetActorLocation();
+		const FVector2D& damageSize = Player->GetDamageSize();
+		const URect& damageMargin = Player->GetDamageMargin();
+
+		if (IsInExplosion4Edges(playerLoc, damageSize, damageMargin))
 		{
-			const FVector2D& playerLoc = Player->GetActorLocation();
-			const FVector2D& damageSize = Player->GetDamageSize();
-			const URect& damageMargin = Player->GetDamageMargin();
-
-			if (IsInExplosion4Edges(playerLoc, damageSize, damageMargin))
-			{
-				Player->Kill();
-			}
+			Player->Kill();
 		}
+	}
 
-		// Check item
-		for (size_t i = 0, size = SplashTileIdxsBackup.size(); i < size; ++i)
+	// Check item
+	for (size_t i = 0, size = SplashTileIdxsBackup.size(); i < size; ++i)
+	{
+		FIntPoint pt = SplashTileIdxsBackup[i];
+		if (MapPtr->HasShowingItem(pt))
 		{
-			FIntPoint pt = SplashTileIdxsBackup[i];
-			if (MapPtr->HasShowingItem(pt))
-			{
-				EItem item = MapPtr->PopItem(pt);	// Remove
-			}
+			EItem item = MapPtr->PopItem(pt);	// Remove
 		}
-
-		executeCnt++;
 	}
 }
 

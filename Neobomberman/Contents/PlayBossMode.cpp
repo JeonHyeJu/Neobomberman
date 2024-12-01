@@ -4,6 +4,7 @@
 #include "HoopGhost.h"
 #include "Player.h"
 #include "StageTitle.h"
+#include "GameUI.h"
 #include "Fade.h"
 
 #include <EngineCore/Level.h>
@@ -54,6 +55,7 @@ void APlayBossMode::Tick(float _deltaTime)
 
 void APlayBossMode::OnFinishGame()
 {
+	AGameUI::StopTimer();
 	Player->ShowWinnerPose();
 }
 

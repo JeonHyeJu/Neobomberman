@@ -77,6 +77,36 @@ public:
 		Player1Score = 0;
 	}
 
+	inline int GetPlayer1BombPower() const
+	{
+		return Player1BombPower;
+	}
+
+	inline float GetPlayer1Speed() const
+	{
+		return Player1Speed;
+	}
+
+	inline int GetPlayer1BombCnt() const
+	{
+		return Player1BombCnt;
+	}
+
+	void SetPlayer1BombPower(int _power)
+	{
+		Player1BombPower = _power;
+	}
+
+	void SetPlayer1Speed(float _speed)
+	{
+		Player1Speed = _speed;
+	}
+
+	void SetPlayer1BombCnt(int _cnt)
+	{
+		Player1BombCnt = _cnt;
+	}
+
 	const unsigned __int8 MAX_PLAYER_LIFE = 2;
 	const unsigned __int8 MAX_COIN = 99;
 
@@ -85,4 +115,8 @@ private:
 	int Player1Life = MAX_PLAYER_LIFE;
 	int Player2Life = MAX_PLAYER_LIFE;
 	int Player1Score = 0;
+
+	float Player1Speed = 1;
+	int Player1BombCnt = 1;
+	int Player1BombPower = 2;
 };

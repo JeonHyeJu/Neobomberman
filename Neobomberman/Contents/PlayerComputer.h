@@ -28,7 +28,7 @@ public:
 	{
 		int Power = 2;
 		float Speed = 1;
-		int BombCount = 5;
+		int BombCount = 1;
 		bool HasGlove = false;
 		bool HasShoes = false;
 		bool HasMoveThrogh = false;
@@ -55,7 +55,7 @@ public:
 		StartDelayMs = _seconds;
 	}
 
-	void InitSprite(std::string_view _sprite);
+	void InitSprite(std::string_view _sprite="");
 	void SetStartLoc(const FVector2D& _val)
 	{
 		StartLocation = _val;
@@ -78,6 +78,11 @@ public:
 	}
 
 	void Kill();
+
+	static void SetSpritePath(std::string_view _sprite)
+	{
+		SpritePath = _sprite;
+	}
 
 protected:
 	void BeginPlay() override;
@@ -144,6 +149,8 @@ private:
 	FIntPoint Destination = FIntPoint::NEGATIVE_ONE;
 	FIntPoint PPrevRouteIdx;
 	FIntPoint PrevRouteIdx;
+
+	static std::string SpritePath;
 
 	/* Sounds */
 	const char* SFXDropBomb = "CreateBomb.mp3";

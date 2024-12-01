@@ -15,10 +15,7 @@
 #include <EngineCore/EngineAPICore.h>
 #include <EnginePlatform/EngineInput.h>
 #include <EnginePlatform/EngineSound.h>
-
-#if defined(DEBUG) || defined(_DEBUG)
 #include <EngineCore/EngineCoreDebug.h>
-#endif
 
 ABaseGameMode::ABaseGameMode()
 {
@@ -45,6 +42,7 @@ void ABaseGameMode::BeginPlay()
 	GameUIPtr->BindHalfTimeEvent(std::bind(&ABaseGameMode::OnHalfTime, this));
 
 	Player = pLevel->GetPawn<APlayer>();
+	Player->InitSprite();
 	Player->SetGameUI(GameUIPtr);
 
 	GameOverScenePtr = pLevel->SpawnActor<AGameOver>();
@@ -183,7 +181,7 @@ void ABaseGameMode::OnExplodeBomb()
 	SplashTileIdxsBackup = MapPtr->GetSplashTileIdxs();
 	IsSplashCheck = true;
 
-	CheckAfterExplosion(.4f);
+	CheckAfterExplosion(0.f);
 }
 
 bool ABaseGameMode::IsInExplosion4Edges(const FVector2D& _loc, const FVector2D& _bodySize, const URect& _margin)
@@ -226,62 +224,55 @@ void ABaseGameMode::CheckAfterExplosion(float _deltaTime)
 	if (SplashTileIdxsBackup.size() == 0) return;
 
 	static float elapsedSecs = 0.f;
-	static int executeCnt = 0;
 
 	elapsedSecs += _deltaTime;
 
-	if (elapsedSecs >= .4f)	// match with explosion anim
+	if (elapsedSecs >= 1.29f)	// match with explosion anim
 	{
 		elapsedSecs = 0.f;
-		if (executeCnt > 3)
-		{
-			executeCnt = 0;
-			IsSplashCheck = false;
-			return;
-		}
+		IsSplashCheck = false;
+		return;
+	}
 
-		// Check monsters
-		std::list<AMonster*>::iterator it = MonsterList.begin();
-		std::list<AMonster*>::iterator itEnd = MonsterList.end();
-		for (; it != itEnd; ++it)
+	// Check monsters
+	std::list<AMonster*>::iterator it = MonsterList.begin();
+	std::list<AMonster*>::iterator itEnd = MonsterList.end();
+	for (; it != itEnd; ++it)
+	{
+		AMonster* monster = *it;
+		if (monster->GetCanHit())
 		{
-			AMonster* monster = *it;
-			if (monster->GetCanHit())
+			const FVector2D& monsterLoc = monster->GetActorLocation();
+			const FVector2D& damageSize = monster->GetDamageSize();
+			const URect& damageMargin = monster->GetDamageMargin();
+
+			if (IsInExplosion4Edges(monsterLoc, damageSize, damageMargin))
 			{
-				const FVector2D& monsterLoc = monster->GetActorLocation();
-				const FVector2D& damageSize = monster->GetDamageSize();
-				const URect& damageMargin = monster->GetDamageMargin();
-
-				if (IsInExplosion4Edges(monsterLoc, damageSize, damageMargin))
-				{
-					monster->Damaged();
-				}
+				monster->Damaged();
 			}
 		}
+	}
 
-		// Check player
+	// Check player
+	{
+		const FVector2D& playerLoc = Player->GetActorLocation();
+		const FVector2D& damageSize = Player->GetDamageSize();
+		const URect& damageMargin = Player->GetDamageMargin();
+
+		if (IsInExplosion4Edges(playerLoc, damageSize, damageMargin))
 		{
-			const FVector2D& playerLoc = Player->GetActorLocation();
-			const FVector2D& damageSize = Player->GetDamageSize();
-			const URect& damageMargin = Player->GetDamageMargin();
-
-			if (IsInExplosion4Edges(playerLoc, damageSize, damageMargin))
-			{
-				Player->Kill();
-			}
+			Player->Kill();
 		}
+	}
 		
-		// Check item
-		for (size_t i = 0, size = SplashTileIdxsBackup.size(); i < size; ++i)
+	// Check item
+	for (size_t i = 0, size = SplashTileIdxsBackup.size(); i < size; ++i)
+	{
+		FIntPoint pt = SplashTileIdxsBackup[i];
+		if (MapPtr->HasShowingItem(pt))
 		{
-			FIntPoint pt = SplashTileIdxsBackup[i];
-			if (MapPtr->HasShowingItem(pt))
-			{
-				EItem item = MapPtr->PopItem(pt);	// Remove
-			}
+			EItem item = MapPtr->PopItem(pt);	// Remove
 		}
-
-		executeCnt++;
 	}
 }
 
@@ -483,5 +474,9 @@ void ABaseGameMode::CheckCheat()
 		{
 			MapPtr->CheatDestoyAllBoxes();
 		}
+	}
+	if (UEngineInput::GetInst().IsDown('T'))
+	{
+		GameUIPtr->SetTimeForDebug(62);
 	}
 }

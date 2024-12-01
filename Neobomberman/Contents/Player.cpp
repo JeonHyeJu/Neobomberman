@@ -17,70 +17,12 @@
 #include <EnginePlatform/EngineSound.h>
 #include <EnginePlatform/EngineInput.h>
 
+std::string APlayer::PlayerSpritePath = "MainCharater_White.png";
+
 APlayer::APlayer()
 {
 	DamageMargin = URect(10, 10, 10, 10);
 	DamageSize = GlobalVar::BOMB_SIZE;
-
-	FVector2D size = GlobalVar::BOMBERMAN_SIZE;
-	{
-		SpriteRendererHead = CreateDefaultSubObject<USpriteRenderer>();
-		SpriteRendererHead->SetSprite(PLAYER_SPRITE_PATH);
-		SpriteRendererHead->SetComponentLocation(size.Half().Half() + FVector2D{ -1.f, 6.f });
-		SpriteRendererHead->SetComponentScale(size);
-		SpriteRendererHead->SetPivotType(PivotType::Bot);
-
-		SpriteRendererHead->CreateAnimation("Idle_Up", PLAYER_SPRITE_PATH, 17, 17, 0.1f);
-		SpriteRendererHead->CreateAnimation("Run_Up", PLAYER_SPRITE_PATH, 18, 22, 0.1f);
-
-		SpriteRendererHead->CreateAnimation("Idle_Down", PLAYER_SPRITE_PATH, 0, 0, 0.1f);
-		SpriteRendererHead->CreateAnimation("Run_Down", PLAYER_SPRITE_PATH, 1, 6, 0.1f);
-
-		SpriteRendererHead->CreateAnimation("Idle_Left", PLAYER_SPRITE_PATH, 9, 9, 0.1f);
-		SpriteRendererHead->CreateAnimation("Run_Left", PLAYER_SPRITE_PATH, 10, 14, 0.1f);
-
-		SpriteRendererHead->CreateAnimation("Idle_Right", PLAYER_SPRITE_PATH, 24, 24, 0.1f);
-		SpriteRendererHead->CreateAnimation("Run_Right", PLAYER_SPRITE_PATH, 25, 30, 0.1f);
-
-		const int BLINK_CNT = 5;
-		std::vector<int> idxs{ 580, 581, 580, 581, 580 };
-		std::vector<float> times(BLINK_CNT, .2f);
-		idxs.resize(5);
-		times[BLINK_CNT - 1] = 2.f;
-
-		SpriteRendererHead->CreateAnimation("BlinkingEyes", PLAYER_SPRITE_PATH, idxs, times);
-		SpriteRendererHead->CreateAnimation("Dead", PLAYER_SPRITE_PATH, 591, 600, 0.2f, false);
-		SpriteRendererHead->CreateAnimation("Ride_Portal", PLAYER_SPRITE_PATH, 583, 589, 0.1f, false);
-		SpriteRendererHead->CreateAnimation("Victory", PLAYER_SPRITE_PATH, 601, 604, 0.5f, false);
-
-		SpriteRendererHead->SetAnimationEvent("Ride_Portal", 589, std::bind(&APlayer::OnEndPortalAnim, this));
-	}
-	
-	{
-		SpriteRendererBody = CreateDefaultSubObject<USpriteRenderer>();
-		SpriteRendererBody->SetSprite(PLAYER_SPRITE_PATH);
-		SpriteRendererBody->SetComponentLocation(SpriteRendererHead->GetComponentLocation() + FVector2D{ 0.f, size.hY() });
-		SpriteRendererBody->SetComponentScale(size);
-		SpriteRendererBody->SetPivotType(PivotType::Bot);
-
-		SpriteRendererBody->CreateAnimation("Idle_Up", PLAYER_SPRITE_PATH, 48, 48, 0.1f);
-		SpriteRendererBody->CreateAnimation("Run_Up", PLAYER_SPRITE_PATH, 49, 54, 0.1f);
-
-		SpriteRendererBody->CreateAnimation("Idle_Down", PLAYER_SPRITE_PATH, 32, 32, 0.1f);
-		SpriteRendererBody->CreateAnimation("Run_Down", PLAYER_SPRITE_PATH, 33, 38, 0.1f);
-
-		SpriteRendererBody->CreateAnimation("Idle_Left", PLAYER_SPRITE_PATH, 40, 40, 0.1f);
-		SpriteRendererBody->CreateAnimation("Run_Left", PLAYER_SPRITE_PATH, 41, 46, 0.1f);
-
-		SpriteRendererBody->CreateAnimation("Idle_Right", PLAYER_SPRITE_PATH, 56, 56, 0.1f);
-		SpriteRendererBody->CreateAnimation("Run_Right", PLAYER_SPRITE_PATH, 57, 62, 0.1f);
-
-		SpriteRendererBody->CreateAnimation("BlinkingEyes", PLAYER_SPRITE_PATH, 612, 613, 1.f);
-		SpriteRendererBody->CreateAnimation("Dead", PLAYER_SPRITE_PATH, 622, 631, 0.2f, false);
-		SpriteRendererBody->CreateAnimation("Ride_Portal", PLAYER_SPRITE_PATH, 615, 621, 0.1f, false);
-
-		SpriteRendererBody->CreateAnimation("Victory", PLAYER_SPRITE_PATH, 633, 636, 0.5f, false);
-	}
 
 	{
 		FVector2D collSize = GlobalVar::BOMB_SIZE;
@@ -104,9 +46,6 @@ APlayer::APlayer()
 	DyingAnimInfo.AnimSeconds = 1.5f;
 	DyingAnimInfo.WaitSeconds = 3.0f;
 
-	SpriteRendererHead->SetOrder(ERenderOrder::PLAYER);
-	SpriteRendererBody->SetOrder(ERenderOrder::PLAYER);
-
 	Fsm.CreateState(EPlayerState::REBORN, nullptr, std::bind(&APlayer::OnReborn, this));
 	Fsm.CreateState(EPlayerState::IDLE, std::bind(&APlayer::Idling, this, std::placeholders::_1), std::bind(&APlayer::OnIdle, this));
 	Fsm.CreateState(EPlayerState::MOVE, std::bind(&APlayer::Moving, this, std::placeholders::_1), std::bind(&APlayer::OnMove, this));
@@ -127,6 +66,11 @@ APlayer::~APlayer()
 void APlayer::BeginPlay()
 {
 	Super::BeginPlay();
+
+	GameData& gameData = GameData::GetInstance();
+	Ability.Power = gameData.GetPlayer1BombPower();
+	Ability.Speed = gameData.GetPlayer1Speed();
+	Ability.BombCount = gameData.GetPlayer1BombCnt();
 
 	Reborn();
 }
@@ -184,6 +128,72 @@ void APlayer::LevelChangeStart()
 {
 	IsClear = false;
 	IsDead = false;
+}
+
+void APlayer::InitSprite()
+{
+	FVector2D size = GlobalVar::BOMBERMAN_SIZE;
+	{
+		SpriteRendererHead = CreateDefaultSubObject<USpriteRenderer>();
+		SpriteRendererHead->SetSprite(PlayerSpritePath);
+		SpriteRendererHead->SetComponentLocation(size.Half().Half() + FVector2D{ -1.f, 6.f });
+		SpriteRendererHead->SetComponentScale(size);
+		SpriteRendererHead->SetPivotType(PivotType::Bot);
+
+		SpriteRendererHead->CreateAnimation("Idle_Up", PlayerSpritePath, 17, 17, 0.1f);
+		SpriteRendererHead->CreateAnimation("Run_Up", PlayerSpritePath, 18, 22, 0.1f);
+
+		SpriteRendererHead->CreateAnimation("Idle_Down", PlayerSpritePath, 0, 0, 0.1f);
+		SpriteRendererHead->CreateAnimation("Run_Down", PlayerSpritePath, 1, 6, 0.1f);
+
+		SpriteRendererHead->CreateAnimation("Idle_Left", PlayerSpritePath, 9, 9, 0.1f);
+		SpriteRendererHead->CreateAnimation("Run_Left", PlayerSpritePath, 10, 14, 0.1f);
+
+		SpriteRendererHead->CreateAnimation("Idle_Right", PlayerSpritePath, 24, 24, 0.1f);
+		SpriteRendererHead->CreateAnimation("Run_Right", PlayerSpritePath, 25, 30, 0.1f);
+
+		const int BLINK_CNT = 5;
+		std::vector<int> idxs{ 580, 581, 580, 581, 580 };
+		std::vector<float> times(BLINK_CNT, .2f);
+		idxs.resize(5);
+		times[BLINK_CNT - 1] = 2.f;
+
+		SpriteRendererHead->CreateAnimation("BlinkingEyes", PlayerSpritePath, idxs, times);
+		SpriteRendererHead->CreateAnimation("Dead", PlayerSpritePath, 591, 600, 0.2f, false);
+		SpriteRendererHead->CreateAnimation("Ride_Portal", PlayerSpritePath, 583, 589, 0.1f, false);
+		SpriteRendererHead->CreateAnimation("Victory", PlayerSpritePath, 601, 604, 0.5f, false);
+
+		SpriteRendererHead->SetAnimationEvent("Ride_Portal", 589, std::bind(&APlayer::OnEndPortalAnim, this));
+	}
+
+	{
+		SpriteRendererBody = CreateDefaultSubObject<USpriteRenderer>();
+		SpriteRendererBody->SetSprite(PlayerSpritePath);
+		SpriteRendererBody->SetComponentLocation(SpriteRendererHead->GetComponentLocation() + FVector2D{ 0.f, size.hY() });
+		SpriteRendererBody->SetComponentScale(size);
+		SpriteRendererBody->SetPivotType(PivotType::Bot);
+
+		SpriteRendererBody->CreateAnimation("Idle_Up", PlayerSpritePath, 48, 48, 0.1f);
+		SpriteRendererBody->CreateAnimation("Run_Up", PlayerSpritePath, 49, 54, 0.1f);
+
+		SpriteRendererBody->CreateAnimation("Idle_Down", PlayerSpritePath, 32, 32, 0.1f);
+		SpriteRendererBody->CreateAnimation("Run_Down", PlayerSpritePath, 33, 38, 0.1f);
+
+		SpriteRendererBody->CreateAnimation("Idle_Left", PlayerSpritePath, 40, 40, 0.1f);
+		SpriteRendererBody->CreateAnimation("Run_Left", PlayerSpritePath, 41, 46, 0.1f);
+
+		SpriteRendererBody->CreateAnimation("Idle_Right", PlayerSpritePath, 56, 56, 0.1f);
+		SpriteRendererBody->CreateAnimation("Run_Right", PlayerSpritePath, 57, 62, 0.1f);
+
+		SpriteRendererBody->CreateAnimation("BlinkingEyes", PlayerSpritePath, 612, 613, 1.f);
+		SpriteRendererBody->CreateAnimation("Dead", PlayerSpritePath, 622, 631, 0.2f, false);
+		SpriteRendererBody->CreateAnimation("Ride_Portal", PlayerSpritePath, 615, 621, 0.1f, false);
+
+		SpriteRendererBody->CreateAnimation("Victory", PlayerSpritePath, 633, 636, 0.5f, false);
+	}
+
+	SpriteRendererHead->SetOrder(ERenderOrder::PLAYER);
+	SpriteRendererBody->SetOrder(ERenderOrder::PLAYER);
 }
 
 void APlayer::ReleaseMove()
@@ -468,6 +478,11 @@ void APlayer::OnShift()
 		SpriteRendererHead->ChangeAnimation("Ride_Portal");
 		SpriteRendererBody->ChangeAnimation("Ride_Portal");
 	}
+
+	GameData& gameData = GameData::GetInstance();
+	gameData.SetPlayer1BombPower(Ability.Power);
+	gameData.SetPlayer1Speed(Ability.Speed);
+	gameData.SetPlayer1BombCnt(Ability.BombCount);
 }
 
 void APlayer::OnEnd()

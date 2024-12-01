@@ -92,7 +92,7 @@ void AMushroom::InitSprite()
 		idxs.push_back(i);
 		if (i >= IDX_LONG_START && i < IDX_LONG_END)
 		{
-			times.push_back(1.f);
+			times.push_back(.5f);
 		}
 		else
 		{

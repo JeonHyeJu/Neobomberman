@@ -29,7 +29,7 @@ public:
 	{
 		int Power = 2;
 		float Speed = 1;
-		int BombCount = 5;
+		int BombCount = 1;
 		bool HasGlove = false;
 		bool HasShoes = false;
 		bool HasMoveThrogh = false;
@@ -83,6 +83,12 @@ public:
 	void BlockMove();
 
 	void Kill();
+	void InitSprite();
+
+	static void SetSpritePath(std::string_view _sprite)
+	{
+		PlayerSpritePath = _sprite;
+	}
 
 protected:
 	void OnResume() override;
@@ -120,7 +126,7 @@ private:
 	void _CheckItem(const FVector2D& _loc);
 
 	int CurIndex = 0;
-	const char* PLAYER_SPRITE_PATH = "MainCharater_White.png";	// 1024 x 640 (32x64)
+	static std::string PlayerSpritePath;
 
 	class USpriteRenderer* SpriteRendererHead = nullptr;
 	class USpriteRenderer* SpriteRendererBody = nullptr;

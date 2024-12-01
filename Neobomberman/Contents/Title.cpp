@@ -4,6 +4,9 @@
 #include "GlobalVar.h"
 #include "GameUI.h"
 #include "GameData.h"
+#include "PlayStage1Mode.h"
+#include "BattleSelectMode.h"
+#include "Player.h"
 #include "Fade.h"
 #include <EnginePlatform/EngineInput.h>
 #include <EngineCore/SpriteRenderer.h>
@@ -286,14 +289,22 @@ void ATitle::Tick(float _deltaTime)
 	{
 		WaitKeyA(_deltaTime);
 	}
-
+	 
 	FSM.Update(_deltaTime);
 }
 
 void ATitle::LevelChangeStart()
 {
-	FSM.ChangeState(ETitleState::OPENING);
 	PrevCoin = 0;
+	ResetSeconds();
+
+	SwitchStartUi(false);
+	SwitchSelectUi(false);
+	SwitchCutSceneUi(false);
+
+	FSM.ChangeState(ETitleState::OPENING);
+
+	AFade::MainFade->FadeIn();
 }
 
 void ATitle::ResetSeconds()
@@ -516,7 +527,7 @@ void ATitle::OnEndAnimation()
 void ATitle::OnEndPainterDraw()
 {
 	SRSelectCircle->SetActive(true);
-	SRSelectCircle->ChangeAnimation("DrawCircle");
+	SRSelectCircle->ChangeAnimation("DrawCircle", true);
 }
 
 void ATitle::OnEndCircleDraw()
@@ -527,26 +538,29 @@ void ATitle::OnEndCircleDraw()
 
 void ATitle::OnEndFadeOut()
 {
-	ETitleState state = static_cast<ETitleState>(FSM.GetState());
+ 	ETitleState state = static_cast<ETitleState>(FSM.GetState());
 
 	switch (state)
 	{
 	case ETitleState::WAIT_SELECT_IDLE:
-		FSM.ChangeState(ETitleState::WAIT_SELECT);
 		AFade::MainFade->FadeIn();
+		FSM.ChangeState(ETitleState::WAIT_SELECT);
 		break;
 	case ETitleState::RUN_CUT_SCENE_IDLE:
-		FSM.ChangeState(ETitleState::RUN_CUT_SCENE);
 		AFade::MainFade->FadeIn();
+		FSM.ChangeState(ETitleState::RUN_CUT_SCENE);
 		break;
 	case ETitleState::GO_TO_BATTLE_IDLE:
-		FSM.ChangeState(ETitleState::GO_TO_BATTLE);
+		UEngineAPICore::GetCore()->ResetLevel<ABattleSelectMode, AActor>("BattleSelect");
 		UEngineAPICore::GetCore()->OpenLevel("BattleSelect");
+		FSM.ChangeState(ETitleState::GO_TO_BATTLE);
 		break;
 	case ETitleState::PREPARE_PLAY:
 		UEngineSound::StopPlayer(SFXCutScene);
-		FSM.ChangeState(ETitleState::PREPARE_DISAPPEAR);
+		GameData::GetInstance().ResetScore();
+		UEngineAPICore::GetCore()->ResetLevel<APlayStage1Mode, APlayer>("Play");
 		UEngineAPICore::GetCore()->OpenLevel("Play");
+		FSM.ChangeState(ETitleState::PREPARE_DISAPPEAR);
 	default:
 		break;
 	}
